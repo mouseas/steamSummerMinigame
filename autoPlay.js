@@ -33,7 +33,7 @@ function goToLaneWithLowest() {
 	var lowTarget = 0;
 	
 	// determine if it's a boss level
-	var isBossLevel = g_Minigame.CurrentScene().level != 0 && (1 + g_Minigame.CurrentScene().level) % 10 == 0;
+	var isBossLevel = g_Minigame.m_CurrentScene.m_nCurrentLevel != 0 && (1 + g_Minigame.m_CurrentScene.m_nCurrentLevel) % 10 == 0;
 	
 	// if it's a boss level, prefer the lane with the boss, then the lane with the miniboss closest to dying.
 	if (isBossLevel) {
