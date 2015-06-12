@@ -26,126 +26,37 @@ function doTheThing() {
 	isAlreadyRunning = false;
 }
 
-function goToLaneWithLowest() {
-	var targetFound = false;
-	var lowHP = 0;
-	var lowLane = 0;
-	var lowTarget = 0;
-	
-	// determine which lane the boss is in, if still alive
-	
-	// find the boss
-	for (var i = 0; i < 3; i++) {
-		for (var j = 0; j < 4; j++) {
-			var boss = g_Minigame.CurrentScene().GetEnemy(i, j);
-			if (boss && boss.m_data.type == 2) {
-				// found the boss monster.
-				targetFound = true;
-				lowHP = boss.m_flDisplayedHP;
-				lowLane = boss.m_nLane;
-				lowTarget = boss.m_nID;
-				break;
-			}
-		}
-	}
-	
-	if (!targetFound) {
-		// if no boss, find the weakest miniboss
-		var minibosses = [];
-		for (var i = 0; i < 3; i++) {
-			for (var j = 0; j < 4; j++) {
-				var miniboss = g_Minigame.CurrentScene().GetEnemy(i, j);
-				if (miniboss && miniboss.m_data.type == 3) {
-					minibosses[minibosses.length] = miniboss;
-				}
-			}
-		}
-		
-		for (var i = 0; i < minibosses.length; i++) {
-			if (minibosses[i] && !minibosses[i].m_bIsDestroyed) {
-				if(lowHP < 1 || minibosses[i].m_flDisplayedHP < lowHP) {
-					targetFound = true;
-					lowHP = minibosses[i].m_flDisplayedHP;
-					lowLane = minibosses[i].m_nLane;
-					lowTarget = minibosses[i].m_nID;
-				}
-			}
-		}
-	}
-	
+function goToLaneWithLowest() {		
 	// TODO prefer lane with a dying creep as long as all living spawners have >50% health
+
+	var bosses = findEnemies('boss');
+	if (targetWeakestEnemy(bosses))
+		return;
+
+	// if no boss, find the weakest miniboss
+	var minibosses = findEnemies('miniboss');
+	if (targetWeakestEnemy(minibosses))
+		return;
+
 	
 	// determine which living spawner has lowest hp
-	if (!targetFound) {
-		var spawners = [];
-		for (var i = 0; i < 3; i++) {
-			for (var j = 0; j < 4; j++) {
-				var enemy = g_Minigame.CurrentScene().GetEnemy(i, j);
-				if (enemy && enemy.m_data.type == 0) {
-					spawners[spawners.length] = g_Minigame.CurrentScene().GetEnemy(i, j);
-				}
-			}
-		}
-		for (var i = 0; i < spawners.length; i++) {
-			if (spawners[i] && !spawners[i].m_bIsDestroyed) {
-				if (lowHP < 1 || spawners[i].m_flDisplayedHP < lowHP) {
-					targetFound = true;
-					lowHP = spawners[i].m_flDisplayedHP;
-					lowLane = spawners[i].m_nLane;
-					lowTarget = spawners[i].m_nID;
-				}
-			}
-		}
-	}
+	var spawners = findEnemies('spawner');
+	if (targetWeakestEnemy(spawners))
+		return;
 	
-	// if no spawners remain, determine which lane has a creep with the lowest health
-	if (!targetFound) {
-		// determine which living creep has the lowest hp
-		var creeps = [];
-		for (var i = 0; i < 3; i++) {
-			for (var j = 0; j < 4; j++) {
-				var enemy = g_Minigame.CurrentScene().GetEnemy(i, j);
-				if (enemy && enemy.m_data.type == 1) {
-					creeps[creeps.length] = g_Minigame.CurrentScene().GetEnemy(i, j);
-				}
-			}
-		}
-		
-		for (var i = 0; i < creeps.length; i++) {
-			if (creeps[i] && !creeps[i].m_bIsDestroyed) {
-				if (lowHP < 1 || creeps[i].m_flDisplayedHP < lowHP) {
-					targetFound = true;
-					lowHP = creeps[i];
-					lowLane = creeps[i].m_nLane;
-					lowTarget = creeps[i].m_nID;
-				}
-			}
-		}
-	}
-	
-	// go to the chosen lane
-	if (targetFound) {
-		if (g_Minigame.CurrentScene().m_nExpectedLane != lowLane) {
-			//console.log('switching langes');
-			g_Minigame.CurrentScene().TryChangeLane(lowLane);
-		}
-		
-		// target the chosen enemy
-		if (g_Minigame.CurrentScene().m_nTarget != lowTarget) {
-			//console.log('switching targets');
-			g_Minigame.CurrentScene().TryChangeTarget(lowTarget);
-		}
-	}
+	// determine which living creep has the lowest hp
+	var creeps = findEnemies('creep');
+	targetWeakestEnemy(creeps);
+
 }
 
 function useMedicsIfRelevant() {
-	// regularly check HP to try to determine max health (I haven't found the variable for it yet)
-	if (g_Minigame.CurrentScene().m_rgPlayerData.hp > myMaxHealth) {
-		myMaxHealth = g_Minigame.CurrentScene().m_rgPlayerData.hp;
-	}
+
+	myMaxHealth = g_Minigame.CurrentScene().m_rgPlayerTechTree.max_hp;
 	
 	// check if health is below 50%
 	var hpPercent = g_Minigame.CurrentScene().m_rgPlayerData.hp / myMaxHealth;
+
 	if (hpPercent > 0.5 || g_Minigame.CurrentScene().m_rgPlayerData.hp < 1) {
 		return; // no need to heal - HP is above 50% or already dead
 	}
@@ -171,12 +82,81 @@ function useMedicsIfRelevant() {
 	}
 }
 
-//If player is dead, call respawn method
+//If respawn button is available, call respawn method
 function attemptRespawn() {
-	if ((g_Minigame.CurrentScene().m_bIsDead) && 
-			((g_Minigame.CurrentScene().m_rgPlayerData.time_died * 1000) + 5000) < (new Date().getTime())) {
+   if (document.getElementById('player_respawn_btn')) {
 		RespawnPlayer();
 	}
 }
 
 var thingTimer = window.setInterval(doTheThing, 1000);
+
+// helpers
+
+function enemyTypeFinder(enemy) {
+	switch (enemy.m_data.type) {
+		case 0:
+			return 'spawner';
+		case 1:
+			return 'creep';
+		case 2:
+			return 'boss';
+		case 3:
+			return 'miniboss';
+	}
+}
+
+function switchLanes(newLane) {
+	// switches only if it's not our current
+	if (g_Minigame.CurrentScene().m_nExpectedLane != newLane) {
+		//console.log('switching lanes');
+		g_Minigame.CurrentScene().TryChangeLane(newLane);
+	}
+}
+function switchTargets(newTarget) {
+	// target the chosen enemy
+	// switches only if it's not our current
+	if (g_Minigame.CurrentScene().m_nTarget != newTarget) {
+		//console.log('switching targets');
+		g_Minigame.CurrentScene().TryChangeTarget(newTarget);
+	}
+}
+
+function findEnemies(type) {
+	var enemies = [];
+	for (var i = 0; i < 3; i++) {
+		for (var j = 0; j < 4; j++) {
+			var enemy = g_Minigame.CurrentScene().GetEnemy(i, j);
+			if (enemy && enemyTypeFinder(enemy) == type) {
+				enemies[enemies.length] = g_Minigame.CurrentScene().GetEnemy(i, j);
+			}
+		}
+	}
+	return enemies;
+}
+
+function targetWeakestEnemy(enemyList) {
+	var targetFound = false;
+	var lowLane;
+	var lowTarget;
+	var lowHP = 0;
+
+	for (var i = 0; i < enemyList.length; i++) {
+		if (enemyList[i] && !enemyList[i].m_bIsDestroyed) {
+			if(lowHP < 1 || enemyList[i].m_flDisplayedHP < lowHP) {
+				targetFound = true;
+				lowHP = enemyList[i].m_flDisplayedHP;
+				lowLane = enemyList[i].m_nLane;
+				lowTarget = enemyList[i].m_nID;
+			}
+		}
+	}
+
+	if (targetFound) {
+		switchLanes(lowLane);
+		switchTargets(lowTarget);
+	}
+
+	return targetFound;
+
+}
