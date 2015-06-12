@@ -8,7 +8,9 @@ It goes beyond the autoclicker scripts already out there. It will keep you in th
 most money, activate abilities as they are available and best apply, and possibly purchase upgrades and
 powerups for you.
 
-### How to use in Tampermonkey / Greasemonkey ###
+### How to use in [Tampermonkey](https://github.com/mouseas/steamSummerMinigame/wiki/How-to-install-with-tampermonkey) / Greasemonkey ###
+
+
 
 1. Open `autoPlay.js` in a text editor.
 2. Select All, Copy
