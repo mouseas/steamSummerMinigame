@@ -10,6 +10,8 @@ powerups for you.
 
 ### How to use in Tampermonkey / Greasemonkey ###
 
+For tampermonkey installation instructions click [here](https://github.com/mouseas/steamSummerMinigame/wiki/How-to-install-with-tampermonkey)
+
 1. Open `autoPlay.js` in a text editor.
 2. Select All, Copy
 3. Open a new script in Tampermonkey or Greasemonkey.
