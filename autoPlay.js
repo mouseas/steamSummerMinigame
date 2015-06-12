@@ -88,7 +88,7 @@ function useMedicsIfRelevant() {
 	}
 	
 	// check if Medics is purchased and cooled down
-	if ((1 << 7) & g_Minigame.CurrentScene().m_rgPlayerTechTree.unlocked_abilities_bitfield) {
+	if (hasAbility(7)) {
 		// each bit in unlocked_abilities_bitfield corresponds to an ability. Medics is ability 7.
 		// the above condition checks if the Medics bit is set or cleared. I.e. it checks if
 		// the player has the Medics ability.
@@ -108,7 +108,7 @@ function useMedicsIfRelevant() {
 // Use Good Luck Charm if doable
 function useGoodLuckCharmIfRelevant() {
 	// check if Good Luck Charms is purchased and cooled down
-	if ((1 << 6) & g_Minigame.CurrentScene().m_rgPlayerTechTree.unlocked_abilities_bitfield) {
+	if (hasAbility(6)) {
 		if (hasCooldown(6)) {
 			return;
 		}
@@ -131,6 +131,10 @@ function attemptRespawn() {
 
 function hasCooldown(abilityId) {
 	return g_Minigame.CurrentScene().GetCooldownForAbility(abilityId) > 0;
+}
+
+function hasAbility(abilityId) {
+	return g_Minigame.CurrentScene().bHaveAbility(abilityId) > 0;
 }
 
 var thingTimer = window.setInterval(doTheThing, 1000);
