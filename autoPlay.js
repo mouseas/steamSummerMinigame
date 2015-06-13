@@ -509,7 +509,7 @@ function bestcrit() {
 }
 
 function bestdps() {
-	if (!g_Minigame.CurrentScene().m_bUpgradesBusy) {
+	if (g_Minigame.CurrentScene().m_bUpgradesBusy) {
 		return
 	}
 	var clickbest = bestclick();
