@@ -14,37 +14,37 @@
 var isAlreadyRunning = false;
 
 var ABILITIES = {
-	"MORALE_BOOSTER": 5,
-	"GOOD_LUCK": 6,
-	"MEDIC": 7,
-	"METAL_DETECTOR": 8,
-	"COOLDOWN": 9,
-	"NUKE": 10,
-	"CLUSTER_BOMB": 11,
-	"NAPALM": 12
+	"MORALE_BOOSTER" : 5,
+	"GOOD_LUCK" : 6,
+	"MEDIC" : 7,
+	"METAL_DETECTOR" : 8,
+	"COOLDOWN" : 9,
+	"NUKE" : 10,
+	"CLUSTER_BOMB" : 11,
+	"NAPALM" : 12
 };
 
 var ITEMS = {
-	"REVIVE": 13,
-	"CRIPPLE_SPAWNER": 14,
-	"CRIPPLE_MONSTER": 15,
-	"MAXIMIZE_ELEMENT": 16,
-	"GOLD_RAIN": 17,
-	"CRIT": 18,
+	"REVIVE" : 13,
+	"CRIPPLE_SPAWNER" : 14,
+	"CRIPPLE_MONSTER" : 15,
+	"MAXIMIZE_ELEMENT" : 16,
+	"GOLD_RAIN" : 17,
+	"CRIT" : 18,
 	"PUMPED_UP" : 19,
 	"THROW_MONEY" : 20,
 	"GOD_MODE" : 21,
 	"TREASURE" : 22,
 	"STEAL_HEALTH" : 23,
-	"REFLECT_DAMAGE":24
+	"REFLECT_DAMAGE" : 24
 }
 	
 var ENEMY_TYPE = {
-	"SPAWNER":0,
-	"CREEP":1,
-	"BOSS":2,
-	"MINIBOSS":3,
-	"TREASURE":4
+	"SPAWNER" : 0,
+	"CREEP" : 1,
+	"BOSS" : 2,
+	"MINIBOSS" : 3,
+	"TREASURE" : 4
 }
 
 if (thingTimer){
