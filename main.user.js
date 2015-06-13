@@ -550,6 +550,10 @@ function isAbilityItemEnabled(abilityId) {
 }
 
 function clickTheThing() {
+	// If we're going to be clicking, we should reset g_msTickRate
+	// There's a reddit thread about why and we might as well be safe
+	g_msTickRate = 1100;
+
     g_Minigame.m_CurrentScene.DoClick(
         {
             data: {
