@@ -96,7 +96,7 @@ function doTheThing() {
 		useNapalmIfRelevant();
 		useTacticalNukeIfRelevant();
 		useCrippleSpawnerIfRelevant();
-		useMetalDetecorIfRelevant();
+		useMetalDetectorIfRelevant();
 		useGoldRainIfRelevant();
 		attemptRespawn();
 
@@ -404,7 +404,7 @@ function useTacticalNukeIfRelevant() {
 	}
 }
 
-function useMetalDetecorIfRelevant() {
+function useMetalDetectorIfRelevant() {
     if (hasPurchasedAbility(ABILITIES.METAL_DETECTOR)) {
         if (isAbilityCoolingDown(ABILITIES.METAL_DETECTOR)) {
             return;
