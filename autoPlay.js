@@ -236,24 +236,18 @@ function purchaseUpgrades() {
 				if(upgrade.multiplier / upgradeCost > highestUpgradeValueForArmor) { // hp increase per moneys
 				//if(upgradeCost / upgrade.multiplier < highestUpgradeValueForArmor) {
 					bestUpgradeForArmor = i;
-					highestUpgradeValueForArmor = upgradeCost / upgrade.multiplier;
 					highestUpgradeValueForArmor = upgrade.multiplier / upgradeCost;
 				}
 				break;
 			case UPGRADE_TYPES.CLICK_DAMAGE:
-				//var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
 				if(avgClicksPerSecond * upgrade.multiplier / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
-				//if(upgradeCost / upgrade.multiplier < highestUpgradeValueForDamage) {
 					bestUpgradeForDamage = i;
-					highestUpgradeValueForDamage = upgradeCost / upgrade.multiplier;
 					highestUpgradeValueForDamage = upgrade.multiplier / upgradeCost;
 				}
 				break;
 			case UPGRADE_TYPES.DPS:
 				if(upgrade.multiplier / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
-				//if(upgradeCost / upgrade.multiplier < highestUpgradeValueForDamage) {
 					bestUpgradeForDamage = i;
-					highestUpgradeValueForDamage = upgradeCost / upgrade.multiplier;
 					highestUpgradeValueForDamage = upgrade.multiplier / upgradeCost;
 				}
 				break;
@@ -264,6 +258,15 @@ function purchaseUpgrades() {
 				if(upgradeCurrentLevel > highestElementLevel){
 					highestElementLevel = upgradeCurrentLevel;
 					bestElement = i;
+				}
+				break;
+			case UPGRADE_TYPES.LUCKY_SHOT:
+				//var critMultiplier = ?
+				var critChance = g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage;
+				var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
+				if(upgrade.multiplier /* critMultiplier*/ * dpc * critChance * avgClicksPerSecond / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+					/*bestUpgradeForDamage = i;
+					highestUpgradeValueForDamage = upgrade.multiplier / upgradeCost;*/
 				}
 				break;
 			default:
