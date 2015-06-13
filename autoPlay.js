@@ -41,7 +41,8 @@ var ITEMS = {
 	"CRIT": 18,
 	"CRIPPLE_MONSTER": 15,
 	"CRIPPLE_SPAWNER": 14,
-	"MAXIMIZE_ELEMENT": 16
+	"MAXIMIZE_ELEMENT": 16,
+	"STEAL_HEALTH": 23
 }
 	
 var ENEMY_TYPE = {
@@ -289,11 +290,16 @@ function useMedicsIfRelevant() {
 	
 	// check if Medics is purchased and cooled down
 	if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
-
 		// Medics is purchased, cooled down, and needed. Trigger it.
 		console.log('Medics is purchased, cooled down, and needed. Trigger it.');
 		triggerAbility(ABILITIES.MEDIC);
-	} else if (hasItem(ITEMS.GOD_MODE) && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
+	} else if (hasItem(ITEMS.STEAL_HEALTH) && !isAbilityCoolingDown(ITEMS.STEAL_HEALTH) && 
+			!isAbilityActive(ABILITIES.MEDIC)) {
+		
+		console.log('We have steal health, cooled down, and needed. Trigger it.');
+		triggerItem(ITEMS.STEAL_HEALTH);
+	} else if (hasItem(ITEMS.GOD_MODE) && !isAbilityCoolingDown(ITEMS.GOD_MODE) &&
+			!isAbilityActive(ABILITIES.MEDIC) && !isAbilityActive(ITEMS.STEAL_HEALTH)) {
 		
 		console.log('We have god mode, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.GOD_MODE);
@@ -376,8 +382,8 @@ function useNapalmIfRelevant() {
 
 function useMoraleBoosterIfRelevant() {
 	// Check if Morale Booster is purchased
-	if(hasPurchasedAbility(5)) {
-		if (isAbilityCoolingDown(5)) {
+	if(hasPurchasedAbility(ABILITIES.MORALE_BOOSTER)) {
+		if (isAbilityCoolingDown(ABILITIES.MORALE_BOOSTER)) {
 			return;
 		}
 		
@@ -397,7 +403,7 @@ function useMoraleBoosterIfRelevant() {
 		}
 		//Hype everybody up!
 		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(5);
+			triggerAbility(ABILITIES.MORALE_BOOSTER);
 		}
 	}
 }
@@ -492,7 +498,8 @@ function attemptRespawn() {
 }
 
 function isAbilityActive(abilityId) {
-	return g_Minigame.CurrentScene().bIsAbilityActive(abilityId);
+	var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+	return g_Minigame.CurrentScene().m_rgLaneData[currentLane].abilities[abilityId] != undefined;
 }
 
 function hasItem(itemId) {
