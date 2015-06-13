@@ -456,6 +456,7 @@ function isAbilityItemEnabled(abilityId) {
 	}
 	return false;
 }
+//AUTOCLICKERS change this variable below this
 var clickpersec = 10
 function bestclick() {
 	if (g_Minigame.CurrentScene().m_bUpgradesBusy == false) {
