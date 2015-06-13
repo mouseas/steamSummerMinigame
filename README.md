@@ -22,6 +22,7 @@ powerups for you.
 	- Morale Booster, Napalm, and Cluster Bombs if the lane has a Spawner and 2-3 Creeps
 	- Good Luck Charm as soon as possible
 	- Tactical Nuke if the current Spawner is between 60% and 30% health
+	- Metal Detector is facing a Boss who has less than 30% health
 - Activates some items if you have them and the situation calls for them:
 	- God Mode if Medics is in cooldown and your health is low
 	- Cripple Spawner if the spawner in the current lane has more than 95% health

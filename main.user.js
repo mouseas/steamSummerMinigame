@@ -96,6 +96,7 @@ function doTheThing() {
 		useNapalmIfRelevant();
 		useTacticalNukeIfRelevant();
 		useCrippleSpawnerIfRelevant();
+		useMetalDetectorIfRelevant();
 		useGoldRainIfRelevant();
 		attemptRespawn();
 
@@ -403,6 +404,25 @@ function useTacticalNukeIfRelevant() {
 	}
 }
 
+function useMetalDetectorIfRelevant() {
+	if (hasPurchasedAbility(ABILITIES.METAL_DETECTOR)) {
+		if (isAbilityCoolingDown(ABILITIES.METAL_DETECTOR)) {
+			return;
+		}
+
+		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+
+		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+
+			if (enemyBossHealthPercent < 0.3 ) {
+				console.log('Metal detector is purchased and cooled down, Triggering it on boss');
+				triggerAbility(ABILITIES.METAL_DETECTOR);
+			}
+		}
+	}
+}
+
 function useCrippleSpawnerIfRelevant() {
 	// Check if Cripple Spawner is available
 	if(hasItem(ITEMS.CRIPPLE_SPAWNER)) {
@@ -502,20 +522,20 @@ function triggerAbility(abilityId) {
 }
 
 function toggleAbilityVisibility(abilityId, show) {
-    var vis = show === true ? "visible" : "hidden";
+	var vis = show === true ? "visible" : "hidden";
 
-    var elem = document.getElementById('ability_' + abilityId);
-    if (elem && elem.childElements() && elem.childElements().length >= 1) {
-        elem.childElements()[0].style.visibility = vis;
-    }
+	var elem = document.getElementById('ability_' + abilityId);
+	if (elem && elem.childElements() && elem.childElements().length >= 1) {
+		elem.childElements()[0].style.visibility = vis;
+	}
 }
 
 function disableAbility(abilityId) {
-    toggleAbilityVisibility(abilityId, false);
+	toggleAbilityVisibility(abilityId, false);
 }
 
 function enableAbility(abilityId) {
-    toggleAbilityVisibility(abilityId, true);
+	toggleAbilityVisibility(abilityId, true);
 }
 
 function isAbilityEnabled(abilityId) {
@@ -527,20 +547,20 @@ function isAbilityEnabled(abilityId) {
 }
 
 function toggleAbilityItemVisibility(abilityId, show) {
-    var vis = show === true ? "visible" : "hidden";
+	var vis = show === true ? "visible" : "hidden";
 
-    var elem = document.getElementById('abilityitem_' + abilityId);
-    if (elem && elem.childElements() && elem.childElements().length >= 1) {
-        elem.childElements()[0].style.visibility = show;
-    }
+	var elem = document.getElementById('abilityitem_' + abilityId);
+	if (elem && elem.childElements() && elem.childElements().length >= 1) {
+		elem.childElements()[0].style.visibility = show;
+	}
 }
 
 function disableAbilityItem(abilityId) {
-    toggleAbilityItemVisibility(abilityId, false);
+	toggleAbilityItemVisibility(abilityId, false);
 }
 
 function enableAbilityItem(abilityId) {
-    toggleAbilityItemVisibility(abilityId, true);
+	toggleAbilityItemVisibility(abilityId, true);
 }
 
 function isAbilityItemEnabled(abilityId) {
@@ -556,23 +576,23 @@ function clickTheThing() {
 	// There's a reddit thread about why and we might as well be safe
 	g_msTickRate = 1100;
 
-    g_Minigame.m_CurrentScene.DoClick(
-        {
-            data: {
-                getLocalPosition: function() {
-                    var enemy = g_Minigame.m_CurrentScene.GetEnemy(
-                                      g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane,
-                                      g_Minigame.m_CurrentScene.m_rgPlayerData.target),
-                        laneOffset = enemy.m_nLane * 440;
+	g_Minigame.m_CurrentScene.DoClick(
+		{
+			data: {
+				getLocalPosition: function() {
+					var enemy = g_Minigame.m_CurrentScene.GetEnemy(
+						g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane,
+						g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+					var laneOffset = enemy.m_nLane * 440;
 
-                    return {
-                        x: enemy.m_Sprite.position.x - laneOffset,
-                        y: enemy.m_Sprite.position.y - 52
-                    }
-                }
-            }
-        }
-    );
+					return {
+						x: enemy.m_Sprite.position.x - laneOffset,
+						y: enemy.m_Sprite.position.y - 52
+					}
+				}
+			}
+		}
+	);
 	timer = timer - 1;
 }
 
