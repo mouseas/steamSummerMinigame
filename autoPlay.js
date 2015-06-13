@@ -12,12 +12,12 @@
 // IMPORTANT: Update the @version property above to a higher number such as 1.1 and 1.2 when you update the script! Otherwise, Tamper / Greasemonkey users will not update automatically.
 
 var isAlreadyRunning = false;
-//vvvvvvvvvvv Variables for Goldrain Clicker
+
 var clickRate = 10; // change to number of desired clicks per second
 var timer = 0;
 var lastAction = 500; //start with the max. Array length
 var clickTimer;
-//^^^^^^^^^^ Variables for Goldrain Clicker
+
 var ABILITIES = {
 	"MORALE_BOOSTER": 5,
 	"GOOD_LUCK": 6,
@@ -55,7 +55,7 @@ if (thingTimer){
 function firstRun() {
 	// disable particle effects - this drastically reduces the game's memory leak
 	if (g_Minigame !== undefined) {
-	//	g_Minigame.CurrentScene().DoClickEffect = function() {}; //this is irritating
+		g_Minigame.CurrentScene().DoClickEffect = function() {};
 		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
 		g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
 			emitter.emit = false;
@@ -534,7 +534,7 @@ function isAbilityItemEnabled(abilityId) {
 	}
 	return false;
 }
-//vvvvvvvvvv Variables for Goldrain Clicker
+
 function clickTheThing() {
     g_Minigame.m_CurrentScene.DoClick(
         {
@@ -555,7 +555,7 @@ function clickTheThing() {
     );
 	timer = timer - 1;
 }
-//------ can be done more elegant but i have got no time to make it pretty
+
 function goldRain() {
 	var actions = g_Minigame.CurrentScene().m_rgActionLog;
 	if(lastAction > actions.length){
@@ -581,7 +581,7 @@ function goldRain() {
 		timer = 0;
 	}
 }
-//^^^^^^^^^^ functions for Goldrain Clicker
+
 var thingTimer = window.setInterval(function(){
 	if (g_Minigame && g_Minigame.CurrentScene().m_bRunning && g_Minigame.CurrentScene().m_rgPlayerTechTree) {
 		window.clearInterval(thingTimer);
