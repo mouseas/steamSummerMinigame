@@ -2,7 +2,7 @@
 // @name Monster Minigame Auto-script
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 1.3
+// @version 1.4
 // @match http://steamcommunity.com/minigame/towerattack*
 // @updateURL https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js
 // @downloadURL https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js
@@ -39,6 +39,9 @@ function doTheThing() {
 	isAlreadyRunning = true;
 	
 	goToLaneWithBestTarget();
+	
+	// Auto "clicker", submits 500 amount of clicks every tick (1 second)
+	window.g_Minigame.CurrentScene().m_nClicks = 500;
 	
 	useGoodLuckCharmIfRelevant();
 	useMedicsIfRelevant();
