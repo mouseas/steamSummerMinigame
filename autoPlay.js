@@ -1,10 +1,12 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 1.8
+// @version 1.9
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
+// @match http://steamcommunity.com//minigame/towerattack*
+// @grant none
 // @updateURL https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js
 // @downloadURL https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js
 // ==/UserScript==
@@ -51,8 +53,7 @@ if (thingTimer){
 function firstRun() {
 	// disable particle effects - this drastically reduces the game's memory leak
 	if (g_Minigame !== undefined) {
-		g_Minigame.CurrentScene().DoClickEffect = function() {};
-		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
+		//disableDamageText();
 		g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
 			emitter.emit = false;
 			return emitter;
@@ -60,11 +61,8 @@ function firstRun() {
 	}
 
 	// disable enemy flinching animation when they get hit
-	if (CEnemy !== undefined) {
-		CEnemy.prototype.TakeDamage = function() {};
-		CEnemySpawner.prototype.TakeDamage = function() {};
-		CEnemyBoss.prototype.TakeDamage = function() {};
-	}
+	//disableFlinchingAnimation();
+	// too many confused users think that the script breaks clicking. The flinching animation uses few resources and is a good enough indicator.
 }
 
 function doTheThing() {
@@ -544,3 +542,18 @@ var thingTimer = window.setInterval(function(){
 		thingTimer = window.setInterval(doTheThing, 1000);
 	}
 }, 1000);
+
+// disable enemy flinching animation when they get hit (must be manually called in the console)
+function disableFlinchingAnimation() {
+	if (CEnemy !== undefined) {
+		CEnemy.prototype.TakeDamage = function() {};
+		CEnemySpawner.prototype.TakeDamage = function() {};
+		CEnemyBoss.prototype.TakeDamage = function() {};
+	}
+}
+
+// disable damage text from clicking (must be manually called in the console)
+function disableDamageText() {
+	g_Minigame.CurrentScene().DoClickEffect = function() {};
+	g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
+}
