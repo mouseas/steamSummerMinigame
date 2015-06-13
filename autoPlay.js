@@ -1,16 +1,18 @@
 // ==UserScript== 
-// @name Monster Minigame Auto-script
-// @namespace https://github.com/mouseas/steamSummerMinigame
+// @name Monster Minigame Auto-script w/ auto-click
+// @namespace https://github.com/chauffer/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @version 1.2
 // @match http://steamcommunity.com/minigame/towerattack*
-// @updateURL https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js
-// @downloadURL https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js
+// @updateURL https://raw.githubusercontent.com/chauffer/steamSummerMinigame/master/autoPlay.js
+// @downloadURL https://raw.githubusercontent.com/chauffer/steamSummerMinigame/master/autoPlay.js
 // ==/UserScript==
 
 // IMPORTANT: Update the @version property above to a higher number such as 1.1 and 1.2 when you update the script! Otherwise, Tamper / Greasemonkey users will not update automatically.
 
 var isAlreadyRunning = false;
+var clickRate = 25;
+
 
 // disable particle effects - this drastically reduces the game's memory leak
 if (window.g_Minigame !== undefined) {
@@ -61,6 +63,28 @@ function doTheThing() {
 	isAlreadyRunning = false;
 }
 
+function clickTheThing() {
+    g_Minigame.m_CurrentScene.DoClick(
+        {
+            data: {
+                getLocalPosition: function() {
+                    var enemy = g_Minigame.m_CurrentScene.GetEnemy(
+                                      g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane,
+                                      g_Minigame.m_CurrentScene.m_rgPlayerData.target),
+                        laneOffset = enemy.m_nLane * 440;
+
+                    return {
+                        x: enemy.m_Sprite.position.x - laneOffset,
+                        y: enemy.m_Sprite.position.y - 52
+                    }
+                }
+            }
+        }
+    );
+}
+var clickTimer = window.setInterval(clickTheThing, 1000/clickRate);
+
+
 var ABILITIES = {
 	"GOOD_LUCK": 6,
 	"MEDIC": 7,
@@ -77,6 +101,7 @@ var ITEMS = {
 	"GOD_MODE": 21,
 	"REFLECT_DAMAGE":24
 }
+>>>>>>> upstream/master
 
 function goToLaneWithBestTarget() {
 	// We can overlook spawners if all spawners are 40% hp or higher and a creep is under 10% hp
