@@ -52,8 +52,7 @@ if (thingTimer){
 function firstRun() {
 	// disable particle effects - this drastically reduces the game's memory leak
 	if (g_Minigame !== undefined) {
-		g_Minigame.CurrentScene().DoClickEffect = function() {};
-		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
+		//disableDamageText();
 		g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
 			emitter.emit = false;
 			return emitter;
@@ -61,7 +60,7 @@ function firstRun() {
 	}
 
 	// disable enemy flinching animation when they get hit
-	//disableFlinchingAnimation()
+	//disableFlinchingAnimation();
 	// too many confused users think that the script breaks clicking. The flinching animation uses few resources and is a good enough indicator.
 }
 
@@ -543,4 +542,10 @@ function disableFlinchingAnimation() {
 		CEnemySpawner.prototype.TakeDamage = function() {};
 		CEnemyBoss.prototype.TakeDamage = function() {};
 	}
+}
+
+// disable damage text from clicking (must be manually called in the console)
+function disableDamageText() {
+	g_Minigame.CurrentScene().DoClickEffect = function() {};
+	g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
 }
