@@ -14,37 +14,37 @@
 var isAlreadyRunning = false;
 
 var ABILITIES = {
-	"MORALE_BOOSTER": 5,
-	"GOOD_LUCK": 6,
-	"MEDIC": 7,
-	"METAL_DETECTOR": 8,
-	"COOLDOWN": 9,
-	"NUKE": 10,
-	"CLUSTER_BOMB": 11,
-	"NAPALM": 12
+	"MORALE_BOOSTER" : 5,
+	"GOOD_LUCK" : 6,
+	"MEDIC" : 7,
+	"METAL_DETECTOR" : 8,
+	"COOLDOWN" : 9,
+	"NUKE" : 10,
+	"CLUSTER_BOMB" : 11,
+	"NAPALM" : 12
 };
 
 var ITEMS = {
-	"REVIVE": 13,
-	"CRIPPLE_SPAWNER": 14,
-	"CRIPPLE_MONSTER": 15,
-	"MAXIMIZE_ELEMENT": 16,
-	"GOLD_RAIN": 17,
-	"CRIT": 18,
+	"REVIVE" : 13,
+	"CRIPPLE_SPAWNER" : 14,
+	"CRIPPLE_MONSTER" : 15,
+	"MAXIMIZE_ELEMENT" : 16,
+	"GOLD_RAIN" : 17,
+	"CRIT" : 18,
 	"PUMPED_UP" : 19,
 	"THROW_MONEY" : 20,
 	"GOD_MODE" : 21,
 	"TREASURE" : 22,
 	"STEAL_HEALTH" : 23,
-	"REFLECT_DAMAGE": 24
+	"REFLECT_DAMAGE" : 24
 }
 	
 var ENEMY_TYPE = {
-	"SPAWNER":0,
-	"CREEP":1,
-	"BOSS":2,
-	"MINIBOSS":3,
-	"TREASURE":4
+	"SPAWNER" : 0,
+	"CREEP" : 1,
+	"BOSS" : 2,
+	"MINIBOSS" : 3,
+	"TREASURE" : 4
 }
 
 if (thingTimer){
@@ -52,6 +52,7 @@ if (thingTimer){
 }
 
 function firstRun() {
+	purchaseBadgeItems();
 	// disable particle effects - this drastically reduces the game's memory leak
 	if (g_Minigame !== undefined) {
 		g_Minigame.CurrentScene().DoClickEffect = function() {};
@@ -89,31 +90,47 @@ function doTheThing() {
 	}
 }
 
-function purchaseBadgeItems() {
+function purchaseBadgeItems(badgePoints) {
 	// Spends badge points when joining a new game.
 
 	// Dict contains the priority in terms of amount to buy (percentage of purchase). Probably a nicer way to do this...
 	// First version of priorities is based on this badge point table 'usefulness' from reddit:
 	// http://www.reddit.com/r/Steam/comments/39i0qc/psa_how_the_monster_game_works_an_indepth/
-	var abilitySkillPriority = {
-		"GOLD_RAIN" : 50,
-		"CRIPPLE_MONSTER" : 10,
-		"CRIPPLE_SPAWNER" : 8,
-		"MAXIMIZE_ELEMENT" : 7,
-		"CRIT" : 5,
-		"TREASURE" : 5,
-		"REVIVE" : 5,
-		"STEAL_HEALTH" : 4,
-		"GOD_MODE" : 3,
-		"REFLECT_DAMAGE" : 2,
-		"PUMPED_UP" : 1,
-		"THROW_MONEY" : 0
-	}
+	var abilityItemPriority = [
+		[ITEMS.GOLD_RAIN, 50],
+		[ITEMS.CRIPPLE_MONSTER, 10],
+		[ITEMS.CRIPPLE_SPAWNER, 8],
+		[ITEMS.MAXIMIZE_ELEMENT, 7],
+		[ITEMS.CRIT, 5],
+		[ITEMS.TREASURE, 5],
+		[ITEMS.REVIVE, 5],
+		[ITEMS.STEAL_HEALTH, 4],
+		[ITEMS.GOD_MODE, 3],
+		[ITEMS.REFLECT_DAMAGE, 2],
+		[ITEMS.PUMPED_UP, 1],
+		[ITEMS.THROW_MONEY, 0]
+	]
+
 	var buyItem = function(id) {
 		g_Minigame.CurrentScene().TrySpendBadgePoints(document.getElementById('purchase_abilityitem_' + id));
 	}
-	
 
+	//var badgePoints = g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
+
+	for (var i = 0; i < abilityItemPriority.length; i++) {
+		var abilityItem = abilityItemPriority[i];
+		var cost = $J(document.getElementById('purchase_abilityitem_' + abilityItem[0])).data('cost');
+		if (cost > badgePoints)//g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points)
+			continue;
+		badgePoints -= cost;
+		var numBuy = Math.round((badgePoints * abilityItem[1] / 100) / cost);
+		console.log(abilityItem[0] + ": " + numBuy + ":" + cost + ", ");
+		//for (var j = 0; j < numBuy; j++) {
+		//	buyItem(abilityItem[0]);
+		//}
+		
+	}
+	console.log("AMT LEFT: " + badgePoints);
 }
 
 function goToLaneWithBestTarget() {
