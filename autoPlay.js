@@ -92,23 +92,27 @@ function doTheThing() {
 function purchaseBadgeItems() {
 	// Spends badge points when joining a new game.
 
+	// Dict contains the priority in terms of amount to buy (percentage of purchase). Probably a nicer way to do this...
+	// First version of priorities is based on this badge point table 'usefulness' from reddit:
+	// http://www.reddit.com/r/Steam/comments/39i0qc/psa_how_the_monster_game_works_an_indepth/
 	var abilitySkillPriority = {
-		"REVIVE": 13,
-		"CRIPPLE_SPAWNER": 14,
-		"CRIPPLE_MONSTER": 15,
-		"MAXIMIZE_ELEMENT": 16,
-		"GOLD_RAIN": 17,
-		"CRIT": 18,
-		"PUMPED_UP" : 19,
-		"THROW_MONEY" : 20,
-		"GOD_MODE" : 21,
-		"TREASURE" : 22,
-		"STEAL_HEALTH" : 23,
-		"REFLECT_DAMAGE":24
+		"GOLD_RAIN" : 50,
+		"CRIPPLE_MONSTER" : 10,
+		"CRIPPLE_SPAWNER" : 8,
+		"MAXIMIZE_ELEMENT" : 7,
+		"CRIT" : 5,
+		"TREASURE" : 5,
+		"REVIVE" : 5,
+		"STEAL_HEALTH" : 4,
+		"GOD_MODE" : 3,
+		"REFLECT_DAMAGE" : 2,
+		"PUMPED_UP" : 1,
+		"THROW_MONEY" : 0
 	}
-	var buyBadge = function(id) {
-		g_Minigame.CurrentScene().TrySpendBadgePoints(document.getElementById('purchase_abilityitem_' + id).childElements()[0].childElements()[1]);
+	var buyItem = function(id) {
+		g_Minigame.CurrentScene().TrySpendBadgePoints(document.getElementById('purchase_abilityitem_' + id));
 	}
+	
 
 }
 
