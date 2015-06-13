@@ -233,7 +233,7 @@ function useMedicsIfRelevant() {
 	// check if health is below 50%
 	var hpPercent = g_Minigame.CurrentScene().m_rgPlayerData.hp / myMaxHealth;
 	if (hpPercent < 0.6) {
-		besthp();
+		buyupgrade(besthp());
 	}
 	if (hpPercent > 0.5 || g_Minigame.CurrentScene().m_rgPlayerData.hp < 1) {
 		return; // no need to heal - HP is above 50% or already dead
@@ -556,21 +556,21 @@ function besthp() {
 		if ((hp2 < hp1)&&(hp1count > 9)) {
 			if ((hp3 < hp2)&&(hp2count > 9)) {
 				//console.log('hp3');
-				buyupgrade(20);
+				return 20;
 				//g_Minigame.CurrentScene().TryUpgrade(20);
 			} else {
 				//console.log('hp2');
-				buyupgrade(8);
+				return 8;
 				//g_Minigame.CurrentScene().TryUpgrade(8);
 			}
 		} else {
 			if ((hp3 < hp1)&&(hp2count > 9)) {
 				//console.log('hp3');
-				buyupgrade(20);
+				return 20;
 				//g_Minigame.CurrentScene().TryUpgrade(20);
 			} else {
 				//console.log('hp1');
-				buyupgrade(0);
+				return 0;
 				//g_Minigame.CurrentScene().TryUpgrade(0);
 			}
 		};
@@ -674,8 +674,9 @@ function isAbilityItemEnabled(abilityId) {
 	}
 	return false;
 }
+
 function buyupgrade(upgr_id) {
-	var elem = document.getElementById('upgr_' + abilityId);
+	var elem = document.getElementById('upgr_' + upgr_id);
 	if (elem && elem.childElements() && elem.childElements().length >= 1) {
 		if (elem.childElements()[0].length >= 2 && elem.childElements()[0].childElements()) {
 			g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + upgr_id).childElements()[0].childElements()[1])
