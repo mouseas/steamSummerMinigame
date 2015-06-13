@@ -75,8 +75,8 @@ function firstRun() {
 		g_Minigame.CurrentScene().DoClickEffect = function() {};
 		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
 		g_Minigame.CurrentScene().SpawnEmitter = function (emitter) {
-		    emitter.emit = false;
-		    return emitter;
+			emitter.emit = false;
+			return emitter;
 		};
 	}
 
@@ -591,8 +591,8 @@ function clickTheThing() {
 					var laneOffset = enemy.m_nLane * 440;
 
 					return {
-					    x: enemy.m_Sprite.position.x - laneOffset,
-					    y: enemy.m_Sprite.position.y - 52
+						x: enemy.m_Sprite.position.x - laneOffset,
+						y: enemy.m_Sprite.position.y - 52
 					};
 				}
 			}
