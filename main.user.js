@@ -4,10 +4,8 @@
 // @version 2.2
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @match http://steamcommunity.com/minigame/towerattack*
-// @match http://steamcommunity.com//minigame/towerattack*
-// @match https://steamcommunity.com/minigame/towerattack*
-// @match https://steamcommunity.com//minigame/towerattack*
+// @match *://steamcommunity.com/minigame/towerattack*
+// @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
 // @updateURL https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/main.user.js
 // @downloadURL https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/main.user.js
