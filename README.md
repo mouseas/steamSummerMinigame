@@ -29,7 +29,7 @@ powerups for you.
 
 ### Tampermonkey ###
 
-1. Open Tapermonkey's dashboard.
+1. Open Tampermonkey's dashboard.
 2. Click on the `Utilites` tab on the right.
 3. Paste `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js` into the text area, and click `Import`.
 4. When the editor has loaded, press `Install` (*NOT* `Process with Chrome`).
