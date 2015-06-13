@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 1.8
+// @version 1.9
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
@@ -566,9 +566,11 @@ function goldRain() {
 		for (var i = lastAction; i < actions.length; i++) {
 			//console.log(actions[i].ability + " " + actions[i].type);
 			if(actions[i].ability == 17 && actions[i].type == 'ability'){
+				clearInterval(clickTimer);
+				timer = 0;
 				console.log('Let the GOLD rain!');
 				clickTimer = window.setInterval(clickTheThing, 1000/clickRate);
-				timer = 200;
+				timer = 150;
 			}
 		}
 		lastAction = i;
