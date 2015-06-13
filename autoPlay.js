@@ -274,10 +274,10 @@ function useGoodLuckCharmIfRelevant() {
 	}
 }
 
-function useClusterBombIfRelevant() {
+function useOffensiveAbilityIfRelevant(ability){
 	//Check if Cluster Bomb is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.CLUSTER_BOMB)) {
-		if (isAbilityCoolingDown(ABILITIES.CLUSTER_BOMB)) {
+	if (hasPurchasedAbility(ability)) {
+		if (isAbilityCoolingDown(ability)) {
 			return;
 		}
 		
@@ -297,37 +297,16 @@ function useClusterBombIfRelevant() {
 		}
 		//Bombs away if spawner and 2+ other monsters
 		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.CLUSTER_BOMB);
+			triggerAbility(ability);
 		}
 	}
 }
+function useClusterBombIfRelevant() {
+	useOffensiveAbilityIfRelevant(ABILITIES.CLUSTER_BOMB);
+}
 
 function useNapalmIfRelevant() {
-	//Check if Napalm is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.NAPALM)) {
-		if (isAbilityCoolingDown(ABILITIES.NAPALM)) {
-			return;
-		}
-		
-		//Check lane has monsters to burn
-		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type == 0) { 
-					enemySpawnerExists = true;
-				}
-			}
-		}
-		//Burn them all if spawner and 2+ other monsters
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.NAPALM);
-		}
-	}
+	useOffensiveAbilityIfRelevant(ABILITIES.NAPALM);
 }
 
 function useMoraleBoosterIfRelevant() {
