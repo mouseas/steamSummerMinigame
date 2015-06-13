@@ -109,7 +109,7 @@ function doTheThing() {
 	}
 }
 
-// Each elemental damage, lucky shot and loot have their own type
+// Each elemental damage, lucky shot and loot have their own type in m_rgTuningData
 var UPGRADE_TYPES = {
 	"ARMOR": 0,
 	"DPS": 1,
@@ -300,9 +300,7 @@ function purchaseUpgrades() {
 		}
 	}
 	
-	console.log("Best upgrade for DPS is " + upgrades[bestUpgradeForType[UPGRADE_TYPES.DPS]].name);
-	console.log("Best upgrade for CLICK_DAMAGE is " + upgrades[bestUpgradeForType[UPGRADE_TYPES.CLICK_DAMAGE]].name);
-	console.log("Best upgrade for ARMOR is " + upgrades[bestUpgradeForType[UPGRADE_TYPES.ARMOR]].name);
+	upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestUpgradeForType[UPGRADE_TYPES.DPS]);
 	
 	if(myGold > upgradeCost) {
 		console.log("Buying " + upgrades[bestUpgradeForType[UPGRADE_TYPES.DPS]].name);
