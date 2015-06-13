@@ -274,67 +274,90 @@ function useGoodLuckCharmIfRelevant() {
 	}
 }
 
-function useOffensiveAbilityIfRelevant(ability){
-	//Check if Cluster Bomb is purchased and cooled down
-	if (hasPurchasedAbility(ability)) {
-		if (isAbilityCoolingDown(ability)) {
-			return;
-		}
-		
-		//Check lane has monsters to explode
-		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type == 0) { 
-					enemySpawnerExists = true;
-				}
-			}
-		}
-		//Bombs away if spawner and 2+ other monsters
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ability);
-		}
-	}
+var abilityConditions = {};
+abilityConditions[ABILITIES.CLUSTER_BOMB] = {
+    spawnerExists: true,
+    enemyCount: 3,
+    spawnerMinHealthPercent: null,
+    spawnerMaxHealthPercent: null
+};
+abilityConditions[ABILITIES.NAPALM] = {
+    spawnerExists: true,
+    enemyCount: 3,
+    spawnerMinHealthPercent: null,
+    spawnerMaxHealthPercent: null
+};
+abilityConditions[ABILITIES.NUKE] = {
+    spawnerExists: true,
+    enemyCount: null,
+    spawnerMinHealthPercent: 0.3,
+    spawnerMaxHealthPercent: 0.6
+};
+
+function useOffensiveAbilityIfAvailable(abilityId) {
+    //Check if Cluster Bomb is purchased and cooled down
+    if (hasPurchasedAbility(abilityId)) {
+        if (isAbilityCoolingDown(abilityId)) {
+            return;
+        }
+
+        //Check lane has monsters to explode
+        var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+        var enemyCount = 0;
+        var enemySpawnerExists = false;
+        var enemySpawnerHealthPercent = 0.0;
+
+        //Count each slot in lane
+        for (var i = 0; i < 4; i++) {
+            var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
+            if (enemy) {
+                enemyCount++;
+                if (enemy.m_data.type == 0) {
+                    enemySpawnerExists = true;
+                    enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+                }
+            }
+        }
+
+        var meetsConditions = true;
+        
+        //Only check the conditions that need to be checked    
+        if (abilityConditions[abilityId].enemyCount != null) {
+            meetsConditions = meetsConditions && enemyCount >= abilityConditions[abilityId].enemyCount;
+        }
+
+        if (abilityConditions[abilityId].spawnerExists != null) {
+            meetsConditions = meetsConditions && enemySpawnerExists === abilityConditions[abilityId].spawnerExists;
+        }
+
+        if (abilityConditions[abilityId].spawnerMinHealthPercent != null) {
+            meetsConditions = meetsConditions && enemySpawnerHealthPercent > abilityConditions[abilityId].spawnerMinHealthPercent;
+        }
+
+        if (abilityConditions[abilityId].spawnerMaxHealthPercent != null) {
+            meetsConditions = meetsConditions && enemySpawnerHealthPercent < abilityConditions[abilityId].spawnerMaxHealthPercent;
+        }
+
+        if (meetsConditions === true) {
+            triggerAbility(abilityId);
+        }
+    }
 }
+
 function useClusterBombIfRelevant() {
-	useOffensiveAbilityIfRelevant(ABILITIES.CLUSTER_BOMB);
+    useOffensiveAbilityIfAvailable(ABILITIES.CLUSTER_BOMB);
 }
 
 function useNapalmIfRelevant() {
-	useOffensiveAbilityIfRelevant(ABILITIES.NAPALM);
+    useOffensiveAbilityIfAvailable(ABILITIES.NAPALM);
 }
 
 function useMoraleBoosterIfRelevant() {
-	// Check if Morale Booster is purchased
-	if(hasPurchasedAbility(5)) {
-		if (isAbilityCoolingDown(5)) {
-			return;
-		}
-		
-		//Check lane has monsters so the hype isn't wasted
-		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type == 0) { 
-					enemySpawnerExists = true;
-				}
-			}
-		}
-		//Hype everybody up!
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(5);
-		}
-	}
+    useOffensiveAbilityIfAvailable(ABILITIES.MORALE_BOOSTER);
+}
+
+function useTacticalNukeIfRelevant() {
+    useOffensiveAbilityIfAvailable(ABILITIES.NUKE);
 }
 
 //If player is dead, call respawn method
