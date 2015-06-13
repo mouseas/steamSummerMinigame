@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.3
+// @version 2.0.4
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match *://steamcommunity.com/minigame/towerattack*
@@ -18,7 +18,7 @@
 //  | || |  | |  __/| |_| |  _ < | |/ ___ \| |\  | | |   //
 // |___|_|  |_|_|    \___/|_| \_\|_/_/   \_\_| \_| |_|   //
 //
-// Increment the @version parameter every time you update the script (2.1, 2.2, etc.).
+// Increment the @version parameter every time you update the script (2.0.1, 2.0.2, etc.).
 // Otherwise, Greasemonkey / Tampermonkey users will NOT update automatically!
 //
 //////////////////////////////////////////////////////////////////////////////////////
