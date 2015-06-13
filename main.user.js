@@ -369,7 +369,7 @@ function useMoraleBoosterIfRelevant() {
 		}
 		//Hype everybody up!
 		if (enemySpawnerExists && enemyCount >= 3) {
-			console.log("Morale Booster is purchased, cooled down, and needed. Rally around, everyone!.");
+			console.log("Morale Booster is purchased, cooled down, and needed. Rally around, everyone!");
 			triggerAbility(ABILITIES.MORALE_BOOSTER);
 		}
 	}
