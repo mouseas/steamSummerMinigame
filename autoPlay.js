@@ -489,7 +489,7 @@ function bestclick() {
 
 function bestauto() {
 	if (g_Minigame.CurrentScene().m_bUpgradesBusy == false) {
-		var auto1 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[1].cost_for_next_level/1.3;
+		var auto1 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[1].cost_for_next_level/1;
 		var auto1count = g_Minigame.CurrentScene().m_rgPlayerUpgrades[1].level;
 		var auto2 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[9].cost_for_next_level/10;
 		var auto2count = g_Minigame.CurrentScene().m_rgPlayerUpgrades[9].level;
@@ -536,7 +536,7 @@ function bestdps() {
 		var clickmod = 100;
 	};
 	if (autobest == 2) {
-		var automod = 1.3
+		var automod = 1
 	} else if (autobest == 9) {
 		var automod = 10;
 	} else {
