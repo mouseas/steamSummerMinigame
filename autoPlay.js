@@ -194,7 +194,7 @@ function goToLaneWithBestTarget() {
 
 function purchaseUpgrades() {
 	var oddsOfElement = 1 - (0.75*0.75*0.75); //This values elemental too much because best element lanes are not focused(0.578)
-	var avgClicksPerSecond = 10;
+	var avgClicksPerSecond = 0.2;
 	
 	var buyUpgrade = function(id) {
 		g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + id).childElements()[0].childElements()[1]);
@@ -281,9 +281,9 @@ function purchaseUpgrades() {
 	}
 	
 	var myMaxHealth = g_Minigame.CurrentScene().m_rgPlayerTechTree.max_hp;
-	// check if health is below 60%
+	// check if health is below 30%
 	var hpPercent = g_Minigame.CurrentScene().m_rgPlayerData.hp / myMaxHealth;
-	if (hpPercent < 0.6) {
+	if (hpPercent < 0.3) {
 		// Prioritize armor over damage
 		// - Should we by any armor we can afford or just wait for the best one possible?
 		//	 currently waiting
@@ -291,7 +291,7 @@ function purchaseUpgrades() {
 		
 		if(myGold > upgradeCost && bestUpgradeForArmor) {
 			console.log("Buying " + upgrades[bestUpgradeForArmor].name);
-			//buyUpgrade(bestUpgradeForArmor);
+			buyUpgrade(bestUpgradeForArmor);
 		}
 	}
 	
@@ -302,6 +302,9 @@ function purchaseUpgrades() {
 		console.log("Buying " + upgrades[bestUpgradeForDamage].name);
 		buyUpgrade(bestUpgradeForDamage);
 	}
+	
+	/*console.log("Best armor: " + upgrades[bestUpgradeForArmor].name);
+	console.log("Best damage: " + upgrades[bestUpgradeForDamage].name);*/
 }
 
 function useMedicsIfRelevant() {
