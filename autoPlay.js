@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 1.4
+// @version 1.5
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
@@ -77,6 +77,8 @@ function doTheThing() {
 	useMoraleBoosterIfRelevant();
 	useClusterBombIfRelevant();
 	useNapalmIfRelevant();
+	
+	bestdps();
 	
 	// TODO use abilities if available and a suitable target exists
 	// - Tactical Nuke on a Spawner if below 50% and above 25% of its health
@@ -243,6 +245,8 @@ function useMedicsIfRelevant() {
 	var hpPercent = g_Minigame.CurrentScene().m_rgPlayerData.hp / myMaxHealth;
 	if (hpPercent > 0.5 || g_Minigame.CurrentScene().m_rgPlayerData.hp < 1) {
 		return; // no need to heal - HP is above 50% or already dead
+	} else if (hpPercent < 0.1) {
+		besthp();
 	}
 	
 	// check if Medics is purchased and cooled down
@@ -450,5 +454,143 @@ function isAbilityItemEnabled(abilityId) {
 	}
 	return false;
 }
+var clickpersec = 10
+function bestclick() {
+	if (g_Minigame.CurrentScene().m_bUpgradesBusy == false) {
+		var click1 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[2].cost_for_next_level/1.3;
+		var click1count = g_Minigame.CurrentScene().m_rgPlayerUpgrades[2].level;
+		var click2 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[10].cost_for_next_level/10;
+		var click2count = g_Minigame.CurrentScene().m_rgPlayerUpgrades[10].level;
+		var click3 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[22].cost_for_next_level/100;
+		if ((click2 < click1)&&(click1count > 9)) {
+			if ((click3 < click2)&&(click2count > 9)) {
+				//console.log('click3');
+				return 22;
+				//g_Minigame.CurrentScene().TryUpgrade(22);
+			} else {
+				//console.log('click2');
+				return 10;
+				//g_Minigame.CurrentScene().TryUpgrade(10);
+			}
+		} else {
+			if ((click3 < click1)&&(click2count > 9)) {
+				//console.log('click3');
+				return 22;
+				//g_Minigame.CurrentScene().TryUpgrade(22);
+			} else {
+				//console.log('click1');
+				return 2;
+				//g_Minigame.CurrentScene().TryUpgrade(2);
+			}
+		};
+	};
+}
+//g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + 20).childElements()[0].childElements()[1])
 
+function bestauto() {
+	if (g_Minigame.CurrentScene().m_bUpgradesBusy == false) {
+		var auto1 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[1].cost_for_next_level/1.3;
+		var auto1count = g_Minigame.CurrentScene().m_rgPlayerUpgrades[1].level;
+		var auto2 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[9].cost_for_next_level/10;
+		var auto2count = g_Minigame.CurrentScene().m_rgPlayerUpgrades[9].level;
+		var auto3 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[21].cost_for_next_level/100;
+		if ((auto2 < auto1)&&(auto1count > 9)) {
+			if ((auto3 < auto2)&&(auto2count > 9)) {
+				//console.log('auto3');
+				return 21;
+				//g_Minigame.CurrentScene().TryUpgrade(22);
+			} else {
+				//console.log('auto2');
+				return 9;
+				//g_Minigame.CurrentScene().TryUpgrade(10);
+			}
+		} else {
+			if ((auto3 < auto1)&&(auto2count > 9)) {
+				//console.log('auto3');
+				return 21;
+				//g_Minigame.CurrentScene().TryUpgrade(22);
+			} else {
+				//console.log('auto1');
+				return 1;
+				//g_Minigame.CurrentScene().TryUpgrade(2);
+			}
+		};
+	};
+}
+
+function bestcrit() {
+	var critcount = g_Minigame.CurrentScene().m_rgPlayerUpgrades[7].level;
+	var critcost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[7].cost_for_next_level;
+	return critcost/(1.5*(clickpersec+1)*0.001);
+}
+
+function bestdps() {
+	var clickbest = bestclick();
+	var autobest = bestauto();
+	var critbestcost = bestcrit();
+	if (clickbest == 2) {
+		var clickmod = 1
+	} else if (clickbest == 10) {
+		var clickmod = 10;
+	} else {
+		var clickmod = 100;
+	};
+	if (autobest == 2) {
+		var automod = 1.3
+	} else if (autobest == 9) {
+		var automod = 10;
+	} else {
+		var automod = 100;
+	};
+	var clickbestcost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[clickbest].cost_for_next_level/(clickmod*clickpersec);
+	var autobestcost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[autobest].cost_for_next_level/automod;
+	if (clickbestcost < autobestcost) {
+		if (critbestcost < clickbestcost) {
+			buyupgrade(7);
+		} else {
+			buyupgrade(clickbest);
+		}
+	} else {
+		if (critbestcost < autobestcost) {
+			buyupgrade(7);
+		} else {
+			buyupgrade(autobest);
+		}
+	};
+}
+
+function besthp() {
+	if (g_Minigame.CurrentScene().m_bUpgradesBusy == false) {
+		var hp1 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[0].cost_for_next_level/1.3;
+		var hp1count = g_Minigame.CurrentScene().m_rgPlayerUpgrades[0].level;
+		var hp2 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[8].cost_for_next_level/10;
+		var hp2count = g_Minigame.CurrentScene().m_rgPlayerUpgrades[8].level;
+		var hp3 = g_Minigame.CurrentScene().m_rgPlayerUpgrades[20].cost_for_next_level/100;
+		if ((hp2 < hp1)&&(hp1count > 9)) {
+			if ((hp3 < hp2)&&(hp2count > 9)) {
+				//console.log('hp3');
+				buyupgrade(20);
+				//g_Minigame.CurrentScene().TryUpgrade(20);
+			} else {
+				//console.log('hp2');
+				buyupgrade(8);
+				//g_Minigame.CurrentScene().TryUpgrade(8);
+			}
+		} else {
+			if ((hp3 < hp1)&&(hp2count > 9)) {
+				//console.log('hp3');
+				buyupgrade(20);
+				//g_Minigame.CurrentScene().TryUpgrade(20);
+			} else {
+				//console.log('hp1');
+				buyupgrade(0);
+				//g_Minigame.CurrentScene().TryUpgrade(0);
+			}
+		};
+	};
+}
+
+function buyupgrade(upgr_id) {
+	g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + upgr_id).childElements()[0].childElements()[1])
+}
 var thingTimer = window.setInterval(doTheThing, 1000);
