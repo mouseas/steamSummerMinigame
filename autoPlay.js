@@ -539,7 +539,7 @@ function bestdps() {
 	} else {
 		var clickmod = 100;
 	};
-	if (autobest == 2) {
+	if (autobest == 1) {
 		var automod = 1
 	} else if (autobest == 9) {
 		var automod = 10;
