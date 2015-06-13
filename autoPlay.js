@@ -509,6 +509,9 @@ function bestcrit() {
 }
 
 function bestdps() {
+	if (!g_Minigame.CurrentScene().m_bUpgradesBusy) {
+		return
+	}
 	var clickbest = bestclick();
 	var autobest = bestauto();
 	var critbestcost = bestcrit();
@@ -526,9 +529,6 @@ function bestdps() {
 	} else {
 		var automod = 100;
 	};
-	if (!g_Minigame.CurrentScene().m_rgPlayerUpgrades || g_Minigame.CurrentScene().m_rgPlayerUpgrades == undefined) {
-		return;
-	}
 	var clickbestcost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[clickbest].cost_for_next_level/(clickmod*clickpersec);
 	var autobestcost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[autobest].cost_for_next_level/automod;
 	if (clickbestcost < autobestcost) {
