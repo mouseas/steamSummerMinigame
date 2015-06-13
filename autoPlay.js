@@ -194,7 +194,7 @@ function goToLaneWithBestTarget() {
 
 function purchaseUpgrades() {
 	var oddsOfElement = 1 - (0.75*0.75*0.75); //This values elemental too much because best element lanes are not focused(0.578)
-	var avgClicksPerSecond = 0.2;	//Set this yourself to serve your needs
+	var avgClicksPerSecond = 3;	//Set this yourself to serve your needs
 	
 	var buyUpgrade = function(id) {
 		g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + id).childElements()[0].childElements()[1]);
