@@ -26,13 +26,17 @@ var ABILITIES = {
 
 var ITEMS = {
 	"REVIVE": 13,
-	"GOLD_RAIN": 17,
-	"GOD_MODE": 21,
-	"REFLECT_DAMAGE":24,
-	"CRIT": 18,
-	"CRIPPLE_MONSTER": 15,
 	"CRIPPLE_SPAWNER": 14,
-	"MAXIMIZE_ELEMENT": 16
+	"CRIPPLE_MONSTER": 15,
+	"MAXIMIZE_ELEMENT": 16,
+	"GOLD_RAIN": 17,
+	"CRIT": 18,
+	"PUMPED_UP" : 19,
+	"THROW_MONEY" : 20,
+	"GOD_MODE" : 21,
+	"TREASURE" : 22,
+	"STEAL_HEALTH" : 23,
+	"REFLECT_DAMAGE": 24
 }
 	
 var ENEMY_TYPE = {
@@ -83,6 +87,29 @@ function doTheThing() {
 
 		isAlreadyRunning = false;
 	}
+}
+
+function purchaseBadgeItems() {
+	// Spends badge points when joining a new game.
+
+	var abilitySkillPriority = {
+		"REVIVE": 13,
+		"CRIPPLE_SPAWNER": 14,
+		"CRIPPLE_MONSTER": 15,
+		"MAXIMIZE_ELEMENT": 16,
+		"GOLD_RAIN": 17,
+		"CRIT": 18,
+		"PUMPED_UP" : 19,
+		"THROW_MONEY" : 20,
+		"GOD_MODE" : 21,
+		"TREASURE" : 22,
+		"STEAL_HEALTH" : 23,
+		"REFLECT_DAMAGE":24
+	}
+	var buyBadge = function(id) {
+		g_Minigame.CurrentScene().TrySpendBadgePoints(document.getElementById('purchase_abilityitem_' + id).childElements()[0].childElements()[1]);
+	}
+
 }
 
 function goToLaneWithBestTarget() {
@@ -242,7 +269,7 @@ function useMedicsIfRelevant() {
 		// Medics is purchased, cooled down, and needed. Trigger it.
 		console.log('Medics is purchased, cooled down, and needed. Trigger it.');
 		triggerAbility(ABILITIES.MEDIC);
-	} else if (hasItem(ITEMS.GOD_MODE) && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
+	} else if (numItem(ITEMS.GOD_MODE) > 0 && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
 		
 		console.log('We have god mode, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.GOD_MODE);
@@ -383,7 +410,7 @@ function useTacticalNukeIfRelevant() {
 
 function useCrippleSpawnerIfRelevant() {
 	// Check if Cripple Spawner is available
-	if(hasItem(ITEMS.CRIPPLE_SPAWNER)) {
+	if(numItem(ITEMS.CRIPPLE_SPAWNER) > 0) {
 		if (isAbilityCoolingDown(ITEMS.CRIPPLE_SPAWNER)) {
 			return;
 		}
@@ -413,7 +440,7 @@ function useCrippleSpawnerIfRelevant() {
 
 function useGoldRainIfRelevant() {
 	// Check if gold rain is purchased
-	if (hasItem(ITEMS.GOLD_RAIN)) {
+	if (numItem(ITEMS.GOLD_RAIN) > 0) {
 		if (isAbilityCoolingDown(ITEMS.GOLD_RAIN)) {
 			return;
 		}
@@ -444,14 +471,14 @@ function isAbilityActive(abilityId) {
 	return g_Minigame.CurrentScene().bIsAbilityActive(abilityId);
 }
 
-function hasItem(itemId) {
+function numItem(itemId) {
 	for ( var i = 0; i < g_Minigame.CurrentScene().m_rgPlayerTechTree.ability_items.length; ++i ) {
 		var abilityItem = g_Minigame.CurrentScene().m_rgPlayerTechTree.ability_items[i];
 		if (abilityItem.ability == itemId) {
-			return true;
+			return abilityItem.quantity;
 		}
 	}
-	return false;
+	return 0;
 }
 
 function isAbilityCoolingDown(abilityId) {
