@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.3.1
+// @version 2.3.2
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match *://steamcommunity.com/minigame/towerattack*
@@ -43,23 +43,27 @@ var ABILITIES = {
 };
 
 var ITEMS = {
-	"REVIVE": 13,
-	"GOLD_RAIN": 17,
-	"GOD_MODE": 21,
-	"REFLECT_DAMAGE":24,
-	"CRIT": 18,
-	"CRIPPLE_MONSTER": 15,
-	"CRIPPLE_SPAWNER": 14,
-	"MAXIMIZE_ELEMENT": 16
-}
-	
+    "REVIVE": 13,
+    "CRIPPLE_SPAWNER": 14,
+    "CRIPPLE_MONSTER": 15,
+    "MAXIMIZE_ELEMENT": 16,
+    "GOLD_RAIN": 17,
+    "CRIT": 18,
+    "PUMPED_UP": 19,
+    "THROW_MONEY": 20,
+    "GOD_MODE": 21,
+    "TREASURE": 22,
+    "STEAL_HEALTH": 23,
+    "REFLECT_DAMAGE": 24
+};
+
 var ENEMY_TYPE = {
-	"SPAWNER":0,
-	"CREEP":1,
-	"BOSS":2,
-	"MINIBOSS":3,
-	"TREASURE":4
-}
+    "SPAWNER": 0,
+    "CREEP": 1,
+    "BOSS": 2,
+    "MINIBOSS": 3,
+    "TREASURE": 4
+};
 
 if (thingTimer){
 	window.clearInterval(thingTimer);
