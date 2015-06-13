@@ -12,7 +12,7 @@ powerups for you.
 ## Features ##
 
 - Moves you to the lane most likely to give you gold, prioritized like so:
-    1. The lane with a Treasure Minion or Boss
+        1. The lane with a Treasure Minion or Boss
 	2. The lane with the Miniboss with the lowest health
 	3. The lane with a Spawner below 40% health
 	4. The lane with a Creep below 10% health
@@ -47,23 +47,23 @@ powerups for you.
 
 #####Chrome#####
 1. Open `autoPlay.js` in a text editor.
-2. Select All, Copy
+2. Select All, Copy.
 3. Navigate to http://steamcommunity.com/minigame/ and join or start a game.
-4. press `Cntrl+Shift+j`
+4. press `Cntrl+Shift+j`.
 5. Paste into the javascript input, and hit `Enter`.
 6. (Optional) To stop the script, type `window.clearTimeout(thingTimer);` into the console and hit Enter.
 
 #####FireFox#####
 1. Open `autoPlay.js` in a text editor.
-2. Select All, Copy
+2. Select All, Copy.
 3. Navigate to http://steamcommunity.com/minigame/ and join or start a game.
-4. press `Cntrl+Shift+k`
+4. press `Cntrl+Shift+k`.
 5. Paste into the javascript input, and hit `Enter`.
 6. (Optional) To stop the script, type `window.clearTimeout(thingTimer);` into the console and hit Enter.
 
 #####Internet Explorer/Microsoft Edge#####
 1. Open `autoPlay.js` in a text editor.
-2. Select All, Copy
+2. Select All, Copy.
 3. Navigate to http://steamcommunity.com/minigame/ and join or start a game.
 4. press `F12` and navigate to the `console` tab.
 5. Paste into the javascript input, and hit `Enter`.
