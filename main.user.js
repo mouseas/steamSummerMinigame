@@ -271,7 +271,11 @@ function purchaseUpgrades() {
 	var avgClicksPerSecond = 3;	//Set this yourself to serve your needs
 	
 	var buyUpgrade = function(id) {
-		g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + id).childElements()[0].childElements()[1]);
+		if(id >= 3 && 6 >= id) { //If upgrade is element damage
+			g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + id).childElements()[3]);
+		} else {
+			g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + id).childElements()[0].childElements()[1]);
+		}
 	}
 	
 	var myGold = g_Minigame.CurrentScene().m_rgPlayerData.gold;
