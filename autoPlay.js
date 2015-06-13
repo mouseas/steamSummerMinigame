@@ -227,7 +227,7 @@ function purchaseUpgrades() {
 		}
 	
 		var upgradeCurrentLevel = g_Minigame.CurrentScene().m_rgPlayerUpgrades[i].level;
-		var upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(i);
+		var upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[i].cost_for_next_level;
 		
 		switch(upgrade.type) {
 			case UPGRADE_TYPES.ARMOR:
@@ -273,8 +273,10 @@ function purchaseUpgrades() {
 	
 	if(bestElement) {
 		//Let user choose what element to level up by adding the point to desired element
-		upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestElement);
+		upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestElement].cost_for_next_level;
+		
 		var dps = g_Minigame.CurrentScene().m_rgPlayerTechTree.dps;
+		dps = dps + (g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click * avgClicksPerSecond);
 		if(oddsOfElement * dps * upgrades[bestElement].multiplier / upgradeCost > highestUpgradeValueForDamage) { //dmg increase / moneys
 			//bestUpgradeForDamage = bestElement; // Not doing this because this values element damage too much
 		}
@@ -287,16 +289,17 @@ function purchaseUpgrades() {
 		// Prioritize armor over damage
 		// - Should we by any armor we can afford or just wait for the best one possible?
 		//	 currently waiting
-		upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestUpgradeForArmor);
+		upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestUpgradeForArmor].cost_for_next_level;
 		
 		if(myGold > upgradeCost && bestUpgradeForArmor) {
 			console.log("Buying " + upgrades[bestUpgradeForArmor].name);
 			buyUpgrade(bestUpgradeForArmor);
+			myGold = g_Minigame.CurrentScene().m_rgPlayerData.gold;
 		}
 	}
 	
 	// Try to buy some damage
-	upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestUpgradeForDamage);
+	upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestUpgradeForDamage].cost_for_next_level;
 
 	if(myGold > upgradeCost && bestUpgradeForDamage) {
 		console.log("Buying " + upgrades[bestUpgradeForDamage].name);
