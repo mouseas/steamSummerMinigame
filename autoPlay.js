@@ -564,11 +564,11 @@ function goldRain() {
 	
 	if(actions.length > lastAction){
 		for (var i = lastAction; i < actions.length; i++) {
-			console.log(actions[i].ability + " " + actions[i].type);
+			//console.log(actions[i].ability + " " + actions[i].type);
 			if(actions[i].ability == 17 && actions[i].type == 'ability'){
-			console.log('Goldregen');
-			clickTimer = window.setInterval(clickTheThing, 1000/clickRate);
-			timer = 200;
+				console.log('Let the GOLD rain!');
+				clickTimer = window.setInterval(clickTheThing, 1000/clickRate);
+				timer = 200;
 			}
 		}
 		lastAction = i;
