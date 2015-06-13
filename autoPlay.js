@@ -2,7 +2,7 @@
 // @name Monster Minigame Auto-script
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 1.2
+// @version 1.8
 // @match http://steamcommunity.com/minigame/towerattack*
 // @updateURL https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js
 // @downloadURL https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js
@@ -194,7 +194,7 @@ function goToLaneWithBestTarget() {
 
 function purchaseUpgrades() {
 	var oddsOfElement = 1 - (0.75*0.75*0.75); //This values elemental too much because best element lanes are not focused(0.578)
-	var avgClicksPerSecond = 0.2;
+	var avgClicksPerSecond = 0.2;	//Set this yourself to serve your needs
 	
 	var buyUpgrade = function(id) {
 		g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + id).childElements()[0].childElements()[1]);
@@ -204,8 +204,6 @@ function purchaseUpgrades() {
 	
 	//Initial values for   armor, dps, click damage 
 	var bestUpgradeForDamage,bestUpgradeForArmor;
-	/*var highestUpgradeValueForDamage = Number.MAX_VALUE;
-	var highestUpgradeValueForArmor = Number.MAX_VALUE;*/
 	var highestUpgradeValueForDamage = 0;
 	var highestUpgradeValueForArmor = 0;
 	var bestElement = -1;
@@ -234,7 +232,6 @@ function purchaseUpgrades() {
 		switch(upgrade.type) {
 			case UPGRADE_TYPES.ARMOR:
 				if(upgrade.multiplier / upgradeCost > highestUpgradeValueForArmor) { // hp increase per moneys
-				//if(upgradeCost / upgrade.multiplier < highestUpgradeValueForArmor) {
 					bestUpgradeForArmor = i;
 					highestUpgradeValueForArmor = upgrade.multiplier / upgradeCost;
 				}
@@ -279,7 +276,7 @@ function purchaseUpgrades() {
 		upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestElement);
 		var dps = g_Minigame.CurrentScene().m_rgPlayerTechTree.dps;
 		if(oddsOfElement * dps * upgrades[bestElement].multiplier / upgradeCost > highestUpgradeValueForDamage) { //dmg increase / moneys
-			//bestUpgradeForDamage = bestElement;
+			//bestUpgradeForDamage = bestElement; // Not doing this because this values element damage too much
 		}
 	}
 	
@@ -305,9 +302,6 @@ function purchaseUpgrades() {
 		console.log("Buying " + upgrades[bestUpgradeForDamage].name);
 		buyUpgrade(bestUpgradeForDamage);
 	}
-	
-	/*console.log("Best armor: " + upgrades[bestUpgradeForArmor].name);
-	console.log("Best damage: " + upgrades[bestUpgradeForDamage].name);*/
 }
 
 function useMedicsIfRelevant() {
