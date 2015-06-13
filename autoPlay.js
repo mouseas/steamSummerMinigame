@@ -338,7 +338,14 @@ function useClusterBombIfRelevant() {
 		}
 		//Bombs away if spawner and 2+ other monsters
 		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.CLUSTER_BOMB);
+			if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN))
+			{
+				console.log("Cooling down prior to long-downtime ability use");
+				triggerAbility(ABILITIES.COOLDOWN);
+				window.setInterval(function(){ triggerAbility(ABILITIES.CLUSTER_BOMB); }, 300);
+			}else{
+				triggerAbility(ABILITIES.CLUSTER_BOMB);
+			}
 		}
 	}
 }
@@ -366,7 +373,14 @@ function useNapalmIfRelevant() {
 		}
 		//Burn them all if spawner and 2+ other monsters
 		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.NAPALM);
+			if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN))
+			{
+				console.log("Cooling down prior to long-downtime ability use");
+				triggerAbility(ABILITIES.COOLDOWN);
+				window.setInterval(function(){ triggerAbility(ABILITIES.NAPALM); }, 300);
+			}else{
+				triggerAbility(ABILITIES.NAPALM);
+			}
 		}
 	}
 }
@@ -424,7 +438,14 @@ function useTacticalNukeIfRelevant() {
 		// If there is a spawner and it's health is between 60% and 30%, nuke it!
 		if (enemySpawnerExists && enemySpawnerHealthPercent < 0.6 && enemySpawnerHealthPercent > 0.3) {
 			console.log("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.");
-			triggerAbility(ABILITIES.NUKE);
+			if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN))
+			{
+				console.log("Cooling down prior to long-downtime ability use");
+				triggerAbility(ABILITIES.COOLDOWN);
+				window.setInterval(function(){ triggerAbility(ABILITIES.NUKE); }, 300);
+			}else{
+				triggerAbility(ABILITIES.NUKE);
+			}
 		}
 	}
 }
