@@ -61,11 +61,8 @@ function firstRun() {
 	}
 
 	// disable enemy flinching animation when they get hit
-	if (CEnemy !== undefined) {
-		CEnemy.prototype.TakeDamage = function() {};
-		CEnemySpawner.prototype.TakeDamage = function() {};
-		CEnemyBoss.prototype.TakeDamage = function() {};
-	}
+	//disableFlinchingAnimation()
+	// too many confused users think that the script breaks clicking. The flinching animation uses few resources and is a good enough indicator.
 }
 
 function doTheThing() {
@@ -538,3 +535,12 @@ var thingTimer = window.setInterval(function(){
 		thingTimer = window.setInterval(doTheThing, 1000);
 	}
 }, 1000);
+
+// disable enemy flinching animation when they get hit (must be manually called in the console)
+function disableFlinchingAnimation() {
+	if (CEnemy !== undefined) {
+		CEnemy.prototype.TakeDamage = function() {};
+		CEnemySpawner.prototype.TakeDamage = function() {};
+		CEnemyBoss.prototype.TakeDamage = function() {};
+	}
+}
