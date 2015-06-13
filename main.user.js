@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.1
+// @version 2.2
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
@@ -550,6 +550,10 @@ function isAbilityItemEnabled(abilityId) {
 }
 
 function clickTheThing() {
+	// If we're going to be clicking, we should reset g_msTickRate
+	// There's a reddit thread about why and we might as well be safe
+	g_msTickRate = 1100;
+
     g_Minigame.m_CurrentScene.DoClick(
         {
             data: {
