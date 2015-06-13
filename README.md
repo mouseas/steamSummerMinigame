@@ -31,12 +31,12 @@ powerups for you.
 
 1. Open Tampermonkey's dashboard.
 2. Click on the `Utilites` tab on the right.
-3. Paste `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js` into the text area, and click `Import`.
+3. Paste `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.user.js` into the text area, and click `Import`.
 4. When the editor has loaded, click `Install` (*NOT* `Process with Chrome`).
 
 ### Greasemonkey ###
 
-1. Navigate to `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js`.
+1. Navigate to `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.user.js`.
 2. Right click on the page, and click `Save Page As`.
 3. In the name text area at the top, remove the tailing `.js` and add `.user.js` to the end (this may be redundant in the future).
 4. While Firefox is still open, open a File Manager of any sort, and navigate to the directory you saved the script.
@@ -46,21 +46,21 @@ powerups for you.
 ### Manual ###
 
 ##### Chrome #####
-1. Open `autoPlay.js` in a text editor.
+1. Open `autoPlay.user.js` in a text editor.
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `Ctrl + Shift + J`.
 5. Paste into the javascript input, and hit `Enter`.
 
 ##### Firefox #####
-1. Open `autoPlay.js` in a text editor.
+1. Open `autoPlay.user.js` in a text editor.
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `Ctrl + Shift + K`.
 5. Paste into the javascript input, and hit `Enter`.
 
 ##### Internet Explorer / Microsoft Edge #####
-1. Open `autoPlay.js` in a text editor.
+1. Open `autoPlay.user.js` in a text editor.
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `F12` and navigate to the `Console` tab.
@@ -85,4 +85,4 @@ This project is open-source on github. There are different ways you can help:
 	 - Metal Detector if a spawner death is imminent (predicted in > 2 and < 7 seconds)
 	 - Decrease Cooldowns right before using another long-cooldown item. (Decrease Cooldown affects abilities triggered while it is active, not right before it's used)
 - purchase abilities and upgrades intelligently
-- automatically update the manual script by periodically checking https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js
+- automatically update the manual script by periodically checking https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.user.js
