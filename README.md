@@ -68,7 +68,7 @@ If you have been redirected here, it means you are on an outdated version of the
 
 Thank you!
 
---- /u/mouseasw & /u/WinneonSword
+&mdash; /u/mouseasw & /u/WinneonSword
 
 ## I want to contribute! ##
 
