@@ -52,7 +52,9 @@ if (thingTimer){
 }
 
 function firstRun() {
+	// if the purchase item window is open, spend your badge points!
 	purchaseBadgeItems();
+	
 	// disable particle effects - this drastically reduces the game's memory leak
 	if (g_Minigame !== undefined) {
 		g_Minigame.CurrentScene().DoClickEffect = function() {};
@@ -90,7 +92,7 @@ function doTheThing() {
 	}
 }
 
-function purchaseBadgeItems(badgePoints) {
+function purchaseBadgeItems() {
 	// Spends badge points when joining a new game.
 
 	// Dict contains the priority in terms of amount to buy (percentage of purchase). Probably a nicer way to do this...
@@ -111,26 +113,45 @@ function purchaseBadgeItems(badgePoints) {
 		[ITEMS.THROW_MONEY, 0]
 	]
 
+	// Being extra paranoid about spending, since money updates faster
+	var safeToBuy = true;
+	var intervalID = window.setInterval( function() {
+		var queueLen = g_Minigame.CurrentScene().m_rgPurchaseItemsQueue.length;
+		if (safeToBuy && queueLen > 0)
+			safeToBuy = false;
+		else if (!safeToBuy && queueLen === 0)
+			safeToBuy = true;
+	}, 100);
+
 	var buyItem = function(id) {
 		g_Minigame.CurrentScene().TrySpendBadgePoints(document.getElementById('purchase_abilityitem_' + id));
 	}
 
-	//var badgePoints = g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
-
-	for (var i = 0; i < abilityItemPriority.length; i++) {
+	var badgePoints = g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
+	for (var i = 0; i < abilityItemPriority.length - 1; i++) {
 		var abilityItem = abilityItemPriority[i];
 		var cost = $J(document.getElementById('purchase_abilityitem_' + abilityItem[0])).data('cost');
-		if (cost > badgePoints)//g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points)
-			continue;
-		badgePoints -= cost;
-		var numBuy = Math.round((badgePoints * abilityItem[1] / 100) / cost);
-		console.log(abilityItem[0] + ": " + numBuy + ":" + cost + ", ");
-		//for (var j = 0; j < numBuy; j++) {
-		//	buyItem(abilityItem[0]);
-		//}
-		
+		var maxSpend = badgePoints * abilityItem[1] / 100;
+		var spent = 0;
+
+		while (spent < maxSpend && cost <= g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points) {
+			if (!safeToBuy)
+				continue;
+			buyItem(abilityItem[0]);
+			spent += cost;
+		}
+
+		// Get any stragling 1's or 2's left over
+		if (i === abilityItemPriority.length - 2) {
+			while (g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points > 0) {
+				if (!safeToBuy)
+					continue;
+				buyItem(abilityItem[0]);
+			}
+		}
 	}
-	console.log("AMT LEFT: " + badgePoints);
+
+	window.clearInterval(intervalID);
 }
 
 function goToLaneWithBestTarget() {
