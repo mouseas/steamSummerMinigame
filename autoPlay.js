@@ -12,7 +12,12 @@
 // IMPORTANT: Update the @version property above to a higher number such as 1.1 and 1.2 when you update the script! Otherwise, Tamper / Greasemonkey users will not update automatically.
 
 var isAlreadyRunning = false;
-
+//vvvvvvvvvvv Variables for Goldrain Clicker
+var clickRate = 10; // change to number of desired clicks per second
+var timer = 0;
+var lastAction = 500; //start with the max. Array length
+var clickTimer;
+//^^^^^^^^^^ Variables for Goldrain Clicker
 var ABILITIES = {
 	"MORALE_BOOSTER": 5,
 	"GOOD_LUCK": 6,
@@ -528,7 +533,52 @@ function isAbilityItemEnabled(abilityId) {
 	}
 	return false;
 }
+//vvvvvvvvvv Variables for Goldrain Clicker
+function clickTheThing() {
+    g_Minigame.m_CurrentScene.DoClick(
+        {
+            data: {
+                getLocalPosition: function() {
+                    var enemy = g_Minigame.m_CurrentScene.GetEnemy(
+                                      g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane,
+                                      g_Minigame.m_CurrentScene.m_rgPlayerData.target),
+                        laneOffset = enemy.m_nLane * 440;
 
+                    return {
+                        x: enemy.m_Sprite.position.x - laneOffset,
+                        y: enemy.m_Sprite.position.y - 52
+                    }
+                }
+            }
+        }
+    );
+	timer = timer - 1;
+}
+//------ can be done more elegant but i have got no time to make it pretty
+function goldRain() {
+	var actions = g_Minigame.CurrentScene().m_rgActionLog;
+	if(lastAction > actions.length){
+		lastAction = actions.length;
+	}
+	
+	if(actions.length > lastAction){
+		for (var i = lastAction; i < actions.length; i++) {
+			console.log(actions[i].ability + " " + actions[i].type);
+			if(actions[i].ability == 17 && actions[i].type == 'ability'){
+			console.log('Goldregen');
+			clickTimer = window.setInterval(clickTheThing, 1000/clickRate);
+			timer = 200;
+			}
+		}
+		lastAction = i;
+	}
+	
+	if(timer <= 0){
+		clearInterval(clickTimer);
+		timer = 0;
+	}
+}
+//^^^^^^^^^^ functions for Goldrain Clicker
 var thingTimer = window.setInterval(function(){
 	if (g_Minigame && g_Minigame.CurrentScene().m_bRunning && g_Minigame.CurrentScene().m_rgPlayerTechTree) {
 		window.clearInterval(thingTimer);
