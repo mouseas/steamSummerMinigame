@@ -96,6 +96,7 @@ function doTheThing() {
 		useNapalmIfRelevant();
 		useTacticalNukeIfRelevant();
 		useCrippleSpawnerIfRelevant();
+		useMetalDetecorIfRelevant();
 		useGoldRainIfRelevant();
 		attemptRespawn();
 
@@ -401,6 +402,25 @@ function useTacticalNukeIfRelevant() {
 			triggerAbility(ABILITIES.NUKE);
 		}
 	}
+}
+
+function useMetalDetecorIfRelevant() {
+    if (hasPurchasedAbility(ABILITIES.METAL_DETECTOR)) {
+        if (isAbilityCoolingDown(ABILITIES.METAL_DETECTOR)) {
+            return;
+        }
+
+        var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+
+        if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+            var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+
+            if (enemyBossHealthPercent < 0.3 ) {
+                console.log('Metal detector is purchased and cooled down, Triggering it on boss');
+                triggerItem(ABILITIES.METAL_DETECTOR);
+            }
+        }
+    }
 }
 
 function useCrippleSpawnerIfRelevant() {
