@@ -31,21 +31,10 @@ powerups for you.
 
 ## Installation ##
 
-### Tampermonkey ###
-
-1. Open Tampermonkey's dashboard.
-2. Click on the `Utilites` tab on the right.
-3. Paste `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/main.user.js` into the text area, and click `Import`.
-4. When the editor has loaded, click `Install` (*NOT* `Process with Chrome`).
-
-### Greasemonkey ###
-
+### Greasemonkey & Tampermonkey ###
 1. Navigate to `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/main.user.js`.
-2. Right click on the page, and click `Save Page As`.
-3. In the name text area at the top, remove the tailing `.js` and add `.user.js` to the end (this may be redundant in the future).
-4. While Firefox is still open, open a File Manager of any sort, and navigate to the directory you saved the script.
-5. Drag & drop the script file onto the Firefox window.
-6. Press `Install`.
+2. Press `Install`
+3. That's it!
 
 ### Manual ###
 
