@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.0
+// @version 2.1
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
@@ -27,9 +27,10 @@
 
 var isAlreadyRunning = false;
 
-var avgClickRate = 5; // to keep track of the average clicks per second that the game actually records
-var totalClicksPastFiveSeconds = avgClickRate * 5; // keeps track of total clicks over the past 5 seconds for a moving average
-var previousTickTime = 0; // tracks the last time we received an update from the game
+var clickRate = 10; // change to number of desired clicks per second
+var timer = 0;
+var lastAction = 500; //start with the max. Array length
+var clickTimer;
 
 var ABILITIES = {
 	"MORALE_BOOSTER": 5,
@@ -68,7 +69,8 @@ if (thingTimer){
 function firstRun() {
 	// disable particle effects - this drastically reduces the game's memory leak
 	if (g_Minigame !== undefined) {
-		//disableDamageText();
+		g_Minigame.CurrentScene().DoClickEffect = function() {};
+		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
 		g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
 			emitter.emit = false;
 			return emitter;
@@ -76,15 +78,17 @@ function firstRun() {
 	}
 
 	// disable enemy flinching animation when they get hit
-	//disableFlinchingAnimation();
-	// too many confused users think that the script breaks clicking. The flinching animation uses few resources and is a good enough indicator.
+	if (CEnemy !== undefined) {
+		CEnemy.prototype.TakeDamage = function() {};
+		CEnemySpawner.prototype.TakeDamage = function() {};
+		CEnemyBoss.prototype.TakeDamage = function() {};
+	}
 }
 
 function doTheThing() {
 	if (!isAlreadyRunning){
 		isAlreadyRunning = true;
 
-		updateAvgClickRate();
 		goToLaneWithBestTarget();
 		useGoodLuckCharmIfRelevant();
 		useMedicsIfRelevant();
@@ -95,20 +99,9 @@ function doTheThing() {
 		useCrippleSpawnerIfRelevant();
 		useGoldRainIfRelevant();
 		attemptRespawn();
+		goldRain();
 
 		isAlreadyRunning = false;
-	}
-}
-
-// This calculates a 5 second moving average of clicks per second based
-// on the values that the game is recording.
-function updateAvgClickRate() {
-	// Make sure we have updated info from the game first
-	if (previousTickTime != g_Minigame.CurrentScene().m_nLastTick){
-		totalClicksPastFiveSeconds -= avgClickRate;
-		totalClicksPastFiveSeconds += g_Minigame.CurrentScene().m_nLastClicks / ((g_Minigame.CurrentScene().m_nLastTick - previousTickTime) / 1000);
-		avgClickRate = totalClicksPastFiveSeconds / 5;
-		previousTickTime = g_Minigame.CurrentScene().m_nLastTick;
 	}
 }
 
@@ -122,12 +115,7 @@ function goToLaneWithBestTarget() {
 	var lowLane = 0;
 	var lowTarget = 0;
 	var lowPercentageHP = 0;
-	var lowGold = 0;
 	
-	var goldRainLane = 0;
-	var goldRainTarget = 0;
-	var goldRainGoldPerClick = 0;
-
 	// determine which lane and enemy is the optimal target
 	var enemyTypePriority = [
 		ENEMY_TYPE.TREASURE, 
@@ -170,7 +158,6 @@ function goToLaneWithBestTarget() {
 					lowHP = enemies[i].m_flDisplayedHP;
 					lowLane = enemies[i].m_nLane;
 					lowTarget = enemies[i].m_nID;
-					lowGold = enemies[i].m_data.gold;
 				}
 				var percentageHP = enemies[i].m_flDisplayedHP / enemies[i].m_data.max_hp;
 				if (lowPercentageHP == 0 || percentageHP < lowPercentageHP) {
@@ -179,19 +166,6 @@ function goToLaneWithBestTarget() {
 			}
 		}
 		
-		// target the enemy of the specified type with gold rain active in lane
-		for (var i = 0; i < enemies.length; i++) {
-			activeGoldRains = g_Minigame.CurrentScene().m_rgGameData.lanes[enemies[i].m_nLane].active_player_ability_gold_per_click
-			if (enemies[i] && !enemies[i].m_bIsDestroyed && activeGoldRains > 0) {
-				if ((enemies[i].m_data.gold * .01 * activeGoldRains) > goldRainGoldPerClick) {
-					targetFound = true;
-					goldRainLane = enemies[i].m_nLane;
-					goldRainTarget = enemies[i].m_nID;
-					goldRainGoldPerClick = (enemies[i].m_data.gold * .01 * activeGoldRains)
-				}
-			}
-		}
-
 		// If we just finished looking at spawners, 
 		// AND none of them were below our threshold,
 		// remember them and look for low creeps (so don't quit now)
@@ -208,20 +182,6 @@ function goToLaneWithBestTarget() {
 		if (skippingSpawner && enemyTypePriority[k] == ENEMY_TYPE.CREEP && lowPercentageHP > creepSnagThreshold ) {
 			lowLane = skippedSpawnerLane;
 			lowTarget = skippedSpawnerTarget;
-		}
-
-		// If we found a lane with gold rain active and we have a avgClickRate > 0, 
-		// we probably want to go there, but first we'll check if we think our low hp 
-		// target will die in the next 5 seconds and provide more gold from dying than 
-		// our potential gold income from gold rain over the next 5 seconds. Also, if
-		// our current low hp target is in the same lane as gold rain, we'll make sure
-		// we're targeting the enemy that provides the most gold per click.
-		if (goldRainGoldPerClick > 0 && avgClickRate > 0) {
-			if ((g_Minigame.CurrentScene().m_rgLaneData[lowLane].friendly_dps * 5) < lowHP || lowGold < (goldRainGoldPerClick * avgClickRate) || lowLane == goldRainLane) {
-				lowLane = goldRainLane;
-				lowTarget = goldRainTarget;
-				targetFound = true;
-			}
 		}
 	}
 
@@ -589,6 +549,53 @@ function isAbilityItemEnabled(abilityId) {
 	return false;
 }
 
+function clickTheThing() {
+    g_Minigame.m_CurrentScene.DoClick(
+        {
+            data: {
+                getLocalPosition: function() {
+                    var enemy = g_Minigame.m_CurrentScene.GetEnemy(
+                                      g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane,
+                                      g_Minigame.m_CurrentScene.m_rgPlayerData.target),
+                        laneOffset = enemy.m_nLane * 440;
+
+                    return {
+                        x: enemy.m_Sprite.position.x - laneOffset,
+                        y: enemy.m_Sprite.position.y - 52
+                    }
+                }
+            }
+        }
+    );
+	timer = timer - 1;
+}
+
+function goldRain() {
+	var actions = g_Minigame.CurrentScene().m_rgActionLog;
+	if(lastAction > actions.length){
+		lastAction = actions.length;
+	}
+	
+	if(actions.length > lastAction){
+		for (var i = lastAction; i < actions.length; i++) {
+			//console.log(actions[i].ability + " " + actions[i].type);
+			if(actions[i].ability == 17 && actions[i].type == 'ability'){
+				clearInterval(clickTimer);
+				timer = 0;
+				console.log('Let the GOLD rain!');
+				clickTimer = window.setInterval(clickTheThing, 1000/clickRate);
+				timer = 150;
+			}
+		}
+		lastAction = i;
+	}
+	
+	if(timer <= 0){
+		clearInterval(clickTimer);
+		timer = 0;
+	}
+}
+
 var thingTimer = window.setInterval(function(){
 	if (g_Minigame && g_Minigame.CurrentScene().m_bRunning && g_Minigame.CurrentScene().m_rgPlayerTechTree) {
 		window.clearInterval(thingTimer);
@@ -596,18 +603,3 @@ var thingTimer = window.setInterval(function(){
 		thingTimer = window.setInterval(doTheThing, 1000);
 	}
 }, 1000);
-
-// disable enemy flinching animation when they get hit (must be manually called in the console)
-function disableFlinchingAnimation() {
-	if (CEnemy !== undefined) {
-		CEnemy.prototype.TakeDamage = function() {};
-		CEnemySpawner.prototype.TakeDamage = function() {};
-		CEnemyBoss.prototype.TakeDamage = function() {};
-	}
-}
-
-// disable damage text from clicking (must be manually called in the console)
-function disableDamageText() {
-	g_Minigame.CurrentScene().DoClickEffect = function() {};
-	g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
-}
