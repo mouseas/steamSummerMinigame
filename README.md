@@ -35,12 +35,12 @@ powerups for you.
 
 1. Open Tampermonkey's dashboard.
 2. Click on the `Utilites` tab on the right.
-3. Paste `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js` into the text area, and click `Import`.
+3. Paste `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/main.user.js` into the text area, and click `Import`.
 4. When the editor has loaded, click `Install` (*NOT* `Process with Chrome`).
 
 ### Greasemonkey ###
 
-1. Navigate to `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js`.
+1. Navigate to `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/main.user.js`.
 2. Right click on the page, and click `Save Page As`.
 3. In the name text area at the top, remove the tailing `.js` and add `.user.js` to the end (this may be redundant in the future).
 4. While Firefox is still open, open a File Manager of any sort, and navigate to the directory you saved the script.
@@ -50,21 +50,21 @@ powerups for you.
 ### Manual ###
 
 ##### Chrome #####
-1. Open `autoPlay.js` in a text editor.
+1. Open `main.user.js` in a text editor.
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `Ctrl + Shift + J`.
 5. Paste into the javascript input, and hit `Enter`.
 
 ##### Firefox #####
-1. Open `autoPlay.js` in a text editor.
+1. Open `main.user.js` in a text editor.
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `Ctrl + Shift + K`.
 5. Paste into the javascript input, and hit `Enter`.
 
 ##### Internet Explorer / Microsoft Edge #####
-1. Open `autoPlay.js` in a text editor.
+1. Open `main.user.js` in a text editor.
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `F12` and navigate to the `Console` tab.
@@ -73,6 +73,13 @@ powerups for you.
 To stop the manual script, type `window.clearTimeout(thingTimer);` into the console and hit `Enter`.
 
 The game should now play itself, you should leave it running in the background. If you're not sure if it is auto-playing, try changing lanes. If it jumps back almost immediately, it's working.
+
+## Update to 2.0 (Greasemonkey / Tampermonkey only) ##
+If you have been redirected here, it means you are on an outdated version of the script that we cannot automatically update for you due to GM / TM limitations. To update the script, simply delete your version of the script from GM / TM, and follow the installation instructions above as you did the first time.
+
+Thank you!
+
+&emdash; /u/mouseasw & /u/WinneonSword
 
 ## I want to contribute! ##
 
@@ -90,4 +97,4 @@ This project is open-source on github. There are different ways you can help:
 	 - Decrease Cooldowns right before using another long-cooldown item. (Decrease Cooldown affects abilities triggered while it is active, not right before it's used)
 	 - Steal Health item if Medics is in cooldown and health is low. This should happen before using God Mode, and God Mode shouldn't be used if Steal Health is active.
 - purchase abilities and upgrades intelligently
-- automatically update the manual script by periodically checking https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js
+- automatically update the manual script by periodically checking https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/main.user.js
