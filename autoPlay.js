@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 1.9
+// @version 1.91
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
@@ -14,6 +14,10 @@
 // IMPORTANT: Update the @version property above to a higher number such as 1.1 and 1.2 when you update the script! Otherwise, Tamper / Greasemonkey users will not update automatically.
 
 var isAlreadyRunning = false;
+
++// remove background pictures of lanes (optional)
++$J('#col_right > .lanes').removeClass().addClass('lanes')
++
 
 var ABILITIES = {
 	"MORALE_BOOSTER": 5,
@@ -52,7 +56,8 @@ if (thingTimer){
 function firstRun() {
 	// disable particle effects - this drastically reduces the game's memory leak
 	if (g_Minigame !== undefined) {
-		//disableDamageText();
+		g_Minigame.CurrentScene().DoClickEffect = function() {};
+		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
 		g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
 			emitter.emit = false;
 			return emitter;
@@ -60,7 +65,7 @@ function firstRun() {
 	}
 
 	// disable enemy flinching animation when they get hit
-	//disableFlinchingAnimation();
+	//disableFlinchingAnimation()
 	// too many confused users think that the script breaks clicking. The flinching animation uses few resources and is a good enough indicator.
 }
 
@@ -542,10 +547,4 @@ function disableFlinchingAnimation() {
 		CEnemySpawner.prototype.TakeDamage = function() {};
 		CEnemyBoss.prototype.TakeDamage = function() {};
 	}
-}
-
-// disable damage text from clicking (must be manually called in the console)
-function disableDamageText() {
-	g_Minigame.CurrentScene().DoClickEffect = function() {};
-	g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
 }
