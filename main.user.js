@@ -417,7 +417,7 @@ function useMetalDetectorIfRelevant() {
 
             if (enemyBossHealthPercent < 0.3 ) {
                 console.log('Metal detector is purchased and cooled down, Triggering it on boss');
-                triggerItem(ABILITIES.METAL_DETECTOR);
+                triggerAbility(ABILITIES.METAL_DETECTOR);
             }
         }
     }
