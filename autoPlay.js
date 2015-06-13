@@ -293,6 +293,12 @@ abilityConditions[ABILITIES.NUKE] = {
     spawnerMinHealthPercent: 0.3,
     spawnerMaxHealthPercent: 0.6
 };
+abilityConditions[ABILITIES.MORALE_BOOSTER] = {
+    spawnerExists: true,
+    enemyCount: 3,
+    spawnerMinHealthPercent: null,
+    spawnerMaxHealthPercent: null
+};
 
 function useOffensiveAbilityIfAvailable(abilityId) {
     //Check if Cluster Bomb is purchased and cooled down
