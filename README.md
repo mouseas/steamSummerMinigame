@@ -82,8 +82,7 @@ This project is open-source on github. There are different ways you can help:
 
 ### TODO ###
 
-- use abilities if available and a suitable target exists:
-	 - Metal Detector if against a Boss and he's below 30% health
+- Use abilities if available and a suitable target exists:
 	 - Decrease Cooldowns right before using another long-cooldown item. (Decrease Cooldown affects abilities triggered while it is active, not right before it's used)
 	 - Steal Health item if Medics is in cooldown and health is low. This should happen before using God Mode, and God Mode shouldn't be used if Steal Health is active.
 - purchase abilities and upgrades intelligently
