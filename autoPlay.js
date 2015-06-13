@@ -246,7 +246,7 @@ function useMedicsIfRelevant() {
 		console.log('We have steal health, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.STEAL_HEALTH);
 	} else if (hasItem(ITEMS.GOD_MODE) && !isAbilityCoolingDown(ITEMS.GOD_MODE) &&
-			!isAbilityActive(ABILITIES.MEDIC) && !isAbilityActive(ITEM.STEAL_HEALTH)) {
+			!isAbilityActive(ABILITIES.MEDIC) && !isAbilityActive(ITEMS.STEAL_HEALTH)) {
 		
 		console.log('We have god mode, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.GOD_MODE);
