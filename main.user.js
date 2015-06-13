@@ -61,7 +61,8 @@ var ENEMY_TYPE = {
     "SPAWNER": 0,
     "CREEP": 1,
     "BOSS": 2,
-    "MINIBOSS": 3
+    "MINIBOSS": 3,
+    "TREASURE": 4
 };
 
 if (thingTimer){
