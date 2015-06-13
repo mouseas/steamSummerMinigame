@@ -26,7 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////////////
 
 var isAlreadyRunning = false;
-var autoClickGoldRain = false;
+var autoClickGoldRain = true;
 
 var clickRate = 10; // change to number of desired clicks per second
 var timer = 0;
