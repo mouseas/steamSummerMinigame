@@ -53,7 +53,8 @@ if (thingTimer){
 
 function firstRun() {
 	// if the purchase item window is open, spend your badge points!
-	purchaseBadgeItems();
+	if (g_Minigame.CurrentScene().m_UI.m_spendBadgePointsDialog.is(":visible"))
+		purchaseBadgeItems();
 	
 	// disable particle effects - this drastically reduces the game's memory leak
 	if (g_Minigame !== undefined) {
@@ -93,7 +94,7 @@ function doTheThing() {
 }
 
 function purchaseBadgeItems() {
-	// Spends badge points when joining a new game.
+	// Spends badge points (BP's) when joining a new game.
 
 	// Dict contains the priority in terms of amount to buy (percentage of purchase). Probably a nicer way to do this...
 	// First version of priorities is based on this badge point table 'usefulness' from reddit:
@@ -109,11 +110,13 @@ function purchaseBadgeItems() {
 		[ITEMS.STEAL_HEALTH, 4],
 		[ITEMS.GOD_MODE, 3],
 		[ITEMS.REFLECT_DAMAGE, 2],
-		[ITEMS.PUMPED_UP, 1],
-		[ITEMS.THROW_MONEY, 0]
+		[ITEMS.PUMPED_UP, 1]
+		//[ITEMS.THROW_MONEY, 0]
+		// Only go up to the second-last item. Throw money
+		// should never be used, but it's here just in case.
 	]
 
-	// Being extra paranoid about spending, since money updates faster
+	// Being extra paranoid about spending, since abilities update slowly.
 	var safeToBuy = true;
 	var intervalID = window.setInterval( function() {
 		var queueLen = g_Minigame.CurrentScene().m_rgPurchaseItemsQueue.length;
@@ -128,29 +131,32 @@ function purchaseBadgeItems() {
 	}
 
 	var badgePoints = g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
-	for (var i = 0; i < abilityItemPriority.length - 1; i++) {
+
+	for (var i = 0; i < abilityItemPriority.length; i++) {
 		var abilityItem = abilityItemPriority[i];
 		var cost = $J(document.getElementById('purchase_abilityitem_' + abilityItem[0])).data('cost');
+
+		// Maximum amount to spend on each upgrade. i.e. 100 BP on item with a 10% share = 10 BP
 		var maxSpend = badgePoints * abilityItem[1] / 100;
 		var spent = 0;
 
+		// Don't over-spend the budget for each item, and don't overdraft on the BP
 		while (spent < maxSpend && cost <= g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points) {
 			if (!safeToBuy)
 				continue;
 			buyItem(abilityItem[0]);
 			spent += cost;
 		}
-
-		// Get any stragling 1's or 2's left over
-		if (i === abilityItemPriority.length - 2) {
-			while (g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points > 0) {
-				if (!safeToBuy)
-					continue;
-				buyItem(abilityItem[0]);
-			}
-		}
+	}
+	
+	// Get any stragling 1 or 2 BP left over, using the last item (1 BP) in the priority array
+	while (g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points > 0) {
+		if (!safeToBuy)
+			continue;
+		buyItem(abilityItemPriority[abilityItemPriority.length - 1][0]);
 	}
 
+	// Get rid of that interval, it could end up taking up too many resources
 	window.clearInterval(intervalID);
 }
 
