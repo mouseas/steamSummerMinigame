@@ -342,7 +342,7 @@ function useClusterBombIfRelevant() {
 			{
 				console.log("Cooling down prior to long-downtime ability use");
 				triggerAbility(ABILITIES.COOLDOWN);
-				window.setInterval(function(){ triggerAbility(ABILITIES.CLUSTER_BOMB); }, 300);
+				window.setInterval(function(){ triggerAbility(ABILITIES.CLUSTER_BOMB); }, 1500);
 			}else{
 				triggerAbility(ABILITIES.CLUSTER_BOMB);
 			}
@@ -377,7 +377,7 @@ function useNapalmIfRelevant() {
 			{
 				console.log("Cooling down prior to long-downtime ability use");
 				triggerAbility(ABILITIES.COOLDOWN);
-				window.setInterval(function(){ triggerAbility(ABILITIES.NAPALM); }, 300);
+				window.setInterval(function(){ triggerAbility(ABILITIES.NAPALM); }, 1500);
 			}else{
 				triggerAbility(ABILITIES.NAPALM);
 			}
@@ -442,7 +442,7 @@ function useTacticalNukeIfRelevant() {
 			{
 				console.log("Cooling down prior to long-downtime ability use");
 				triggerAbility(ABILITIES.COOLDOWN);
-				window.setInterval(function(){ triggerAbility(ABILITIES.NUKE); }, 300);
+				window.setInterval(function(){ triggerAbility(ABILITIES.NUKE); }, 1500);
 			}else{
 				triggerAbility(ABILITIES.NUKE);
 			}
