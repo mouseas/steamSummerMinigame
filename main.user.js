@@ -89,6 +89,7 @@ function doTheThing() {
 		isAlreadyRunning = true;
 
 		goToLaneWithBestTarget();
+		purchaseUpgrades();
 		useGoodLuckCharmIfRelevant();
 		useMedicsIfRelevant();
 		useMoraleBoosterIfRelevant();
@@ -106,6 +107,20 @@ function doTheThing() {
 
 		isAlreadyRunning = false;
 	}
+}
+
+// Each elemental damage, lucky shot and loot have their own type
+var UPGRADE_TYPES = {
+	"ARMOR": 0,
+	"DPS": 1,
+	"CLICK_DAMAGE": 2,
+	"ELEMENTAL_FIRE": 3,
+	"ELEMENTAL_WATER": 4,
+	"ELEMENTAL_AIR": 5,
+	"ELEMENTAL_EARTH": 6,
+	"LUCKY_SHOT": 7,
+	"ABILITY": 8,
+	"LOOT": 9
 }
 
 function goToLaneWithBestTarget() {
@@ -247,6 +262,51 @@ function goToLaneWithBestTarget() {
 			// Reflect Damage
 			enableAbilityItem(ITEMS.REFLECT_DAMAGE);
 		}
+	}
+}
+
+
+function purchaseUpgrades() {
+
+	var myGold = g_Minigame.CurrentScene().m_rgPlayerData.gold;
+	
+	//Initial values for   armor, dps, click damage 
+	var bestUpgradeForType = [-1, -1, -1];
+	var highestUpgradeValueForType = [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE];
+	
+	var upgrades = g_Minigame.CurrentScene().m_rgTuningData.upgrades.slice(0);
+	
+	for( var i=0; i< upgrades.length; i++ ) {
+		var upgrade = upgrades[i];
+		
+		if ( upgrade.required_upgrade != undefined )
+		{
+			var requiredUpgradeLevel = upgrade.required_upgrade_level != undefined ? upgrade.required_upgrade_level : 1;
+			var parentUpgradeLevel = g_Minigame.CurrentScene().GetUpgradeLevel(upgrade.required_upgrade);
+			if ( requiredUpgradeLevel > parentUpgradeLevel )
+			{
+				//If upgrade is not available, we skip it
+				continue;
+			}
+		}
+	
+		var upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(i);
+		
+		if(upgrade.type == UPGRADE_TYPES.DPS || upgrade.type == UPGRADE_TYPES.CLICK_DAMAGE || upgrade.type == UPGRADE_TYPES.ARMOR) {
+			if(upgradeCost / upgrade.multiplier < highestUpgradeValueForType[upgrade.type]) {
+				bestUpgradeForType[upgrade.type] = i;
+				highestUpgradeValueForType[upgrade.type] = upgradeCost / upgrade.multiplier;
+			}
+		}
+	}
+	
+	console.log("Best upgrade for DPS is " + upgrades[bestUpgradeForType[UPGRADE_TYPES.DPS]].name);
+	console.log("Best upgrade for CLICK_DAMAGE is " + upgrades[bestUpgradeForType[UPGRADE_TYPES.CLICK_DAMAGE]].name);
+	console.log("Best upgrade for ARMOR is " + upgrades[bestUpgradeForType[UPGRADE_TYPES.ARMOR]].name);
+	
+	if(myGold > upgradeCost) {
+		console.log("Buying " + upgrades[bestUpgradeForType[UPGRADE_TYPES.DPS]].name);
+		g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + bestUpgradeForType[UPGRADE_TYPES.DPS]).childElements()[0].childElements()[1]);
 	}
 }
 
