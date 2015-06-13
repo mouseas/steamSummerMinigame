@@ -345,13 +345,13 @@ function purchaseUpgrades() {
 		}
 	}
 	
-	if(bestElement) {
+	if(bestElement != -1) {
 		//Let user choose what element to level up by adding the point to desired element
 		upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestElement].cost_for_next_level;
 		
 		var dps = g_Minigame.CurrentScene().m_rgPlayerTechTree.dps;
 		dps = dps + (g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click * avgClicksPerSecond);
-		if(oddsOfElement * dps * upgrades[bestElement].multiplier / upgradeCost > highestUpgradeValueForDamage) { //dmg increase / moneys
+		if(0.25 * oddsOfElement * dps * upgrades[bestElement].multiplier / upgradeCost > highestUpgradeValueForDamage) { //dmg increase / moneys
 			//bestUpgradeForDamage = bestElement; // Not doing this because this values element damage too much
 		}
 	}
