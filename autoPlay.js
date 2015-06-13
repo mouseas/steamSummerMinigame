@@ -11,4 +11,4 @@
 // @grant none
 // ==/UserScript==
 
-window.location.replace("https://github.com/mouseas/steamSummerMinigame#update-to-2.0");
+window.location.replace("https://github.com/mouseas/steamSummerMinigame#update-to-20-greasemonkey--tampermonkey-only");
