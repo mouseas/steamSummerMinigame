@@ -523,7 +523,8 @@ function bestauto() {
 function bestcrit() {
 	var critcount = g_Minigame.CurrentScene().m_rgPlayerUpgrades[7].level;
 	var critcost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[7].cost_for_next_level;
-	return critcost/(1.5*(clickpersec+1)*0.001);
+	var critrate = g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage/100
+	return critcost/(1.5*(clickpersec)*critrate);
 }
 
 function bestdps() {
