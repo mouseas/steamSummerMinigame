@@ -79,7 +79,7 @@ If you have been redirected here, it means you are on an outdated version of the
 
 Thank you!
 
-&emdash; /u/mouseasw & /u/WinneonSword
+--- /u/mouseasw & /u/WinneonSword
 
 ## I want to contribute! ##
 
