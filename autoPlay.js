@@ -194,7 +194,7 @@ function goToLaneWithBestTarget() {
 
 function purchaseUpgrades() {
 	var oddsOfElement = 1 - (0.75*0.75*0.75); //This values elemental too much because best element lanes are not focused(0.578)
-	var avgClicksPerSecond = 0.05;
+	var avgClicksPerSecond = 10;
 	
 	var buyUpgrade = function(id) {
 		g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + id).childElements()[0].childElements()[1]);
@@ -241,6 +241,13 @@ function purchaseUpgrades() {
 				}
 				break;
 			case UPGRADE_TYPES.CLICK_DAMAGE:
+				//var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
+				if(avgClicksPerSecond * upgrade.multiplier / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+				//if(upgradeCost / upgrade.multiplier < highestUpgradeValueForDamage) {
+					bestUpgradeForDamage = i;
+					highestUpgradeValueForDamage = upgradeCost / upgrade.multiplier;
+					highestUpgradeValueForDamage = upgrade.multiplier / upgradeCost;
+				}
 				break;
 			case UPGRADE_TYPES.DPS:
 				if(upgrade.multiplier / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
@@ -284,7 +291,7 @@ function purchaseUpgrades() {
 		
 		if(myGold > upgradeCost && bestUpgradeForArmor) {
 			console.log("Buying " + upgrades[bestUpgradeForArmor].name);
-			buyUpgrade(bestUpgradeForArmor);
+			//buyUpgrade(bestUpgradeForArmor);
 		}
 	}
 	
@@ -293,7 +300,7 @@ function purchaseUpgrades() {
 
 	if(myGold > upgradeCost && bestUpgradeForDamage) {
 		console.log("Buying " + upgrades[bestUpgradeForDamage].name);
-		buyUpgrade(bestUpgradeForType[UPGRADE_TYPES.DPS]);
+		buyUpgrade(bestUpgradeForDamage);
 	}
 }
 
