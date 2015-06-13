@@ -22,33 +22,37 @@ var totalClicksPastFiveSeconds = avgClickRate * 5; // keeps track of total click
 var previousTickTime = 0; // tracks the last time we received an update from the game
 
 var ABILITIES = {
-	"MORALE_BOOSTER": 5,
-	"GOOD_LUCK": 6,
-	"MEDIC": 7,
-	"METAL_DETECTOR": 8,
-	"COOLDOWN": 9,
-	"NUKE": 10,
-	"CLUSTER_BOMB": 11,
-	"NAPALM": 12
+	"MORALE_BOOSTER" : 5,
+	"GOOD_LUCK" : 6,
+	"MEDIC" : 7,
+	"METAL_DETECTOR" : 8,
+	"COOLDOWN" : 9,
+	"NUKE" : 10,
+	"CLUSTER_BOMB" : 11,
+	"NAPALM" : 12
 };
 
 var ITEMS = {
-	"REVIVE": 13,
-	"GOLD_RAIN": 17,
-	"GOD_MODE": 21,
-	"REFLECT_DAMAGE":24,
-	"CRIT": 18,
-	"CRIPPLE_MONSTER": 15,
-	"CRIPPLE_SPAWNER": 14,
-	"MAXIMIZE_ELEMENT": 16
+	"REVIVE" : 13,
+	"CRIPPLE_SPAWNER" : 14,
+	"CRIPPLE_MONSTER" : 15,
+	"MAXIMIZE_ELEMENT" : 16,
+	"GOLD_RAIN" : 17,
+	"CRIT" : 18,
+	"PUMPED_UP" : 19,
+	"THROW_MONEY" : 20,
+	"GOD_MODE" : 21,
+	"TREASURE" : 22,
+	"STEAL_HEALTH" : 23,
+	"REFLECT_DAMAGE" : 24
 }
 	
 var ENEMY_TYPE = {
-	"SPAWNER":0,
-	"CREEP":1,
-	"BOSS":2,
-	"MINIBOSS":3,
-	"TREASURE":4
+	"SPAWNER" : 0,
+	"CREEP" : 1,
+	"BOSS" : 2,
+	"MINIBOSS" : 3,
+	"TREASURE" : 4
 }
 
 if (thingTimer){
@@ -77,6 +81,7 @@ function doTheThing() {
 		updateAvgClickRate();
 		goToLaneWithBestTarget();
 		useGoodLuckCharmIfRelevant();
+		useReviveIfRelevant()
 		useMedicsIfRelevant();
 		useMoraleBoosterIfRelevant();
 		useClusterBombIfRelevant();
@@ -277,23 +282,63 @@ function goToLaneWithBestTarget() {
 	}
 }
 
+function useReviveIfRelevant() {
+	// Use resurrection if doable
+	
+	var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+	// Check if anyone needs reviving
+	var numDead = g_Minigame.CurrentScene().m_rgGameData.lanes[ currentLane ].player_hp_buckets[0];
+	var numPlayers = g_Minigame.CurrentScene().m_rgLaneData[ currentLane ].players;
+	var numRevives = numAbilityInLane(ABILITIES.REVIVE);
+
+	if (numPlayers === 0)
+		return; // no one alive, apparently
+	
+	var deadPercent = numDead / numPlayers;
+
+	// If it was recently used in current lane, don't bother ('instants' take a few seconds to
+	// register and last for 5 seconds). Also skip if number of dead players < 1/3 of lane team or
+	// lane consists of < 20% of total team players.
+	if (hasItem(ITEMS.REVIVE) && !isAbilityCoolingDown(ITEMS.REVIVE) && numRevives === 0 &&
+		deadPercent > 0.33 && getLanePercent() > 0.2) {
+		console.log('We have revive, cooled down, and needed. Trigger it.');
+		triggerItem(ITEMS.REVIVE);
+	}
+
+}
+
 function useMedicsIfRelevant() {
+	var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+	var HPbuckets = g_Minigame.CurrentScene().m_rgGameData.lanes[ currentLane ].player_hp_buckets;
+	var playersAlive = g_Minigame.CurrentScene().m_rgLaneData[ currentLane ].players - HPbuckets[0];
+	
+	// Get players between health buckets 2 and 6 of 10 (0 means dead).
+	var playersInjured = HPbuckets.slice(1,6).reduce(function(a, b) {return a + b});
+
+	if (playersAlive === 0)
+		return;
+	
+	var injuredPercent = playersInjured / playersAlive;
 	var myMaxHealth = g_Minigame.CurrentScene().m_rgPlayerTechTree.max_hp;
 	
-	// check if health is below 50%
+	// Check if medic is already active, health is below 50%,
+	// lane consists of > 20 % of total team players, or if really hurt players > 40%
 	var hpPercent = g_Minigame.CurrentScene().m_rgPlayerData.hp / myMaxHealth;
-	if (hpPercent > 0.5 || g_Minigame.CurrentScene().m_rgPlayerData.hp < 1) {
+	if (numAbilityInLane(ABILITIES.MEDIC) > 0 ||
+		( (hpPercent > 0.5 || g_Minigame.CurrentScene().m_rgPlayerData.hp < 1) &&
+		  (getLanePercent() < 0.2 || injuredPercent < 0.4) )) {
 		return; // no need to heal - HP is above 50% or already dead
 	}
 	
-	// check if Medics is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
-
-		// Medics is purchased, cooled down, and needed. Trigger it.
+	// TODO: something fancy about when to apply this? I don't think it does much, quick test at 324K health only increased by 100
+	// A strictly better medic
+	if (hasItem(ITEMS.PUMPED_UP) && !isAbilityCoolingDown(ITEMS.PUMPED_UP)) {
+		console.log('We have pumped up, cooled down, and needed. Trigger it.');
+		triggerItem(ITEMS.PUMPED_UP);
+	} else if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
 		console.log('Medics is purchased, cooled down, and needed. Trigger it.');
 		triggerAbility(ABILITIES.MEDIC);
 	} else if (hasItem(ITEMS.GOD_MODE) && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
-		
 		console.log('We have god mode, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.GOD_MODE);
 	}
@@ -577,6 +622,34 @@ function isAbilityItemEnabled(abilityId) {
 		return elem.childElements()[0].style.visibility == "visible";
 	}
 	return false;
+}
+
+function numAbilityInLane(abilityId, lane) {
+	// Checks if an ability is in use in a given lane and returns the number
+
+	lane = lane || g_Minigame.CurrentScene().m_nExpectedLane
+	var numActive = g_Minigame.CurrentScene().m_rgLaneData[lane].abilities[abilityId];
+
+	if (numActive === undefined)
+		return 0;
+	
+	return numActive;
+}
+
+function getLanePercent(lane) {
+	// Gets the percentage of total players in current lane. Useful in deciding if an ability is worthwhile to use
+
+	lane = lane || g_Minigame.CurrentScene().m_nExpectedLane
+	var currentPlayers = g_Minigame.CurrentScene().m_rgLaneData[ lane ].players
+	var numPlayers = 0;
+	for (var i=0; i < g_Minigame.CurrentScene().m_rgGameData.lanes.length; i++) {
+		numPlayers += g_Minigame.CurrentScene().m_rgLaneData[ i ].players;
+	}
+	
+	if (numPlayers === 0)
+		return 0;
+
+	return currentPlayers / numPlayers;
 }
 
 var thingTimer = window.setInterval(function(){
