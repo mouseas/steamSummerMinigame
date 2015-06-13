@@ -574,8 +574,10 @@ function isAbilityItemEnabled(abilityId) {
 	return false;
 }
 
-function numAbilityInLane(abilityId, lane=g_Minigame.CurrentScene().m_nExpectedLane) {
+function numAbilityInLane(abilityId, lane) {
 	// Checks if an ability is in use in a given lane and returns the number
+
+	lane = lane || g_Minigame.CurrentScene().m_nExpectedLane
 	var numActive = g_Minigame.CurrentScene().m_rgLaneData[lane].abilities[abilityId];
 
 	if (numActive === undefined)
@@ -584,9 +586,10 @@ function numAbilityInLane(abilityId, lane=g_Minigame.CurrentScene().m_nExpectedL
 	return numActive;
 }
 
-function getLanePercent(lane=g_Minigame.CurrentScene().m_nExpectedLane) {
+function getLanePercent(lane) {
 	// Gets the percentage of total players in current lane. Useful in deciding if an ability is worthwhile to use
 
+	lane = lane || g_Minigame.CurrentScene().m_nExpectedLane
 	var currentPlayers = g_Minigame.CurrentScene().m_rgLaneData[ lane ].players
 	var numPlayers = 0;
 	for (var i=0; i < g_Minigame.CurrentScene().m_rgGameData.lanes.length; i++) {
