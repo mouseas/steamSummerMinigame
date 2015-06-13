@@ -61,6 +61,20 @@ var ENEMY_TYPE = {
 	"TREASURE":4
 }
 
+// Each elemental damage, lucky shot and loot have their own type in m_rgTuningData
+var UPGRADE_TYPES = {
+	"ARMOR": 0,
+	"DPS": 1,
+	"CLICK_DAMAGE": 2,
+	"ELEMENTAL_FIRE": 3,
+	"ELEMENTAL_WATER": 4,
+	"ELEMENTAL_AIR": 5,
+	"ELEMENTAL_EARTH": 6,
+	"LUCKY_SHOT": 7,
+	"ABILITY": 8,
+	"LOOT": 9
+}
+
 if (thingTimer){
 	window.clearInterval(thingTimer);
 }
@@ -107,20 +121,6 @@ function doTheThing() {
 
 		isAlreadyRunning = false;
 	}
-}
-
-// Each elemental damage, lucky shot and loot have their own type in m_rgTuningData
-var UPGRADE_TYPES = {
-	"ARMOR": 0,
-	"DPS": 1,
-	"CLICK_DAMAGE": 2,
-	"ELEMENTAL_FIRE": 3,
-	"ELEMENTAL_WATER": 4,
-	"ELEMENTAL_AIR": 5,
-	"ELEMENTAL_EARTH": 6,
-	"LUCKY_SHOT": 7,
-	"ABILITY": 8,
-	"LOOT": 9
 }
 
 function goToLaneWithBestTarget() {
