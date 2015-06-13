@@ -33,7 +33,7 @@ powerups for you.
 
 ### Greasemonkey & Tampermonkey ###
 1. Navigate to `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/main.user.js`.
-2. Press `Install`
+2. Press `Install`.
 3. That's it!
 
 ### Manual ###
