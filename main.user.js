@@ -26,7 +26,7 @@
 ///////////////////////////////////////////////////////////
 
 var isAlreadyRunning = false;
-var autoClickGoldRain = true;
+var autoClickGoldRain = false;
 
 var clickRate = 10; // change to number of desired clicks per second
 var timer = 0;
@@ -88,6 +88,9 @@ function firstRun() {
 		CEnemySpawner.prototype.TakeDamage = function() {};
 		CEnemyBoss.prototype.TakeDamage = function() {};
 	}
+
+	// add some extra buttons
+	jQuery(".toggle_music_btn").after("<span onclick=\"toggleGoldenRainAutoClick()\" class=\"toggle_music_btn\" id=\"GRACSpan\">Golden Rain Clicker<br/><span id=\"GRACStaus\">Currently Off</span></span>");
 }
 
 function doTheThing() {
@@ -582,10 +585,13 @@ function clickTheThing() {
 	// There's a reddit thread about why and we might as well be safe
 	g_msTickRate = 1100;
 
-	g_Minigame.m_CurrentScene.DoClick(
+	// Check if we should still click...we might get turned off/on
+	// during a Golden Rain
+	if (autoClickGoldRain) {
+		g_Minigame.m_CurrentScene.DoClick(
 		{
 			data: {
-				getLocalPosition: function() {
+				getLocalPosition: function () {
 					var enemy = g_Minigame.m_CurrentScene.GetEnemy(
 						g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane,
 						g_Minigame.m_CurrentScene.m_rgPlayerData.target);
@@ -598,7 +604,8 @@ function clickTheThing() {
 				}
 			}
 		}
-	);
+		);
+	}
 	timer = timer - 1;
 }
 
@@ -635,3 +642,16 @@ var thingTimer = window.setInterval(function(){
 		thingTimer = window.setInterval(doTheThing, 1000);
 	}
 }, 1000);
+
+// Toggles the Golden Rain Auto Clicker On and Off
+// Also updates the button on the UI
+function toggleGoldenRainAutoClick() {
+	var status = "Off";
+	autoClickGoldRain = !autoClickGoldRain;
+
+	if (autoClickGoldRain) {
+		status = "On";
+	}
+
+	jQuery("#GRACStaus").text("Currently " + status);
+}
