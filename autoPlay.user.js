@@ -173,7 +173,7 @@ function MainLoop() {
 	if (!isAlreadyRunning) {
 		isAlreadyRunning = true;
 
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		goToLaneWithBestTarget();
 		useGoodLuckCharmIfRelevant();
 		useMedicsIfRelevant();
@@ -593,7 +593,7 @@ function goToLaneWithBestTarget() {
 
 
 		// Prevent attack abilities and items if up against a boss or treasure minion
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		if (targetIsTreasure || (targetIsBoss && (level < 1000 || level % 200 == 0))) {
 			// Morale
 			disableAbility(ABILITIES.MORALE_BOOSTER);
@@ -717,7 +717,7 @@ function useClusterBombIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
@@ -746,7 +746,7 @@ function useNapalmIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
@@ -796,7 +796,7 @@ function useTacticalNukeIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemySpawnerExists = false;
 		var enemySpawnerHealthPercent = 0.0;
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level;
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1;
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
