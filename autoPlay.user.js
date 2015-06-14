@@ -36,6 +36,7 @@ var autoRefreshMinutes = 30; // refresh page after x minutes
 // DO NOT MODIFY
 var isAlreadyRunning = false;
 var currentClickRate = clickRate;
+var lockedElement = -1;
 var trt_oldCrit = function() {};
 var trt_oldPush = function() {};
 
@@ -1138,13 +1139,13 @@ function getCritMultiplier(){
 function getElementMultiplier(index) {
     switch(index) {
         case 3:
-	    	return s().m_rgPlayerTechTree.damage_multiplier_fire,
+	    	return s().m_rgPlayerTechTree.damage_multiplier_fire;
         case 4:
-    		return s().m_rgPlayerTechTree.damage_multiplier_water,
+    		return s().m_rgPlayerTechTree.damage_multiplier_water;
         case 5:
-	    	return s().m_rgPlayerTechTree.damage_multiplier_air,
+	    	return s().m_rgPlayerTechTree.damage_multiplier_air;
         case 6:
-    		return s().m_rgPlayerTechTree.damage_multiplier_earth
+    		return s().m_rgPlayerTechTree.damage_multiplier_earth;
     }
     return 1;
 }
@@ -1155,6 +1156,14 @@ function getDPS(){
 
 function getClickDamage(){
     return s().m_rgPlayerTechTree.damage_per_click;
+}
+
+function getClickDamageMultiplier() {
+	return s().m_rgPlayerTechTree.damage_per_click_multiplier;
+}
+
+function getBossLootChance() {
+	return s().m_rgPlayerTechTree.boss_loot_drop_percentage * 100;
 }
 
 function autoRefreshPage(autoRefreshMinutes){
@@ -1180,37 +1189,76 @@ function startFingering() {
 }
 
 function enhanceTooltips(){
-    var trt_oldTooltip = w.fnTooltipUpgradeDesc;
-    w.fnTooltipUpgradeDesc = function(context){
-        var $context = $J(context);
-        var desc = $context.data('desc');
-        var strOut = desc;
-        var multiplier = parseFloat( $context.data('multiplier') );
-        switch( $context.data('upgrade_type') )
-        {
-            case 7: // Lucky Shot's type.
-                var currentMultiplier = getCritMultiplier();
-                var newMultiplier = currentMultiplier + multiplier;
-                var dps = getDPS();
-                var clickDamage = getClickDamage();
+	var trt_oldTooltip = w.fnTooltipUpgradeDesc;
+	w.fnTooltipUpgradeDesc = function(context){
+		var $context = $J(context);
+		var desc = $context.data('desc');
+		var strOut = desc;
+		var multiplier = parseFloat( $context.data('multiplier') );
+		switch( $context.data('upgrade_type') )
+		{
+		case 2: // Type for click damage. All tiers.
+			strOut = trt_oldTooltip(context);
+			var currentCrit = getClickDamage() * getCritMultiplier();
+			var newCrit = g_Minigame.CurrentScene().m_rgTuningData.player.damage_per_click *(getClickDamageMultiplier() + multiplier) * getCritMultiplier();
+			strOut += '<br><br>Crit Click: ' + FormatNumberForDisplay( currentCrit ) + ' => ' + FormatNumberForDisplay( newCrit );
+			break;
+		case 7: // Lucky Shot's type.
+			var currentMultiplier = getCritMultiplier();
+			var newMultiplier = currentMultiplier + multiplier;
+			var dps = getDPS();
+			var clickDamage = getClickDamage();
 
-                strOut += '<br><br>You can have multiple crits in a second. The server combines them into one.';
+			strOut += '<br><br>You can have multiple crits in a second. The server combines them into one.';
 
-                strOut += '<br><br>Crit Percentage: ' + getCritChance().toFixed(1) + '%';
+			strOut += '<br><br>Crit Percentage: ' + getCritChance().toFixed(1) + '%';
 
-                strOut += '<br><br>Current: ' + ( currentMultiplier ) + 'x';
-                strOut += '<br>Next Level: ' + ( newMultiplier ) + 'x';
+			strOut += '<br><br>Critical Damage Multiplier:'
+			strOut += '<br>Current: ' + ( currentMultiplier ) + 'x';
+			strOut += '<br>Next Level: ' + ( newMultiplier ) + 'x';
 
-                strOut += '<br><br>Damage with one crit:';
-                strOut += '<br>DPS: ' + FormatNumberForDisplay( currentMultiplier * dps ) + ' => ' + FormatNumberForDisplay( newMultiplier * dps );
-                strOut += '<br>Click: ' + FormatNumberForDisplay( currentMultiplier * clickDamage ) + ' => ' + FormatNumberForDisplay( newMultiplier * clickDamage );
-                break;
-            default:
-                return trt_oldTooltip(context);
-        }
+			strOut += '<br><br>Damage with one crit:';
+			strOut += '<br>DPS: ' + FormatNumberForDisplay( currentMultiplier * dps ) + ' => ' + FormatNumberForDisplay( newMultiplier * dps );
+			strOut += '<br>Click: ' + FormatNumberForDisplay( currentMultiplier * clickDamage ) + ' => ' + FormatNumberForDisplay( newMultiplier * clickDamage );
+			strOut += '<br><br>Base Increased By: ' + FormatNumberForDisplay(multiplier) + 'x';
+		break;
+			case 9: // Boss Loot Drop's type
+			strOut += '<br><br>Boss Loot Drop Rate:'
+			strOut += '<br>Current: ' + getBossLootChance().toFixed(0) + '%';
+			strOut += '<br>Next Level: ' + (getBossLootChance() + multiplier * 100).toFixed(0) + '%';
+			strOut += '<br><br>Base Increased By: ' + FormatNumberForDisplay(multiplier * 100) + '%';
+			break;
+		default:
+			return trt_oldTooltip(context);
+		}
 
-        return strOut;
-    };
+	return strOut;
+	};
+
+	var trt_oldElemTooltip = w.fnTooltipUpgradeElementDesc;
+		w.fnTooltipUpgradeElementDesc = function (context) {
+			var strOut = trt_oldElemTooltip(context);
+
+			var $context = $J(context);
+			var upgrades = g_Minigame.CurrentScene().m_rgTuningData.upgrades.slice(0);
+			// Element Upgrade index 3 to 6
+			var idx = $context.data('type');
+			// Is the current tooltip for the recommended element?
+			var isRecommendedElement = (lockedElement == idx - 3);
+
+			if (isRecommendedElement){
+				strOut += "<br><br>This is your recommended element. Please upgrade this.";
+
+				if (w.enableElementLock){
+					strOut += "<br><br>Other elements are LOCKED to prevent accidentally upgrading.";
+				}
+
+			} else if (-1 != lockedElement){
+				strOut += "<br><br>This is NOT your recommended element. DO NOT upgrade this.";
+			}
+
+			return strOut;
+		};
 }
 
 }(window));
