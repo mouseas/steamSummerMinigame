@@ -173,6 +173,7 @@ function MainLoop() {
 	if (!isAlreadyRunning) {
 		isAlreadyRunning = true;
 
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
 		goToLaneWithBestTarget();
 		useGoodLuckCharmIfRelevant();
 		useMedicsIfRelevant();
@@ -181,7 +182,9 @@ function MainLoop() {
 		useNapalmIfRelevant();
 		useTacticalNukeIfRelevant();
 		useCrippleSpawnerIfRelevant();
-		useGoldRainIfRelevant();
+        if(level < 1000 || level % 200 == 0) {
+		    useGoldRainIfRelevant();
+        }
 		useMetalDetectorIfRelevant();
 		attemptRespawn();
 		disableCooldownIfRelevant();
@@ -793,11 +796,12 @@ function useTacticalNukeIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemySpawnerExists = false;
 		var enemySpawnerHealthPercent = 0.0;
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level;
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
-				if (enemy.m_data.type === 0) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
 					enemySpawnerExists = true;
 					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 				}
