@@ -15,6 +15,9 @@
 (function(w) {
 "use strict";
 
+//Version displayed to client, update along with the @version above
+var SCRIPT_VERSION = '3.8.5';
+
 // OPTIONS
 var clickRate = 20;
 var logLevel = 1; // 5 is the most verbose, 0 disables all log
@@ -155,7 +158,7 @@ if (node && node.parentNode) {
     document.getElementsByClassName("title_activity")[0].innerHTML = "<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br />" + oldHTML;
 
     var info_box = document.querySelector(".leave_game_helper");
-    info_box.innerHTML = '<b>OPTIONS</b><br/>Some of these may need a refresh to take effect.<br/>';
+    info_box.innerHTML = '<b>OPTIONS</b><br/>Some of these may need a refresh to take effect.<br/>Version: ' + SCRIPT_VERSION +'<br/>';
 
     // reset the CSS for the info box for aesthetics
     info_box.className = "options_box";
