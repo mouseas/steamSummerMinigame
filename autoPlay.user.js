@@ -31,6 +31,7 @@ var removeCritText = getPreferenceBoolean("removeCritText", false);
 var removeAllText = getPreferenceBoolean("removeAllText", false);
 var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 var enableFingering = getPreferenceBoolean("enableFingering", true);
+var enableRenderer = getPreferenceBoolean("enableRenderer", true);
 
 var enableElementLock = getPreferenceBoolean("enableElementLock", true);
 
@@ -43,6 +44,7 @@ var lockedElement = -1;
 var tickData = {};
 var trt_oldCrit = function() {};
 var trt_oldPush = function() {};
+var trt_oldRender = function() {};
 
 var speedThreshold = 10000;
 var rainingRounds = 2000;
@@ -125,6 +127,7 @@ var GITHUB_BASE_URL = "https://raw.githubusercontent.com/pkolodziejczyk/steamSum
 function firstRun() {
     trt_oldCrit = s().DoCritEffect;
     trt_oldPush = s().m_rgClickNumbers.push;
+    trt_oldRender = w.g_Minigame.Renderer.render;
 
     if(enableElementLock) {
         lockElements();
@@ -193,6 +196,10 @@ if (node && node.parentNode) {
         startFingering();
     }
 
+    if (enableRenderer) {
+        toggleRenderer();
+    }
+
     if (w.CSceneGame !== undefined) {
         w.CSceneGame.prototype.DoScreenShake = function() {};
     }
@@ -223,23 +230,24 @@ if (node && node.parentNode) {
     info_box.style.boxShadow = "2px 2px 0 rgba( 0, 0, 0, 0.6 )";
     info_box.style.color = "#ededed";
 
-    var checkboxes = document.createElement("div");
-    checkboxes.style["-moz-column-count"] = 2;
-    checkboxes.style["-webkit-column-count"] = 2;
-    checkboxes.style["column-count"] = 2;
+    var options = document.createElement("div");
+    options.style["-moz-column-count"] = 2;
+    options.style["-webkit-column-count"] = 2;
+    options.style["column-count"] = 2;
 
-    checkboxes.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker));
+    options.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker));
     if (typeof GM_info !== "undefined") {
-        checkboxes.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (fix memory leak)", enableAutoRefresh, toggleAutoRefresh));
+        options.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (fix memory leak)", enableAutoRefresh, toggleAutoRefresh));
     }
-    checkboxes.appendChild(makeCheckBox("removeInterface", "Remove interface (needs refresh)", removeInterface, handleEvent));
-    checkboxes.appendChild(makeCheckBox("removeParticles", "Remove particle effects (needs refresh)", removeParticles, handleEvent));
-    checkboxes.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects (needs refresh)", removeFlinching, handleEvent));
-    checkboxes.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText));
-    checkboxes.appendChild(makeCheckBox("removeAllText", "Remove all text (overrides above)", removeAllText, toggleAllText));
-    checkboxes.appendChild(makeCheckBox("enableElementLock", "Lock element upgrades", enableElementLock, toggleElementLock));
-    checkboxes.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer (needs refresh)", enableFingering, handleEvent));
-    info_box.appendChild(checkboxes);
+    options.appendChild(makeCheckBox("removeInterface", "Remove interface (needs refresh)", removeInterface, handleEvent));
+    options.appendChild(makeCheckBox("removeParticles", "Remove particle effects (needs refresh)", removeParticles, handleEvent));
+    options.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects (needs refresh)", removeFlinching, handleEvent));
+    options.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText));
+    options.appendChild(makeCheckBox("removeAllText", "Remove all text (overrides above)", removeAllText, toggleAllText));
+    options.appendChild(makeCheckBox("enableElementLock", "Lock element upgrades", enableElementLock, toggleElementLock));
+    options.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer (needs refresh)", enableFingering, handleEvent));
+    options.appendChild(makeCheckBox("enableRenderer", "Enable graphics renderer", enableRenderer, toggleRenderer));
+    info_box.appendChild(options);
 
     enhanceTooltips();
 }
@@ -365,6 +373,20 @@ function toggleAutoRefresh(event) {
         autoRefreshPage(autoRefreshMinutes);
     } else {
         clearTimeout(refreshTimer);
+    }
+}
+
+function toggleRenderer(event) {
+    var value = enableRenderer;
+    if (event !== undefined) {
+        value = handleCheckBox(event);
+    }
+
+    if (value) {
+        w.g_Minigame.Renderer.renderer = trt_oldRender;
+    } else {
+        w.g_Minigame.Renderer.render = function() {}
+    }
     }
 }
 
