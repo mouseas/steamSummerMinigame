@@ -44,8 +44,63 @@ var trt_oldPush = function() {};
 var speedThreshold = 10000;
 var rainingRounds = 2000;
 
-var UPGRADES = {};
-var ABILITIES = {};
+var UPGRADES = {
+    LIGHT_ARMOR: 0,
+    AUTO_FIRE_CANNON: 1,
+    ARMOR_PIERCING_ROUND: 2,
+    _DAMAGE_TO_FIRE_MONSTERS: 3,
+    _DAMAGE_TO_WATER_MONSTERS: 4,
+    _DAMAGE_TO_AIR_MONSTERS: 5,
+    _DAMAGE_TO_EARTH_MONSTERS: 6,
+    LUCKY_SHOT: 7,
+    HEAVY_ARMOR: 8,
+    ADVANCED_TARGETING: 9,
+    EXPLOSIVE_ROUNDS: 10,
+    MEDICS: 11,
+    MORALE_BOOSTER: 12,
+    GOOD_LUCK_CHARMS: 13,
+    METAL_DETECTOR: 14,
+    DECREASE_COOLDOWNS: 15,
+    TACTICAL_NUKE: 16,
+    CLUSTER_BOMB: 17,
+    NAPALM: 18,
+    BOSS_LOOT: 19,
+    ENERGY_SHIELDS: 20,
+    FARMING_EQUIPMENT: 21,
+    RAILGUN: 22,
+    PERSONAL_TRAINING: 23,
+    AFK_EQUIPMENT: 24,
+    NEW_MOUSE_BUTTON: 25
+};
+var ABILITIES = {
+    FIRE_WEAPON: 1,
+    CHANGE_LANE: 2,
+    RESPAWN: 3,
+    CHANGE_TARGET: 4,
+    MORALE_BOOSTER: 5,
+    GOOD_LUCK_CHARMS: 6,
+    MEDICS: 7,
+    METAL_DETECTOR: 8,
+    DECREASE_COOLDOWNS: 9,
+    TACTICAL_NUKE: 10,
+    CLUSTER_BOMB: 11,
+    NAPALM: 12,
+    RESURRECTION: 13,
+    CRIPPLE_SPAWNER: 14,
+    CRIPPLE_MONSTER: 15,
+    MAX_ELEMENTAL_DAMAGE: 16,
+    RAINING_GOLD: 17,
+    CRIT: 18,
+    PUMPED_UP: 19,
+    THROW_MONEY_AT_SCREEN: 20,
+    GOD_MODE: 21,
+    TREASURE_: 22,
+    STEAL_HEALTH: 23,
+    REFLECT_DAMAGE: 24,
+    FEELING_LUCKY: 25,
+    WORMHOLE: 26,
+    LIKE_NEW: 27
+};
 var BOSS_DISABLED_ABILITIES = ['MORALE_BOOSTER', 'GOOD_LUCK_CHARMS', 'TACTICAL_NUKE', 'CLUSTER_BOMB', 'NAPALM', 'CRIT', 'CRIPPLE_SPAWNER', 'CRIPPLE_MONSTER', 'MAX_ELEMENTAL_DAMAGE', 'REFLECT_DAMAGE','THROW_MONEY_AT_SCREEN'];
 
 var ENEMY_TYPE = {
@@ -900,17 +955,7 @@ function attemptRespawn() {
     }
 }
 
-function formatConstName(n) {
-    return n.toUpperCase().replace(/^[^A-Z]+/, '').replace(/[^A-Z]+$/, '').replace(/[^A-Z]+/g, '_');
-}
-
 function readTuningData() {
-    $J.each(g_TuningData.upgrades, function(k, v) {
-        UPGRADES[formatConstName(v.name)] = parseInt(k, 10);
-    });
-    $J.each(g_TuningData.abilities, function(k, v) {
-        ABILITIES[formatConstName(v.name)] = parseInt(k, 10);
-    });
 }
 
 function readTickData() {
