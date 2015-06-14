@@ -494,7 +494,7 @@ function goToLaneWithBestTarget() {
 		}
 
 		//Prefer lane with raining gold, unless current enemy target is a treasure or boss.
-		if(targetIsTreasure || targetIsBoss){
+    if (!targetIsTreasure || !targetIsBoss)
 			var potential = 0;
 			// Loop through lanes by elemental preference
 			var sortedLanes = sortLanesByElementals();
