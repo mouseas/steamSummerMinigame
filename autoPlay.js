@@ -340,7 +340,7 @@ function useClusterBombIfRelevant() {
 		if (enemySpawnerExists && enemyCount >= 3) {
 			// Wait 60 seconds if the cooldown ability
 			// is within 1 minute of coming back
-			if(getCooldownTime(ABILITIES.COOLDOWN) > 60)
+			if(getCooldownTime(ABILITIES.COOLDOWN) > 60 || !hasPurchasedAbility(ABILITIES.COOLDOWN) || (hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN)))
 			{
 				if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN) && !currentLaneHasAbility(ABILITIES.COOLDOWN))
 				{
@@ -379,7 +379,7 @@ function useNapalmIfRelevant() {
 		if (enemySpawnerExists && enemyCount >= 3) {
 			// Wait 60 seconds if the cooldown ability
 			// is within 1 minute of coming back
-			if(getCooldownTime(ABILITIES.COOLDOWN) > 60)
+			if(getCooldownTime(ABILITIES.COOLDOWN) > 60 || !hasPurchasedAbility(ABILITIES.COOLDOWN) || (hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN)))
 			{
 				if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN) && !currentLaneHasAbility(ABILITIES.COOLDOWN))
 				{
@@ -448,7 +448,7 @@ function useTacticalNukeIfRelevant() {
 			console.log("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.");
 			// Wait 60 seconds if the cooldown ability
 			// is within 1 minute of coming back
-			if(getCooldownTime(ABILITIES.COOLDOWN) > 60)
+			if(getCooldownTime(ABILITIES.COOLDOWN) > 60 || !hasPurchasedAbility(ABILITIES.COOLDOWN) || (hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN)))
 			{
 				if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN) && !currentLaneHasAbility(ABILITIES.COOLDOWN))
 				{
@@ -615,6 +615,11 @@ function currentLaneHasAbility(abilityID) {
 	if(typeof(g_Minigame.m_CurrentScene.m_rgLaneData[lane].abilities[abilityID]) == 'undefined')
 		return 0;
 	return g_Minigame.m_CurrentScene.m_rgLaneData[lane].abilities[abilityID];
+}
+
+function getCooldownTime(abilityId)
+{
+	return g_Minigame.CurrentScene().GetCooldownForAbility(abilityId);
 }
 
 var thingTimer = window.setInterval(function(){
