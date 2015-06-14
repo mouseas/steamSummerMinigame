@@ -41,6 +41,9 @@ var tickData = {};
 var trt_oldCrit = function() {};
 var trt_oldPush = function() {};
 
+var speedThreshold = 10000;
+var rainingRounds = 2000;
+
 var UPGRADES = {};
 var ABILITIES = {};
 var BOSS_DISABLED_ABILITIES = ['MORALE_BOOSTER', 'GOOD_LUCK_CHARMS', 'TACTICAL_NUKE', 'CLUSTER_BOMB', 'NAPALM', 'CRIT', 'CRIPPLE_SPAWNER', 'CRIPPLE_MONSTER', 'MAX_ELEMENTAL_DAMAGE', 'REFLECT_DAMAGE','THROW_MONEY_AT_SCREEN'];
@@ -201,7 +204,7 @@ function MainLoop() {
         useTacticalNukeIfRelevant();
         useCrippleMonsterIfRelevant();
         useCrippleSpawnerIfRelevant();
-        if (level < 1000 || level % 200 == 0) {
+        if (level < speedThreshold || level % rainingRounds == 0) {
             useGoldRainIfRelevant();
         }
         useMetalDetectorIfRelevant();
@@ -632,7 +635,7 @@ function goToLaneWithBestTarget() {
 
         // Prevent attack abilities and items if up against a boss or treasure minion
         var level = s().m_rgGameData.level + 1; 
-        if (targetIsTreasure || (targetIsBoss && (level < 1000 || level % 200 == 0))) {
+        if (targetIsTreasure || (targetIsBoss && (level < speedThreshold || level % rainingRounds == 0))) {
             BOSS_DISABLED_ABILITIES.each(disableAbility);
         } else {
             BOSS_DISABLED_ABILITIES.each(enableAbility);
@@ -720,7 +723,7 @@ function useClusterBombIfRelevant() {
             var enemy = s().GetEnemy(currentLane, i);
             if (enemy) {
                 enemyCount++;
-                if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
+                if (enemy.m_data.type === 0 || (level > speedThreshold && level % rainingRounds != 0 && level % 10 == 0)) {
                     enemySpawnerExists = true;
                 }
             }
@@ -746,7 +749,7 @@ function useNapalmIfRelevant() {
             var enemy = s().GetEnemy(currentLane, i);
             if (enemy) {
                 enemyCount++;
-                if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
+                if (enemy.m_data.type === 0 || (level > speedThreshold && level % rainingRounds != 0 && level % 10 == 0)) {
                     enemySpawnerExists = true;
                 }
             }
@@ -790,7 +793,7 @@ function useTacticalNukeIfRelevant() {
         for (var i = 0; i < 4; i++) {
             var enemy = s().GetEnemy(currentLane, i);
             if (enemy) {
-                if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
+                if (enemy.m_data.type === 0 || (level > speedThreshold && level % rainingRounds != 0 && level % 10 == 0)) {
                     enemySpawnerExists = true;
                     enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
                 }
@@ -811,7 +814,7 @@ function useCrippleMonsterIfRelevant() {
 
         var level = s().m_rgGameData.level + 1;
         // Use nukes on boss when level >3000 for faster kills
-        if (level > 1000 && level % 200 != 0 && level % 10 == 0) {
+        if (level > speedThreshold && level % rainingRounds != 0 && level % 10 == 0) {
             var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
             if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
                 var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
