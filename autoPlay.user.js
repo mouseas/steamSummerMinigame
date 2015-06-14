@@ -15,6 +15,9 @@
 (function(w) {
 "use strict";
 
+//Version displayed to client, update along with the @version above
+var SCRIPT_VERSION = '3.8.5';
+
 // OPTIONS
 var clickRate = 20;
 var logLevel = 1; // 5 is the most verbose, 0 disables all log
@@ -55,8 +58,6 @@ var ENEMY_TYPE = {
     "MINIBOSS": 3,
     "TREASURE": 4
 };
-
-var SCRIPT_VERSION = getVersionNumber();
 
 function s() {
     return g_Minigame.m_CurrentScene;
@@ -1186,18 +1187,6 @@ function enhanceTooltips() {
 
         return strOut;
     };
-}
-
-function getVersionNumber()
-{
-	if(typeof GM_info !== 'undefined' && typeof GM_info.script !== 'undefined')
-	{
-		return GM_info.script.version;
-	}
-	else
-	{
-		return 'Manually Launched';
-	}
 }
 
 }(window));
