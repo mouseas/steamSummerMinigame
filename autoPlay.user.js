@@ -146,6 +146,12 @@ function firstRun() {
 		w.CSceneGame.prototype.DoScreenShake = function() {};
 	}
 
+    var egg = document.createElement("span");
+    egg.className = "toggle_music_btn";
+    egg.innerText = "Easter Egg";
+    egg.onclick = SmackTV();
+    document.querySelector(".game_options").insertBefore(egg, document.querySelector(".leave_game_btn"));
+
 	// Add "players in game" label
 	var oldHTML = document.getElementsByClassName("title_activity")[0].innerHTML;
 	document.getElementsByClassName("title_activity")[0].innerHTML = "<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br />" + oldHTML;
