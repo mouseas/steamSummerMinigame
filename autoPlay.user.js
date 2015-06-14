@@ -27,7 +27,7 @@ var removeFlinching = getPreferenceBoolean("removeFlinching", true);
 var removeCritText = getPreferenceBoolean("removeCritText", false);
 var removeAllText = getPreferenceBoolean("removeAllText", false);
 var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
-var enableFinger = getPreferenceBoolean("enableFinger", true);
+var enableFingering = getPreferenceBoolean("enableFingering", true);
 
 var enableElementLock = getPreferenceBoolean("enableElementLock", true);
 
@@ -73,13 +73,17 @@ var ENEMY_TYPE = {
 	"TREASURE":4
 };
 
+function s() {
+    return g_Minigame.m_CurrentScene;
+}
+
 var refreshTimer = null; // global to cancel running timers if disabled after timer has already started
 var GITHUB_BASE_URL = "https://raw.githubusercontent.com/pkolodziejczyk/steamSummerMinigame/master/";
 
 
 function firstRun() {
 	trt_oldCrit = w.g_Minigame.CurrentScene().DoCritEffect;
-	trt_oldPush = w.g_Minigame.m_CurrentScene.m_rgClickNumbers.push;
+	trt_oldPush = s().m_rgClickNumbers.push;
 	
     if(enableElementLock) {
         lockElements();
@@ -144,9 +148,9 @@ function firstRun() {
 		autoRefreshPage(autoRefreshMinutes);
 	}
 
-    if (enableFinger) {
-        startFingering();
-    }
+	    if (enableFingering) {
+		startFingering();
+	    }
 
 	if (w.CSceneGame !== undefined) {
 		w.CSceneGame.prototype.DoScreenShake = function() {};
@@ -184,6 +188,7 @@ function firstRun() {
 	checkboxes.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText));
 	checkboxes.appendChild(makeCheckBox("removeAllText", "Remove all text (overrides above)", removeAllText, toggleAllText));
 	checkboxes.appendChild(makeCheckBox("enableElementLock", "Lock element upgrades", enableElementLock, toggleElementLock));
+	checkboxes.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer (needs refresh)", enableFingering, handleEvent));
 	info_box.appendChild(checkboxes);
 	
 	enhanceTooltips();
@@ -193,7 +198,7 @@ function MainLoop() {
 	if (!isAlreadyRunning) {
 		isAlreadyRunning = true;
 
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
+        var level = s().m_rgGameData.level + 1; 
 		goToLaneWithBestTarget();
 		useGoodLuckCharmIfRelevant();
 		useMedicsIfRelevant();
@@ -211,21 +216,21 @@ function MainLoop() {
 		disableCooldownIfRelevant();
 		updatePlayersInGame();
 
-		g_Minigame.m_CurrentScene.m_nClicks = currentClickRate;
+		s().m_nClicks = currentClickRate;
 		g_msTickRate = 1000;
 
-		var damagePerClick = g_Minigame.m_CurrentScene.CalculateDamage(
-            		g_Minigame.m_CurrentScene.m_rgPlayerTechTree.damage_per_click,
-            		g_Minigame.m_CurrentScene.m_rgGameData.lanes[g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane].element
+		var damagePerClick = s().CalculateDamage(
+            		s().m_rgPlayerTechTree.damage_per_click,
+            		s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].element
         	);
 
         	advLog("Ticked. Current clicks per second: " + currentClickRate + ". Current damage per second: " + (damagePerClick * currentClickRate), 4);
 
 		isAlreadyRunning = false;
 
-		var enemy = g_Minigame.m_CurrentScene.GetEnemy(
-			g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane,
-			g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+		var enemy = s().GetEnemy(
+			s().m_rgPlayerData.current_lane,
+			s().m_rgPlayerData.target);
 
 		if (enemy) {
 	        displayText(
@@ -235,14 +240,14 @@ function MainLoop() {
 	            "#aaf"
 	        );
 
-			if( g_Minigame.m_CurrentScene.m_rgStoredCrits.length > 0 )
+			if( s().m_rgStoredCrits.length > 0 )
 			{
-				var rgDamage = g_Minigame.m_CurrentScene.m_rgStoredCrits.splice(0,1);
+				var rgDamage = s().m_rgStoredCrits.splice(0,1);
 
-				g_Minigame.m_CurrentScene.DoCritEffect( rgDamage[0], enemy.m_Sprite.position.x - (enemy.m_nLane * 440), enemy.m_Sprite.position.y - 52, 'Crit!' );
+				s().DoCritEffect( rgDamage[0], enemy.m_Sprite.position.x - (enemy.m_nLane * 440), enemy.m_Sprite.position.y - 52, 'Crit!' );
 			}
 
-	        var goldPerClickPercentage = g_Minigame.m_CurrentScene.m_rgGameData.lanes[g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
+	        var goldPerClickPercentage = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
 	        if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0)
 	        {
 	            var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
@@ -340,11 +345,11 @@ function toggleAllText(event){
         value = handleCheckBox(event);
     if (value) {
     // Replaces the entire text function.
-            w.g_Minigame.m_CurrentScene.m_rgClickNumbers.push = function(elem){
+            s().m_rgClickNumbers.push = function(elem){
                 elem.container.removeChild(elem);
             };
     } else {
-            w.g_Minigame.m_CurrentScene.m_rgClickNumbers.push = trt_oldPush;
+            s().m_rgClickNumbers.push = trt_oldPush;
     }
 }
 
@@ -474,9 +479,9 @@ function displayText(x, y, strText, color) {
 }
 
 function updatePlayersInGame() {
-	var totalPlayers = 	g_Minigame.m_CurrentScene.m_rgLaneData[ 0 ].players +
-						g_Minigame.m_CurrentScene.m_rgLaneData[ 1 ].players +
-						g_Minigame.m_CurrentScene.m_rgLaneData[ 2 ].players;
+	var totalPlayers = 	s().m_rgLaneData[ 0 ].players +
+						s().m_rgLaneData[ 1 ].players +
+						s().m_rgLaneData[ 2 ].players;
 	document.getElementById("players_in_game").innerHTML = totalPlayers + "/1500";
 }
 
@@ -537,15 +542,15 @@ function goToLaneWithBestTarget() {
 				if(g_Minigame.CurrentScene().m_rgGameData.lanes[i].dps === 0)
 					continue;
 				var stacks = 0;
-				if(typeof g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[17] != 'undefined') {
-					stacks = g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[17];
+				if(typeof s().m_rgLaneData[i].abilities[17] != 'undefined') {
+					stacks = s().m_rgLaneData[i].abilities[17];
 					advLog('stacks: ' + stacks, 3);
 				}
-				for(var m = 0; m < g_Minigame.m_CurrentScene.m_rgEnemies.length; m++) {
-					var enemyGold = g_Minigame.m_CurrentScene.m_rgEnemies[m].m_data.gold;
+				for(var m = 0; m < s().m_rgEnemies.length; m++) {
+					var enemyGold = s().m_rgEnemies[m].m_data.gold;
 					if (stacks * enemyGold > potential) {
 						potential = stacks * enemyGold;
-						preferredTarget = g_Minigame.m_CurrentScene.m_rgEnemies[m].m_nID;
+						preferredTarget = s().m_rgEnemies[m].m_nID;
 						preferredLane = i;
 					}
 				}
@@ -625,7 +630,7 @@ function goToLaneWithBestTarget() {
 
 
 		// Prevent attack abilities and items if up against a boss or treasure minion
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
+        var level = s().m_rgGameData.level + 1; 
 		if (targetIsTreasure || (targetIsBoss && (level < 1000 || level % 200 == 0))) {
 			// Morale
 			disableAbility(ABILITIES.MORALE_BOOSTER);
@@ -749,7 +754,7 @@ function useClusterBombIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
+        var level = s().m_rgGameData.level + 1; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
@@ -778,7 +783,7 @@ function useNapalmIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
+        var level = s().m_rgGameData.level + 1; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
@@ -828,7 +833,7 @@ function useTacticalNukeIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemySpawnerExists = false;
 		var enemySpawnerHealthPercent = 0.0;
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1;
+        var level = s().m_rgGameData.level + 1;
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
@@ -856,10 +861,10 @@ function useCrippleMonsterIfRelevant() {
 		}
   }
   
-  var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1;
+  var level = s().m_rgGameData.level + 1;
   // Use nukes on boss when level >3000 for faster kills
     if (level > 1000 && level % 200 != 0 && level % 10 == 0) {
-      var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+      var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
       if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
         var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
         if (enemyBossHealthPercent>0.5){
@@ -906,7 +911,7 @@ function useGoldRainIfRelevant() {
 			return;
 		}
 
-		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
 		// check if current target is a boss, otherwise its not worth using the gold rain
 		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
 			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
@@ -927,7 +932,7 @@ function useMetalDetectorIfRelevant() {
 			return;
 		}
 
-		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
 		// check if current target is a boss, otherwise we won't use metal detector
 		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
 			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
@@ -1038,7 +1043,7 @@ function isAbilityItemEnabled(abilityId) {
 }
 
 function getActiveAbilityNum(ability) {
-    var abilities = g_Minigame.m_CurrentScene.m_rgGameData.lanes[g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane].active_player_abilities;
+    var abilities = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_abilities;
     var count = 0;
     for(var i = 0; i < abilities.length; i++)
     {
@@ -1115,19 +1120,19 @@ if(breadcrumbs) {
 
 // Helpers to access player stats.
 function getCritChance(){
-    return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.crit_percentage * 100;
+    return s().m_rgPlayerTechTree.crit_percentage * 100;
 }
 
 function getCritMultiplier(){
-    return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.damage_multiplier_crit;
+    return s().m_rgPlayerTechTree.damage_multiplier_crit;
 }
 
 function getDPS(){
-    return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.dps;
+    return s().m_rgPlayerTechTree.dps;
 }
 
 function getClickDamage(){
-    return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.damage_per_click;
+    return s().m_rgPlayerTechTree.damage_per_click;
 }
 
 function autoRefreshPage(autoRefreshMinutes){
@@ -1143,9 +1148,9 @@ function fixActiveCapacityUI(){
 function startFingering() {
     w.CSceneGame.prototype.ClearNewPlayer = function() {};
 
-    if(!g_Minigame.m_CurrentScene.m_spriteFinger) {
+    if(!s().m_spriteFinger) {
         w.WebStorage.SetLocal('mg_how2click', 0);
-        g_Minigame.m_CurrentScene.CheckNewPlayer();
+        s().CheckNewPlayer();
         w.WebStorage.SetLocal('mg_how2click', 1);
     }
 
