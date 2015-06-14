@@ -123,8 +123,6 @@ function firstRun() {
     trt_oldCrit = s().DoCritEffect;
     trt_oldPush = s().m_rgClickNumbers.push;
 
-    readTuningData();
-
     if(enableElementLock) {
         lockElements();
     }
@@ -953,9 +951,6 @@ function attemptRespawn() {
         ((s().m_rgPlayerData.time_died) + 5) < (s().m_nTime)) {
         RespawnPlayer();
     }
-}
-
-function readTuningData() {
 }
 
 function readTickData() {
