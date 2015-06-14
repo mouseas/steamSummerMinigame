@@ -474,15 +474,12 @@ function goToLaneWithBestTarget() {
 	var skippingSpawner = false;
 	var skippedSpawnerLane = 0;
 	var skippedSpawnerTarget = 0;
-	var targetIsTreasureOrBoss = false;
+	var targetIsTreasure = false;
+	var targetIsBoss = false;
 
 	for (var k = 0; !targetFound && k < enemyTypePriority.length; k++) {
-
-		if (enemyTypePriority[k] == ENEMY_TYPE.TREASURE || enemyTypePriority[k] == ENEMY_TYPE.BOSS){
-			targetIsTreasureOrBoss = true;
-		} else {
-			targetIsTreasureOrBoss = false;
-		}
+        targetIsTreasure = (enemyTypePriority[k] == ENEMY_TYPE.TREASURE);
+        targetIsBoss = (enemyTypePriority[k] == ENEMY_TYPE.BOSS);
 
 		var enemies = [];
 
@@ -596,7 +593,8 @@ function goToLaneWithBestTarget() {
 
 
 		// Prevent attack abilities and items if up against a boss or treasure minion
-		if (targetIsTreasureOrBoss) {
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
+		if (targetIsTreasure || (targetIsBoss && (level < 1000 || level % 200 == 0)) {
 			// Morale
 			disableAbility(ABILITIES.MORALE_BOOSTER);
 			// Luck
@@ -719,6 +717,7 @@ function useClusterBombIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
@@ -747,6 +746,7 @@ function useNapalmIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
