@@ -38,6 +38,7 @@ var trt_oldPush = function() {};
 
 var UPGRADES = {};
 var ABILITIES = {};
+var BOSS_DISABLED_ABILITIES = ['MORALE_BOOSTER', 'GOOD_LUCK_CHARMS', 'TACTICAL_NUKE', 'CLUSTER_BOMB', 'NAPALM', 'CRIT', 'CRIPPLE_SPAWNER', 'CRIPPLE_MONSTER', 'MAX_ELEMENTAL_DAMAGE', 'REFLECT_DAMAGE','THROW_MONEY_AT_SCREEN'];
 
 var ENEMY_TYPE = {
 	"SPAWNER":0,
@@ -578,55 +579,12 @@ function goToLaneWithBestTarget() {
 			g_Minigame.CurrentScene().TryChangeTarget(lowTarget);
 		}
 
-
 		// Prevent attack abilities and items if up against a boss or treasure minion
         var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		if (targetIsTreasure || (targetIsBoss && (level < 1000 || level % 200 == 0))) {
-			// Morale
-			disableAbility('MORALE_BOOSTER');
-			// Luck
-			disableAbility('GOOD_LUCK_CHARMS');
-			// Nuke
-			disableAbility('TACTICAL_NUKE');
-			// Clusterbomb
-			disableAbility('CLUSTER_BOMB');
-			// Napalm
-			disableAbility('NAPALM');
-			// Crit
-			disableAbility('CRIT');
-			// Cripple Spawner
-			disableAbility('CRIPPLE_SPAWNER');
-			// Cripple Monster
-			disableAbility('CRIPPLE_MONSTER');
-			// Max Elemental Damage
-			disableAbility('MAX_ELEMENTAL_DAMAGE');
-			// Reflect Damage
-			disableAbility('REFLECT_DAMAGE');
-			// Throw Money at Screen
-			disableAbility('THROW_MONEY_AT_SCREEN');
+			BOSS_DISABLED_ABILITIES.each(disableAbility);
 		} else {
-			// Morale
-			enableAbility('MORALE_BOOSTER');
-			// Luck
-			enableAbility('GOOD_LUCK_CHARMS');
-			// Nuke
-			enableAbility('TACTICAL_NUKE');
-			// Clusterbomb
-			enableAbility('CLUSTER_BOMB');
-			// Napalm
-			enableAbility('NAPALM');
-			// Crit
-			enableAbility('CRIT');
-			// Cripple Spawner
-			enableAbility('CRIPPLE_SPAWNER');
-			// Cripple Monster
-			enableAbility('CRIPPLE_MONSTER');
-			// Max Elemental Damage
-			enableAbility('MAX_ELEMENTAL_DAMAGE');
-			// Reflect Damage
-			enableAbility('REFLECT_DAMAGE');
-			// Throw Money at Screen
-			enableAbility('THROW_MONEY_AT_SCREEN');
+			BOSS_DISABLED_ABILITIES.each(enableAbility);
 		}
 	}
 }
