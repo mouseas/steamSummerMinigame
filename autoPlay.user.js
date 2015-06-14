@@ -26,8 +26,11 @@ var removeParticles = getPreferenceBoolean("removeParticles", true);
 var removeFlinching = getPreferenceBoolean("removeFlinching", true);
 var removeCritText = getPreferenceBoolean("removeCritText", false);
 var removeAllText = getPreferenceBoolean("removeAllText", false);
+var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 
 var enableElementLock = getPreferenceBoolean("enableElementLock", true);
+
+var autoRefreshMinutes = 30; // refresh page after x minutes 
 
 // DO NOT MODIFY
 var isAlreadyRunning = false;
@@ -68,6 +71,8 @@ var ENEMY_TYPE = {
 	"MINIBOSS":3,
 	"TREASURE":4
 };
+
+var refreshTimer = null; // global to cancel running timers if disabled after timer has already started
 
 
 function firstRun() {
@@ -131,6 +136,10 @@ function firstRun() {
 		document.body.style.backgroundPosition = "0 0";
 	}
 
+	if (enableAutoRefresh) {
+		autoRefreshPage(autoRefreshMinutes);
+	}
+
 	if (w.CSceneGame !== undefined) {
 		w.CSceneGame.prototype.DoScreenShake = function() {};
 	}
@@ -158,6 +167,9 @@ function firstRun() {
 	checkboxes.style["column-count"] = 2;
 	
 	checkboxes.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker));
+	if (typeof GM_info !==  "undefined") {
+		checkboxes.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (fix memory leak)", enableAutoRefresh, toggleAutoRefresh));
+	}
 	checkboxes.appendChild(makeCheckBox("removeInterface", "Remove interface (needs refresh)", removeInterface, handleEvent));
 	checkboxes.appendChild(makeCheckBox("removeParticles", "Remove particle effects (needs refresh)", removeParticles, handleEvent));
 	checkboxes.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects (needs refresh)", removeFlinching, handleEvent));
@@ -273,6 +285,17 @@ function toggleAutoClicker(event) {
         currentClickRate = clickRate;
     } else {
         currentClickRate = 0;
+    }
+}
+
+function toggleAutoRefresh(event) {
+    var value = enableAutoRefresh;
+    if(event !== undefined)
+        value = handleCheckBox(event);
+    if(value) {
+        autoRefreshPage(autoRefreshMinutes);
+    } else {
+		clearTimeout(refreshTimer);	
     }
 }
 
@@ -1071,6 +1094,10 @@ function getDPS(){
 
 function getClickDamage(){
     return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.damage_per_click;
+}
+
+function autoRefreshPage(autoRefreshMinutes){
+	refreshTimer = setTimeout(function(){w.location.reload(true);},autoRefreshMinutes*1000*60);
 }
 
 function enhanceTooltips(){
