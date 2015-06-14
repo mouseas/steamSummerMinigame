@@ -27,6 +27,7 @@ var removeFlinching = getPreferenceBoolean("removeFlinching", true);
 var removeCritText = getPreferenceBoolean("removeCritText", false);
 var removeAllText = getPreferenceBoolean("removeAllText", false);
 var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
+var enableFinger = getPreferenceBoolean("enableFinger", true);
 
 var enableElementLock = getPreferenceBoolean("enableElementLock", true);
 
@@ -143,6 +144,10 @@ function firstRun() {
 		autoRefreshPage(autoRefreshMinutes);
 	}
 
+    if (enableFinger) {
+        startFingering();
+    }
+
 	if (w.CSceneGame !== undefined) {
 		w.CSceneGame.prototype.DoScreenShake = function() {};
 	}
@@ -196,7 +201,7 @@ function MainLoop() {
 		useClusterBombIfRelevant();
 		useNapalmIfRelevant();
 		useTacticalNukeIfRelevant();
-    useCrippleMonsterIfRelevant();
+        useCrippleMonsterIfRelevant();
 		useCrippleSpawnerIfRelevant();
         if(level < 1000 || level % 200 == 0) {
 		    useGoldRainIfRelevant();
@@ -1133,6 +1138,18 @@ function fixActiveCapacityUI(){
 	$J('#activeinlanecontainer').css('height','134px');
 	$J('#activitycontainer').css('height', '270px');
 	$J('#activityscroll').css('height', '270px');
+}
+
+function startFingering() {
+    w.CSceneGame.prototype.ClearNewPlayer = function() {};
+
+    if(!g_Minigame.m_CurrentScene.m_spriteFinger) {
+        w.WebStorage.SetLocal('mg_how2click', 0);
+        g_Minigame.m_CurrentScene.CheckNewPlayer();
+        w.WebStorage.SetLocal('mg_how2click', 1);
+    }
+
+    document.getElementById('newplayer').style.display = 'none';
 }
 
 function enhanceTooltips(){
