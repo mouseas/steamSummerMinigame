@@ -270,7 +270,11 @@ function purchaseUpgrades() {
 	var oddsOfElement = 1 - (0.75*0.75*0.75); //This values elemental too much because best element lanes are not focused(0.578)
 	var avgClicksPerSecond = 3;	//Set this yourself to serve your needs
 	
+	var upgrades = g_Minigame.CurrentScene().m_rgTuningData.upgrades.slice(0);
+	var playerUpgrades = g_Minigame.CurrentScene().m_rgPlayerUpgrades;
+
 	var buyUpgrade = function(id) {
+		console.log("Buying " + upgrades[id].name + " level " + (playerUpgrades[id].level + 1));
 		if(id >= 3 && 6 >= id) { //If upgrade is element damage
 			g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + id).childElements()[3]);
 		} else {
@@ -286,9 +290,7 @@ function purchaseUpgrades() {
 	var highestUpgradeValueForArmor = 0;
 	var bestElement = -1;
 	var highestElementLevel = 0;
-	
-	
-	var upgrades = g_Minigame.CurrentScene().m_rgTuningData.upgrades.slice(0);
+
 	
 	for( var i=0; i< upgrades.length; i++ ) {
 		var upgrade = upgrades[i];
@@ -304,8 +306,8 @@ function purchaseUpgrades() {
 			}
 		}
 	
-		var upgradeCurrentLevel = g_Minigame.CurrentScene().m_rgPlayerUpgrades[i].level;
-		var upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[i].cost_for_next_level;
+		var upgradeCurrentLevel = playerUpgrades[i].level;
+		var upgradeCost = playerUpgrades[i].cost_for_next_level;
 		
 		switch(upgrade.type) {
 			case UPGRADE_TYPES.ARMOR:
@@ -370,7 +372,6 @@ function purchaseUpgrades() {
 		upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestUpgradeForArmor].cost_for_next_level;
 		
 		if(myGold > upgradeCost && bestUpgradeForArmor) {
-			console.log("Buying " + upgrades[bestUpgradeForArmor].name);
 			buyUpgrade(bestUpgradeForArmor);
 			myGold = g_Minigame.CurrentScene().m_rgPlayerData.gold;
 		}
@@ -380,7 +381,6 @@ function purchaseUpgrades() {
 	upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestUpgradeForDamage].cost_for_next_level;
 
 	if(myGold > upgradeCost && bestUpgradeForDamage) {
-		console.log("Buying " + upgrades[bestUpgradeForDamage].name);
 		buyUpgrade(bestUpgradeForDamage);
 	}
 }
