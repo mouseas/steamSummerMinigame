@@ -69,6 +69,8 @@ var ENEMY_TYPE = {
 	"TREASURE":4
 };
 
+var GITHUB_BASE_URL = "https://raw.githubusercontent.com/pkolodziejczyk/steamSummerMinigame/master/";
+
 
 function firstRun() {
 	trt_oldCrit = w.g_Minigame.CurrentScene().DoCritEffect;
@@ -77,6 +79,8 @@ function firstRun() {
     if(enableElementLock) {
         lockElements();
     }
+	// Fix up for capacity
+	fixActiveCapacityUI();
 
 	// disable particle effects - this drastically reduces the game's memory leak
     if(removeParticles) {
@@ -1075,6 +1079,13 @@ function getDPS(){
 
 function getClickDamage(){
     return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.damage_per_click;
+}
+
+function fixActiveCapacityUI(){
+	$J('.tv_ui').css('background-image','url("'+GITHUB_BASE_URL+'game_frame_tv_fix.png")');
+	$J('#activeinlanecontainer').css('height','134px');
+	$J('#activitycontainer').css('height', '270px');
+	$J('#activityscroll').css('height', '270px');
 }
 
 function enhanceTooltips(){
