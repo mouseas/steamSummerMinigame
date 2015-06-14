@@ -1135,6 +1135,20 @@ function getCritMultiplier(){
     return s().m_rgPlayerTechTree.damage_multiplier_crit;
 }
 
+function getElementMultiplier(index) {
+    switch(index) {
+        case 3:
+	    	return s().m_rgPlayerTechTree.damage_multiplier_fire,
+        case 4:
+    		return s().m_rgPlayerTechTree.damage_multiplier_water,
+        case 5:
+	    	return s().m_rgPlayerTechTree.damage_multiplier_air,
+        case 6:
+    		return s().m_rgPlayerTechTree.damage_multiplier_earth
+    }
+    return 1;
+}
+
 function getDPS(){
     return s().m_rgPlayerTechTree.dps;
 }
