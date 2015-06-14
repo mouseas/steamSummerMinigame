@@ -636,9 +636,9 @@ function goToLaneWithBestTarget() {
         // Prevent attack abilities and items if up against a boss or treasure minion
         var level = s().m_rgGameData.level + 1; 
         if (targetIsTreasure || (targetIsBoss && (level < speedThreshold || level % rainingRounds == 0))) {
-            BOSS_DISABLED_ABILITIES.each(disableAbility);
+            BOSS_DISABLED_ABILITIES.forEach(disableAbility);
         } else {
-            BOSS_DISABLED_ABILITIES.each(enableAbility);
+            BOSS_DISABLED_ABILITIES.forEach(enableAbility);
         }
     }
 }
