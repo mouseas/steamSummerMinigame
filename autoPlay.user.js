@@ -2,7 +2,7 @@
 // @name Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 3.7.0
+// @version 3.7.2
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -73,6 +73,7 @@ var ENEMY_TYPE = {
 };
 
 var refreshTimer = null; // global to cancel running timers if disabled after timer has already started
+var GITHUB_BASE_URL = "https://raw.githubusercontent.com/pkolodziejczyk/steamSummerMinigame/master/";
 
 
 function firstRun() {
@@ -82,6 +83,8 @@ function firstRun() {
     if(enableElementLock) {
         lockElements();
     }
+	// Fix up for capacity
+	fixActiveCapacityUI();
 
 	// disable particle effects - this drastically reduces the game's memory leak
     if(removeParticles) {
@@ -185,6 +188,7 @@ function MainLoop() {
 	if (!isAlreadyRunning) {
 		isAlreadyRunning = true;
 
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		goToLaneWithBestTarget();
 		useGoodLuckCharmIfRelevant();
 		useMedicsIfRelevant();
@@ -192,8 +196,11 @@ function MainLoop() {
 		useClusterBombIfRelevant();
 		useNapalmIfRelevant();
 		useTacticalNukeIfRelevant();
+    useCrippleMonsterIfRelevant();
 		useCrippleSpawnerIfRelevant();
-		useGoldRainIfRelevant();
+        if(level < 1000 || level % 200 == 0) {
+		    useGoldRainIfRelevant();
+        }
 		useMetalDetectorIfRelevant();
 		attemptRespawn();
 		disableCooldownIfRelevant();
@@ -494,15 +501,12 @@ function goToLaneWithBestTarget() {
 	var skippingSpawner = false;
 	var skippedSpawnerLane = 0;
 	var skippedSpawnerTarget = 0;
-	var targetIsTreasureOrBoss = false;
+	var targetIsTreasure = false;
+	var targetIsBoss = false;
 
 	for (var k = 0; !targetFound && k < enemyTypePriority.length; k++) {
-
-		if (enemyTypePriority[k] == ENEMY_TYPE.TREASURE || enemyTypePriority[k] == ENEMY_TYPE.BOSS){
-			targetIsTreasureOrBoss = true;
-		} else {
-			targetIsTreasureOrBoss = false;
-		}
+        targetIsTreasure = (enemyTypePriority[k] == ENEMY_TYPE.TREASURE);
+        targetIsBoss = (enemyTypePriority[k] == ENEMY_TYPE.BOSS);
 
 		var enemies = [];
 
@@ -517,7 +521,7 @@ function goToLaneWithBestTarget() {
 		}
 
 		//Prefer lane with raining gold, unless current enemy target is a treasure or boss.
-		if(lowTarget != ENEMY_TYPE.TREASURE && lowTarget != ENEMY_TYPE.BOSS ){
+    if (!targetIsTreasure && !targetIsBoss){
 			var potential = 0;
 			// Loop through lanes by elemental preference
 			var sortedLanes = sortLanesByElementals();
@@ -616,7 +620,8 @@ function goToLaneWithBestTarget() {
 
 
 		// Prevent attack abilities and items if up against a boss or treasure minion
-		if (targetIsTreasureOrBoss) {
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
+		if (targetIsTreasure || (targetIsBoss && (level < 1000 || level % 200 == 0))) {
 			// Morale
 			disableAbility(ABILITIES.MORALE_BOOSTER);
 			// Luck
@@ -739,12 +744,13 @@ function useClusterBombIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type === 0) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
 					enemySpawnerExists = true;
 				}
 			}
@@ -767,12 +773,13 @@ function useNapalmIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type === 0) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
 					enemySpawnerExists = true;
 				}
 			}
@@ -816,11 +823,12 @@ function useTacticalNukeIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemySpawnerExists = false;
 		var enemySpawnerHealthPercent = 0.0;
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1;
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
-				if (enemy.m_data.type === 0) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
 					enemySpawnerExists = true;
 					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 				}
@@ -835,6 +843,27 @@ function useTacticalNukeIfRelevant() {
 	}
 }
 
+function useCrippleMonsterIfRelevant() {
+	// Check if Cripple Spawner is available
+	if(hasItem(ITEMS.CRIPPLE_MONSTER)) {
+		if (isAbilityCoolingDown(ITEMS.CRIPPLE_MONSTER)) {
+			return;
+		}
+  }
+  
+  var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1;
+  // Use nukes on boss when level >3000 for faster kills
+    if (level > 1000 && level % 200 != 0 && level % 10 == 0) {
+      var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+      if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+        var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
+        if (enemyBossHealthPercent>0.5){
+        advLog("Cripple Monster available and used on boss", 2);
+        triggerItem(ITEMS.CRIPPLE_MONSTER);
+        }
+      }
+    }  
+}
 function useCrippleSpawnerIfRelevant() {
 	// Check if Cripple Spawner is available
 	if(hasItem(ITEMS.CRIPPLE_SPAWNER)) {
@@ -1098,6 +1127,12 @@ function getClickDamage(){
 
 function autoRefreshPage(autoRefreshMinutes){
 	refreshTimer = setTimeout(function(){w.location.reload(true);},autoRefreshMinutes*1000*60);
+}
+function fixActiveCapacityUI(){
+	$J('.tv_ui').css('background-image','url("'+GITHUB_BASE_URL+'game_frame_tv_fix.png")');
+	$J('#activeinlanecontainer').css('height','134px');
+	$J('#activitycontainer').css('height', '270px');
+	$J('#activityscroll').css('height', '270px');
 }
 
 function enhanceTooltips(){
