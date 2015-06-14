@@ -338,13 +338,17 @@ function useClusterBombIfRelevant() {
 		}
 		//Bombs away if spawner and 2+ other monsters
 		if (enemySpawnerExists && enemyCount >= 3) {
-			if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN))
+			// Wait 60 seconds if the cooldown ability
+			// is within 1 minute of coming back
+			if(getCooldownTime(ABILITIES.COOLDOWN) > 60)
 			{
-				console.log("Cooling down prior to long-downtime ability use");
-				triggerAbility(ABILITIES.COOLDOWN);
-				window.setInterval(function(){ triggerAbility(ABILITIES.CLUSTER_BOMB); }, 1500);
-			}else{
-				triggerAbility(ABILITIES.CLUSTER_BOMB);
+				if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN) && !currentLaneHasAbility(ABILITIES.COOLDOWN))
+				{
+					console.log("Cooling down prior to long-downtime ability use");
+					triggerAbility(ABILITIES.COOLDOWN);
+				}else{
+					triggerAbility(ABILITIES.CLUSTER_BOMB);
+				}
 			}
 		}
 	}
@@ -373,13 +377,17 @@ function useNapalmIfRelevant() {
 		}
 		//Burn them all if spawner and 2+ other monsters
 		if (enemySpawnerExists && enemyCount >= 3) {
-			if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN))
+			// Wait 60 seconds if the cooldown ability
+			// is within 1 minute of coming back
+			if(getCooldownTime(ABILITIES.COOLDOWN) > 60)
 			{
-				console.log("Cooling down prior to long-downtime ability use");
-				triggerAbility(ABILITIES.COOLDOWN);
-				window.setInterval(function(){ triggerAbility(ABILITIES.NAPALM); }, 1500);
-			}else{
-				triggerAbility(ABILITIES.NAPALM);
+				if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN) && !currentLaneHasAbility(ABILITIES.COOLDOWN))
+				{
+					console.log("Cooling down prior to long-downtime ability use");
+					triggerAbility(ABILITIES.COOLDOWN);
+				}else{
+					triggerAbility(ABILITIES.NAPALM);
+				}
 			}
 		}
 	}
@@ -438,13 +446,17 @@ function useTacticalNukeIfRelevant() {
 		// If there is a spawner and it's health is between 60% and 30%, nuke it!
 		if (enemySpawnerExists && enemySpawnerHealthPercent < 0.6 && enemySpawnerHealthPercent > 0.3) {
 			console.log("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.");
-			if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN))
+			// Wait 60 seconds if the cooldown ability
+			// is within 1 minute of coming back
+			if(getCooldownTime(ABILITIES.COOLDOWN) > 60)
 			{
-				console.log("Cooling down prior to long-downtime ability use");
-				triggerAbility(ABILITIES.COOLDOWN);
-				window.setInterval(function(){ triggerAbility(ABILITIES.NUKE); }, 1500);
-			}else{
-				triggerAbility(ABILITIES.NUKE);
+				if(hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN) && !currentLaneHasAbility(ABILITIES.COOLDOWN))
+				{
+					console.log("Cooling down prior to long-downtime ability use");
+					triggerAbility(ABILITIES.COOLDOWN);
+				}else{
+					triggerAbility(ABILITIES.NUKE);
+				}
 			}
 		}
 	}
@@ -596,6 +608,13 @@ function isAbilityItemEnabled(abilityId) {
 		return elem.childElements()[0].style.visibility == "visible";
 	}
 	return false;
+}
+
+function currentLaneHasAbility(abilityID) {
+	var lane = g_Minigame.CurrentScene().m_rgPlayerData.current_lane;
+	if(typeof(g_Minigame.m_CurrentScene.m_rgLaneData[lane].abilities[abilityID]) == 'undefined')
+		return 0;
+	return g_Minigame.m_CurrentScene.m_rgLaneData[lane].abilities[abilityID];
 }
 
 var thingTimer = window.setInterval(function(){
