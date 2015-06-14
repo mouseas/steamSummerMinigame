@@ -32,34 +32,12 @@ var enableElementLock = getPreferenceBoolean("enableElementLock", true);
 // DO NOT MODIFY
 var isAlreadyRunning = false;
 var currentClickRate = clickRate;
+var tickData = {};
 var trt_oldCrit = function() {};
 var trt_oldPush = function() {};
 
-var ABILITIES = {
-	"MORALE_BOOSTER": 5,
-	"GOOD_LUCK": 6,
-	"MEDIC": 7,
-	"METAL_DETECTOR": 8,
-	"COOLDOWN": 9,
-	"NUKE": 10,
-	"CLUSTER_BOMB": 11,
-	"NAPALM": 12
-};
-
-var ITEMS = {
-	"REVIVE": 13,
-    "CRIPPLE_SPAWNER": 14,
-    "CRIPPLE_MONSTER": 15,
-    "MAXIMIZE_ELEMENT": 16,
-    "GOLD_RAIN": 17,
-    "CRIT": 18,
-    "PUMPED_UP": 19,
-    "THROW_MONEY": 20,
-    "GOD_MODE": 21,
-    "TREASURE": 22,
-    "STEAL_HEALTH": 23,
-    "REFLECT_DAMAGE": 24
-};
+var UPGRADES = {};
+var ABILITIES = {};
 
 var ENEMY_TYPE = {
 	"SPAWNER":0,
@@ -75,7 +53,9 @@ var GITHUB_BASE_URL = "https://raw.githubusercontent.com/pkolodziejczyk/steamSum
 function firstRun() {
 	trt_oldCrit = w.g_Minigame.CurrentScene().DoCritEffect;
 	trt_oldPush = w.g_Minigame.m_CurrentScene.m_rgClickNumbers.push;
-	
+
+	readTuningData();
+
     if(enableElementLock) {
         lockElements();
     }
@@ -177,7 +157,9 @@ function MainLoop() {
 	if (!isAlreadyRunning) {
 		isAlreadyRunning = true;
 
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1;
+		readTickData();
+
 		goToLaneWithBestTarget();
 		useGoodLuckCharmIfRelevant();
 		useMedicsIfRelevant();
@@ -601,66 +583,60 @@ function goToLaneWithBestTarget() {
         var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		if (targetIsTreasure || (targetIsBoss && (level < 1000 || level % 200 == 0))) {
 			// Morale
-			disableAbility(ABILITIES.MORALE_BOOSTER);
+			disableAbility('MORALE_BOOSTER');
 			// Luck
-			disableAbility(ABILITIES.GOOD_LUCK);
+			disableAbility('GOOD_LUCK_CHARMS');
 			// Nuke
-			disableAbility(ABILITIES.NUKE);
+			disableAbility('TACTICAL_NUKE');
 			// Clusterbomb
-			disableAbility(ABILITIES.CLUSTER_BOMB);
+			disableAbility('CLUSTER_BOMB');
 			// Napalm
-			disableAbility(ABILITIES.NAPALM);
+			disableAbility('NAPALM');
 			// Crit
-			disableAbilityItem(ITEMS.CRIT);
+			disableAbility('CRIT');
 			// Cripple Spawner
-			disableAbilityItem(ITEMS.CRIPPLE_SPAWNER);
+			disableAbility('CRIPPLE_SPAWNER');
 			// Cripple Monster
-			disableAbilityItem(ITEMS.CRIPPLE_MONSTER);
+			disableAbility('CRIPPLE_MONSTER');
 			// Max Elemental Damage
-			disableAbilityItem(ITEMS.MAXIMIZE_ELEMENT);
+			disableAbility('MAX_ELEMENTAL_DAMAGE');
 			// Reflect Damage
-			disableAbilityItem(ITEMS.REFLECT_DAMAGE);
+			disableAbility('REFLECT_DAMAGE');
 			// Throw Money at Screen
-			disableAbilityItem(ITEMS.THROW_MONEY);
+			disableAbility('THROW_MONEY_AT_SCREEN');
 		} else {
 			// Morale
-			enableAbility(ABILITIES.MORALE_BOOSTER);
+			enableAbility('MORALE_BOOSTER');
 			// Luck
-			enableAbility(ABILITIES.GOOD_LUCK);
+			enableAbility('GOOD_LUCK_CHARMS');
 			// Nuke
-			enableAbility(ABILITIES.NUKE);
+			enableAbility('TACTICAL_NUKE');
 			// Clusterbomb
-			enableAbility(ABILITIES.CLUSTER_BOMB);
+			enableAbility('CLUSTER_BOMB');
 			// Napalm
-			enableAbility(ABILITIES.NAPALM);
+			enableAbility('NAPALM');
 			// Crit
-			enableAbilityItem(ITEMS.CRIT);
+			enableAbility('CRIT');
 			// Cripple Spawner
-			enableAbilityItem(ITEMS.CRIPPLE_SPAWNER);
+			enableAbility('CRIPPLE_SPAWNER');
 			// Cripple Monster
-			enableAbilityItem(ITEMS.CRIPPLE_MONSTER);
+			enableAbility('CRIPPLE_MONSTER');
 			// Max Elemental Damage
-			enableAbilityItem(ITEMS.MAXIMIZE_ELEMENT);
+			enableAbility('MAX_ELEMENTAL_DAMAGE');
 			// Reflect Damage
-			enableAbilityItem(ITEMS.REFLECT_DAMAGE);
+			enableAbility('REFLECT_DAMAGE');
 			// Throw Money at Screen
-			enableAbilityItem(ITEMS.THROW_MONEY);
+			enableAbility('THROW_MONEY_AT_SCREEN');
 		}
 	}
 }
 
 function disableCooldownIfRelevant() {
-	if(getActiveAbilityNum(ABILITIES.COOLDOWN) > 0)
-	{
-		disableAbility(ABILITIES.COOLDOWN);
-		return;
+	if(isAbilityActive('DECREASE_COOLDOWNS', true)) {
+		disableAbility('DECREASE_COOLDOWNS');
+	} else if(!isAbilityActive('DECREASE_COOLDOWNS')) {
+		enableAbility('DECREASE_COOLDOWNS');
 	}
-
-	if(!isAbilityActive(ABILITIES.COOLDOWN))
-	{
-		enableAbility(ABILITIES.COOLDOWN);
-	}
-
 }
 
 function useMedicsIfRelevant() {
@@ -673,15 +649,15 @@ function useMedicsIfRelevant() {
 	}
 
 	// check if Medics is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
+	if (hasAbility('MEDICS') && !isAbilityCoolingDown('MEDICS')) {
 
 		// Medics is purchased, cooled down, and needed. Trigger it.
 		advLog('Medics is purchased, cooled down, and needed. Trigger it.', 2);
-		triggerAbility(ABILITIES.MEDIC);
-	} else if (hasItem(ITEMS.GOD_MODE) && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
+		triggerAbility('MEDICS');
+	} else if (hasAbility('GOD_MODE') && !isAbilityCoolingDown('GOD_MODE')) {
 
 		advLog('We have god mode, cooled down, and needed. Trigger it.', 2);
-		triggerItem(ITEMS.GOD_MODE);
+		triggerAbility('GOD_MODE');
 	}
 }
 
@@ -689,32 +665,32 @@ function useMedicsIfRelevant() {
 function useGoodLuckCharmIfRelevant() {
 
 	// check if Crits is purchased and cooled down
-	if (hasOneUseAbility(18) && !isAbilityCoolingDown(18)){
+	if (hasAbility('CRIT') && !isAbilityCoolingDown('CRIT')){
 		// Crits is purchased, cooled down, and needed. Trigger it.
 		advLog('Crit chance is always good.', 3);
-		triggerAbility(18);
+		triggerAbility('CRIT');
     }
 
 	// check if Good Luck Charms is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.GOOD_LUCK)) {
-		if (isAbilityCoolingDown(ABILITIES.GOOD_LUCK)) {
+	if (hasAbility('GOOD_LUCK_CHARMS')) {
+		if (isAbilityCoolingDown('GOOD_LUCK_CHARMS')) {
 			return;
 		}
 
-		if (! isAbilityEnabled(ABILITIES.GOOD_LUCK)) {
+		if (!isAbilityEnabled('GOOD_LUCK_CHARMS')) {
 			return;
 		}
 
 		// Good Luck Charms is purchased, cooled down, and needed. Trigger it.
 		advLog('Good Luck Charms is purchased, cooled down, and needed. Trigger it.', 2);
-		triggerAbility(ABILITIES.GOOD_LUCK);
+		triggerAbility('GOOD_LUCK_CHARMS');
 	}
 }
 
 function useClusterBombIfRelevant() {
 	//Check if Cluster Bomb is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.CLUSTER_BOMB)) {
-		if (isAbilityCoolingDown(ABILITIES.CLUSTER_BOMB)) {
+	if (hasAbility('CLUSTER_BOMB')) {
+		if (isAbilityCoolingDown('CLUSTER_BOMB')) {
 			return;
 		}
 
@@ -735,15 +711,15 @@ function useClusterBombIfRelevant() {
 		}
 		//Bombs away if spawner and 2+ other monsters
 		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.CLUSTER_BOMB);
+			triggerAbility('CLUSTER_BOMB');
 		}
 	}
 }
 
 function useNapalmIfRelevant() {
 	//Check if Napalm is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.NAPALM)) {
-		if (isAbilityCoolingDown(ABILITIES.NAPALM)) {
+	if (hasAbility('NAPALM')) {
+		if (isAbilityCoolingDown('NAPALM')) {
 			return;
 		}
 
@@ -764,7 +740,7 @@ function useNapalmIfRelevant() {
 		}
 		//Burn them all if spawner and 2+ other monsters
 		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.NAPALM);
+			triggerAbility('NAPALM');
 		}
 	}
 }
@@ -772,8 +748,8 @@ function useNapalmIfRelevant() {
 // Use Moral Booster if doable
 function useMoraleBoosterIfRelevant() {
 	// check if Good Luck Charms is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.MORALE_BOOSTER)) {
-		if (isAbilityCoolingDown(ABILITIES.MORALE_BOOSTER)) {
+	if (hasAbility('MORALE_BOOSTER')) {
+		if (isAbilityCoolingDown('MORALE_BOOSTER')) {
 			return;
 		}
 		var numberOfWorthwhileEnemies = 0;
@@ -786,14 +762,14 @@ function useMoraleBoosterIfRelevant() {
 		if(numberOfWorthwhileEnemies >= 2){
 			// Moral Booster is purchased, cooled down, and needed. Trigger it.
 			advLog('Moral Booster is purchased, cooled down, and needed. Trigger it.', 2);
-			triggerAbility(ABILITIES.MORALE_BOOSTER);
+			triggerAbility('MORALE_BOOSTER');
 			}
 	}
 }
 function useTacticalNukeIfRelevant() {
 	// Check if Tactical Nuke is purchased
-	if(hasPurchasedAbility(ABILITIES.NUKE)) {
-		if (isAbilityCoolingDown(ABILITIES.NUKE)) {
+	if(hasAbility('TACTICAL_NUKE')) {
+		if (isAbilityCoolingDown('TACTICAL_NUKE')) {
 			return;
 		}
 
@@ -816,15 +792,15 @@ function useTacticalNukeIfRelevant() {
 		// If there is a spawner and it's health is between 60% and 30%, nuke it!
 		if (enemySpawnerExists && enemySpawnerHealthPercent < 0.6 && enemySpawnerHealthPercent > 0.3) {
 			advLog("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.", 2);
-			triggerAbility(ABILITIES.NUKE);
+			triggerAbility('TACTICAL_NUKE');
 		}
 	}
 }
 
 function useCrippleMonsterIfRelevant() {
 	// Check if Cripple Spawner is available
-	if(hasItem(ITEMS.CRIPPLE_MONSTER)) {
-		if (isAbilityCoolingDown(ITEMS.CRIPPLE_MONSTER)) {
+	if(hasAbility('CRIPPLE_MONSTER')) {
+		if (isAbilityCoolingDown('CRIPPLE_MONSTER')) {
 			return;
 		}
   }
@@ -837,15 +813,15 @@ function useCrippleMonsterIfRelevant() {
         var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
         if (enemyBossHealthPercent>0.5){
         advLog("Cripple Monster available and used on boss", 2);
-        triggerItem(ITEMS.CRIPPLE_MONSTER);
+        triggerAbility('CRIPPLE_MONSTER');
         }
       }
     }  
 }
 function useCrippleSpawnerIfRelevant() {
 	// Check if Cripple Spawner is available
-	if(hasItem(ITEMS.CRIPPLE_SPAWNER)) {
-		if (isAbilityCoolingDown(ITEMS.CRIPPLE_SPAWNER)) {
+	if(hasAbility('CRIPPLE_SPAWNER')) {
+		if (isAbilityCoolingDown('CRIPPLE_SPAWNER')) {
 			return;
 		}
 
@@ -867,15 +843,15 @@ function useCrippleSpawnerIfRelevant() {
 		// If there is a spawner and it's health is above 95%, cripple it!
 		if (enemySpawnerExists && enemySpawnerHealthPercent > 0.95) {
 			advLog("Cripple Spawner available, and needed. Cripple 'em.", 2);
-			triggerItem(ITEMS.CRIPPLE_SPAWNER);
+			triggerAbility('CRIPPLE_SPAWNER');
 		}
 	}
 }
 
 function useGoldRainIfRelevant() {
 	// Check if gold rain is purchased
-	if (hasItem(ITEMS.GOLD_RAIN)) {
-		if (isAbilityCoolingDown(ITEMS.GOLD_RAIN)) {
+	if (hasAbility('RAINING_GOLD')) {
+		if (isAbilityCoolingDown('RAINING_GOLD')) {
 			return;
 		}
 
@@ -887,7 +863,7 @@ function useGoldRainIfRelevant() {
 			if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
 				// Gold Rain is purchased, cooled down, and needed. Trigger it.
 				advLog('Gold rain is purchased and cooled down, Triggering it on boss', 2);
-				triggerItem(ITEMS.GOLD_RAIN);
+				triggerAbility('RAINING_GOLD');
 			}
 		}
 	}
@@ -895,8 +871,8 @@ function useGoldRainIfRelevant() {
 
 function useMetalDetectorIfRelevant() {
 	// Check if metal detector is purchased
-	if (hasPurchasedAbility(ABILITIES.METAL_DETECTOR)) {
-		if (isAbilityCoolingDown(ABILITIES.METAL_DETECTOR) || isAbilityActive(ABILITIES.METAL_DETECTOR)) {
+	if (hasAbility('METAL_DETECTOR')) {
+		if (isAbilityCoolingDown('METAL_DETECTOR') || isAbilityActive('METAL_DETECTOR')) {
 			return;
 		}
 
@@ -908,7 +884,7 @@ function useMetalDetectorIfRelevant() {
 			if (enemyBossHealthPercent >= 0.9) { // We want sufficient time for the metal detector to be applicable
 				// Metal Detector is purchased, cooled down, and needed. Trigger it.
 				advLog('Metal Detector is purchased and cooled down, Triggering it on boss', 2);
-				triggerAbility(ABILITIES.METAL_DETECTOR);
+				triggerAbility('METAL_DETECTOR');
 			}
 		}
 	}
@@ -921,111 +897,95 @@ function attemptRespawn() {
 	}
 }
 
-function isAbilityActive(abilityId) {
-	return g_Minigame.CurrentScene().bIsAbilityActive(abilityId);
+function formatConstName(n) {
+	return n.toUpperCase().replace(/^[^A-Z]+/, '').replace(/[^A-Z]+$/, '').replace(/[^A-Z]+/g, '_');
 }
 
-function hasItem(itemId) {
-	for ( var i = 0; i < g_Minigame.CurrentScene().m_rgPlayerTechTree.ability_items.length; ++i ) {
-		var abilityItem = g_Minigame.CurrentScene().m_rgPlayerTechTree.ability_items[i];
-		if (abilityItem.ability == itemId) {
-			return true;
-		}
+function readTuningData() {
+	$J.each(g_TuningData.upgrades, function(k, v) {
+		UPGRADES[formatConstName(v.name)] = parseInt(k, 10);
+	});
+	$J.each(g_TuningData.abilities, function(k, v) {
+		ABILITIES[formatConstName(v.name)] = parseInt(k, 10);
+	});
+}
+
+function readTickData() {
+	var loot = [];
+	var scene = g_Minigame.m_CurrentScene;
+	if(scene.m_rgPlayerTechTree && scene.m_rgPlayerTechTree.ability_items) {
+		scene.m_rgPlayerTechTree.ability_items.each(function(k, v) {
+			loot.push(v.ability);
+		});
+	}
+	tickData = {
+		loot: loot
+	};
+}
+
+function knownAbility(name) {
+	if(name in ABILITIES) {
+		return true;
+	}
+	advLog('Unknown ability "' + name + '"! (known: ' + Object.keys(ABILITIES).join(',') + ')', 3);
+	return false;
+}
+
+function hasAbility(name) {
+	if(knownAbility(name)) {
+		var id = ABILITIES[name];
+		return name in UPGRADES ? g_Minigame.m_CurrentScene.bHaveAbility(id) : tickData.loot.indexOf(id) > -1;
 	}
 	return false;
 }
 
-function isAbilityCoolingDown(abilityId) {
-	return g_Minigame.CurrentScene().GetCooldownForAbility(abilityId) > 0;
-}
-
-function hasOneUseAbility(abilityId) {
-	var elem = document.getElementById('abilityitem_' + abilityId);
-	return elem !== null;
-}
-
-function hasPurchasedAbility(abilityId) {
-	// each bit in unlocked_abilities_bitfield corresponds to an ability.
-	// the above condition checks if the ability's bit is set or cleared. I.e. it checks if
-	// the player has purchased the specified ability.
-	return (1 << abilityId) & g_Minigame.CurrentScene().m_rgPlayerTechTree.unlocked_abilities_bitfield;
-}
-
-function triggerItem(itemId) {
-	var elem = document.getElementById('abilityitem_' + itemId);
-	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		g_Minigame.CurrentScene().TryAbility(document.getElementById('abilityitem_' + itemId).childElements()[0]);
-	}
-}
-
-function triggerAbility(abilityId) {
-	g_Minigame.CurrentScene().m_rgAbilityQueue.push({'ability': abilityId});
-}
-
-function toggleAbilityVisibility(abilityId, show) {
-    var vis = show === true ? "visible" : "hidden";
-
-    var elem = document.getElementById('ability_' + abilityId);
-    if (elem && elem.childElements() && elem.childElements().length >= 1) {
-        elem.childElements()[0].style.visibility = vis;
-    }
-}
-
-function disableAbility(abilityId) {
-    toggleAbilityVisibility(abilityId, false);
-}
-
-function enableAbility(abilityId) {
-    toggleAbilityVisibility(abilityId, true);
-}
-
-function isAbilityEnabled(abilityId) {
-	var elem = document.getElementById('ability_' + abilityId);
-	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		return elem.childElements()[0].style.visibility == "visible";
+function isAbilityActive(name, lane) {
+	if(knownAbility(name)) {
+		var id = ABILITIES[name];
+		var scene = g_Minigame.m_CurrentScene;
+		if(lane) { // check current lane
+			return id in scene.m_rgLaneData[scene.m_rgPlayerData.current_lane].abilities;
+		} // else check player
+		return scene.bIsAbilityActive(id);
 	}
 	return false;
 }
 
-function toggleAbilityItemVisibility(abilityId, show) {
-    var elem = document.getElementById('abilityitem_' + abilityId);
-    if (elem && elem.childElements() && elem.childElements().length >= 1) {
-        elem.childElements()[0].style.visibility = show === true ? "visible" : "hidden";
-    }
+function isAbilityCoolingDown(name) {
+	return knownAbility(name) && g_Minigame.m_CurrentScene.GetCooldownForAbility(ABILITIES[name]) > 0;
 }
 
-function disableAbilityItem(abilityId) {
-    toggleAbilityItemVisibility(abilityId, false);
-}
-
-function enableAbilityItem(abilityId) {
-    toggleAbilityItemVisibility(abilityId, true);
-}
-
-function isAbilityItemEnabled(abilityId) {
-	var elem = document.getElementById('abilityitem_' + abilityId);
-	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		return elem.childElements()[0].style.visibility == "visible";
+function getAbilityButton(name) {
+	if(knownAbility(name)) {
+		return $J('#ability' + (name in UPGRADES ? '_' : 'item_') + ABILITIES[name] + ' .link').get(0);
 	}
-	return false;
 }
 
-function getActiveAbilityNum(ability) {
-    var abilities = g_Minigame.m_CurrentScene.m_rgGameData.lanes[g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane].active_player_abilities;
-    var count = 0;
-    for(var i = 0; i < abilities.length; i++)
-    {
-        if(abilities[i].ability != ability)
-        {
-            continue;
-        }
-        if(abilities[i].timestamp_done < Date.now())
-        {
-            continue;
-        }
-        count++;
-    }
-    return count;
+function triggerAbility(name) {
+	var elem = getAbilityButton(name);
+	if(elem) {
+		w.g_Minigame.m_CurrentScene.TryAbility(elem);
+	}
+}
+
+function isAbilityEnabled(name) {
+	var elem = getAbilityButton(name);
+	return elem && elem.style.visibility == "visible";
+}
+
+function toggleAbilityVisibility(name, show) {
+	var elem = getAbilityButton(name);
+	if(elem) {
+		elem.style.visibility = show === true ? "visible" : "hidden";
+	}
+}
+
+function disableAbility(name) {
+    toggleAbilityVisibility(name, false);
+}
+
+function enableAbility(name) {
+    toggleAbilityVisibility(name, true);
 }
 
 function sortLanesByElementals() {
