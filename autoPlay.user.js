@@ -1090,7 +1090,7 @@ function autoRefreshPage(autoRefreshMinutes) {
 
 function fixActiveCapacityUI() {
     $J('.tv_ui').css('background-image', 'url("' + GITHUB_BASE_URL + 'game_frame_tv_fix.png")');
-    $J('#activeinlanecontainer').css('height', '134px');
+    $J('#activeinlanecontainer').css('height', '154px');
     $J('#activitycontainer').css('height', '270px');
     $J('#activityscroll').css('height', '270px');
 }
