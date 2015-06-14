@@ -808,20 +808,20 @@ function useTacticalNukeIfRelevant() {
 function useCrippleMonsterIfRelevant() {
     // Check if Cripple Spawner is available
     if(hasAbility('CRIPPLE_MONSTER')) {
-  }
-  
-  var level = s().m_rgGameData.level + 1;
-  // Use nukes on boss when level >3000 for faster kills
-    if (level > 1000 && level % 200 != 0 && level % 10 == 0) {
-	var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
-			if (enemyBossHealthPercent>0.5){
-				advLog("Cripple Monster available and used on boss", 2);
-				triggerAbility('CRIPPLE_MONSTER');
-			}
-		}
-	}
+
+        var level = s().m_rgGameData.level + 1;
+        // Use nukes on boss when level >3000 for faster kills
+        if (level > 1000 && level % 200 != 0 && level % 10 == 0) {
+            var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
+            if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+                var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
+                if (enemyBossHealthPercent > 0.5) {
+                    advLog("Cripple Monster available and used on boss", 2);
+                    triggerAbility('CRIPPLE_MONSTER');
+                }
+            }
+        }
+    }
 }
 
 function useCrippleSpawnerIfRelevant() {
