@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.3.3
+// @version 2.3.2
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match *://steamcommunity.com/minigame/towerattack*
@@ -17,11 +17,13 @@
 //  | || |\/| | |_) | | | | |_) || | / _ \ |  \| | | |   //
 //  | || |  | |  __/| |_| |  _ < | |/ ___ \| |\  | | |   //
 // |___|_|  |_|_|    \___/|_| \_\|_/_/   \_\_| \_| |_|   //
-//
-// Increment the @version parameter every time you update the script (2.0.1, 2.0.2, etc.).
-// Otherwise, Greasemonkey / Tampermonkey users will NOT update automatically!
-//
-//////////////////////////////////////////////////////////////////////////////////////
+//                                                       //
+//    Increment the @version parameter every time you    //
+//   update the script (2.0.1, 2.0.2, etc.). Otherwise   //
+//   Greasemonkey / Tampermonkey users will NOT update   //
+//                    automatically!!                    //
+//                                                       //
+///////////////////////////////////////////////////////////
 
 var isAlreadyRunning = false;
 var autoClickGoldRain = true;
@@ -74,10 +76,10 @@ function firstRun() {
 	if (g_Minigame !== undefined) {
 		g_Minigame.CurrentScene().DoClickEffect = function() {};
 		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
-		g_Minigame.CurrentScene().SpawnEmitter = function (emitter) {
+		g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
 			emitter.emit = false;
 			return emitter;
-		};
+		}
 	}
 
 	// disable enemy flinching animation when they get hit
@@ -274,7 +276,7 @@ function useMedicsIfRelevant() {
 		console.log('We have god mode, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.GOD_MODE);
 	}
-}
+};
 
 // Use Good Luck Charm if doable
 function useGoodLuckCharmIfRelevant() {
@@ -352,11 +354,11 @@ function useNapalmIfRelevant() {
 
 function useMoraleBoosterIfRelevant() {
 	// Check if Morale Booster is purchased
-	if (hasPurchasedAbility(ABILITIES.MORALE_BOOSTER)) {
-		if (isAbilityCoolingDown(ABILITIES.MORALE_BOOSTER)) {
+	if(hasPurchasedAbility(5)) {
+		if (isAbilityCoolingDown(5)) {
 			return;
 		}
-
+		
 		//Check lane has monsters so the hype isn't wasted
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
@@ -366,15 +368,14 @@ function useMoraleBoosterIfRelevant() {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type == 0) {
+				if (enemy.m_data.type == 0) { 
 					enemySpawnerExists = true;
 				}
 			}
 		}
 		//Hype everybody up!
 		if (enemySpawnerExists && enemyCount >= 3) {
-			console.log("Morale Booster is purchased, cooled down, and needed. Rally around, everyone!");
-			triggerAbility(ABILITIES.MORALE_BOOSTER);
+			triggerAbility(5);
 		}
 	}
 }
@@ -593,7 +594,7 @@ function clickTheThing() {
 					return {
 						x: enemy.m_Sprite.position.x - laneOffset,
 						y: enemy.m_Sprite.position.y - 52
-					};
+					}
 				}
 			}
 		}
