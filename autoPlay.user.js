@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name Monster Minigame Auto-script w/ auto-click
+// @name [SteamDB] Monster Minigame Script
 // @namespace https://github.com/SteamDatabase/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 3.9.2
+// @version 4.0.3
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -26,20 +26,25 @@ var removeParticles = getPreferenceBoolean("removeParticles", true);
 var removeFlinching = getPreferenceBoolean("removeFlinching", true);
 var removeCritText = getPreferenceBoolean("removeCritText", false);
 var removeAllText = getPreferenceBoolean("removeAllText", false);
+var enableFingering = getPreferenceBoolean("enableFingering", true);
+var enableRenderer = getPreferenceBoolean("enableRenderer", true);
 
 var enableElementLock = getPreferenceBoolean("enableElementLock", true);
 
 var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 
 var autoRefreshMinutes = 30;
+var autoRefreshMinutesRandomDelay = 10;
 
 // DO NOT MODIFY
 var isAlreadyRunning = false;
 var refreshTimer = null;
 var currentClickRate = clickRate;
 var lockedElement = -1;
+var lastLevel = 0;
 var trt_oldCrit = function() {};
 var trt_oldPush = function() {};
+var trt_oldRender = function() {};
 
 var ABILITIES = {
 	"MORALE_BOOSTER": 5,
@@ -75,8 +80,12 @@ var ENEMY_TYPE = {
 	"TREASURE":4
 };
 
+// Try to disable particles straight away,
+// if not yet available, they will be disabled in firstRun
+disableParticles();
+
 function s() {
-	return g_Minigame.m_CurrentScene;
+	return w.g_Minigame.m_CurrentScene;
 }
 
 function firstRun() {
@@ -84,28 +93,32 @@ function firstRun() {
 
 	trt_oldCrit = s().DoCritEffect;
 	trt_oldPush = s().m_rgClickNumbers.push;
+	trt_oldRender = w.g_Minigame.Renderer.render;
 
-	startFingering();
+	if(enableFingering) {
+		startFingering();
+	}
+
 	if(enableElementLock) {
 		lockElements();
 	}
+
 	if (enableAutoRefresh) {
 		autoRefreshPage(autoRefreshMinutes);
 	}
-
-	// disable particle effects - this drastically reduces the game's memory leak
-	if(removeParticles && CSceneGame) {
-		CSceneGame.prototype.SpawnEmitter = function(emitter, x, y, container) {
-			emitter.emit = false;
-			return emitter;
-		};
+	
+	if (enableRenderer) {
+		toggleRenderer();
 	}
 
+	// disable particle effects - this drastically reduces the game's memory leak
+	disableParticles();
+
 	// disable enemy flinching animation when they get hit
-	if(removeFlinching && CEnemy) {
-		CEnemy.prototype.TakeDamage = function() {};
-		CEnemySpawner.prototype.TakeDamage = function() {};
-		CEnemyBoss.prototype.TakeDamage = function() {};
+	if(removeFlinching && w.CEnemy) {
+		w.CEnemy.prototype.TakeDamage = function() {};
+		w.CEnemySpawner.prototype.TakeDamage = function() {};
+		w.CEnemyBoss.prototype.TakeDamage = function() {};
 	}
 
 	if(removeCritText) {
@@ -116,8 +129,15 @@ function firstRun() {
 		toggleAllText();
 	}
 
-	if ( removeInterface ) {
-		var node = document.getElementById("global_header");
+	var node = document.getElementById("abilities");
+
+	if( node ) {
+		node.style.textAlign = 'left';
+		node.style.marginLeft = '300px';
+	}
+
+	if( removeInterface ) {
+		node = document.getElementById("global_header");
 		if (node && node.parentNode) {
 			node.parentNode.removeChild( node );
 		}
@@ -131,34 +151,24 @@ function firstRun() {
 		}
 		node = document.querySelector(".pagecontent");
 		if (node) {
-			node.style["padding-bottom"] = 0;
+			node.style.paddingBottom = 0;
 		}
-		/*
-		node = document.querySelector(".leave_game_helper");
-		if (node && node.parentNode) {
-			node.parentNode.removeChild( node );
-		}
-		*/
 		document.body.style.backgroundPosition = "0 0";
 	}
 
-	if (w.CSceneGame !== undefined) {
-		w.CSceneGame.prototype.DoScreenShake = function() {};
-	}
-
-    var egg = document.createElement("span");
-    egg.className = "toggle_music_btn";
-    egg.innerText = "Easter Egg";
-    egg.onclick = SmackTV();
-    SmackTV(); // need to call it again to disable by default as it gets called once for some reason
-    document.querySelector(".game_options").insertBefore(egg, document.querySelector(".leave_game_btn"));
-
 	// Add "players in game" label
-	var oldHTML = document.getElementsByClassName("title_activity")[0].innerHTML;
-	document.getElementsByClassName("title_activity")[0].innerHTML = "<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br />" + oldHTML;
+	var titleActivity = document.querySelector( '.title_activity' );
+	var playersInGame = document.createElement( 'span' );
+	playersInGame.innerHTML = '<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br>';
+
+	titleActivity.insertBefore(playersInGame, titleActivity.firstChild);
+
+	// Fix alignment
+	var activity = document.getElementById("activitylog");
+	activity.style.marginTop = "25px";
 
 	var info_box = document.querySelector(".leave_game_helper");
-	info_box.innerHTML = '<b>OPTIONS</b><br/>Some of these may need a refresh to take effect.<br/>';
+	info_box.innerHTML = '<b>OPTIONS</b>' + ((typeof GM_info !==  "undefined") ? ' (v' + GM_info.script.version + ')' : '') + '<br>Some of these may need a refresh to take effect.<br>';
 
 	// reset the CSS for the info box for aesthetics
 	info_box.className = "options_box";
@@ -181,9 +191,7 @@ function firstRun() {
 	options1.appendChild(makeCheckBox("removeInterface", "Remove interface (needs refresh)", removeInterface, handleEvent));
 	options1.appendChild(makeCheckBox("removeParticles", "Remove particle effects (needs refresh)", removeParticles, handleEvent));
 	options1.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects (needs refresh)", removeFlinching, handleEvent));
-	options1.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText));
-	options1.appendChild(makeCheckBox("removeAllText", "Remove all text (overrides above)", removeAllText, toggleAllText));
-	options1.appendChild(makeCheckBox("enableElementLock", "Lock element upgrades", enableElementLock, toggleElementLock));
+	options1.appendChild(makeCheckBox("enableRenderer", "Enable game renderer", enableRenderer, toggleRenderer));
 
 	info_box.appendChild(options1);
 
@@ -196,14 +204,54 @@ function firstRun() {
 	if (typeof GM_info !==  "undefined") {
 		options2.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (mitigate memory leak)", enableAutoRefresh, toggleAutoRefresh));
 	}
+
+	options2.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer (needs refresh)", enableFingering, handleEvent));
+	options2.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText));
+	options2.appendChild(makeCheckBox("removeAllText", "Remove all text (overrides above)", removeAllText, toggleAllText));
 	options2.appendChild(makeNumber("setLogLevel", "Change the log level (you shouldn't need to touch this)", "25px", logLevel, 0, 5, updateLogLevel));
 
 	info_box.appendChild(options2);
 
+	//Elemental upgrades lock
+	var ab_box = document.getElementById("abilities");
+	var lock_elements_box = document.createElement("div");
+	lock_elements_box.className = "lock_elements_box";
+	lock_elements_box.style.backgroundColor = "#000000";
+	lock_elements_box.style.width = "160px";
+	lock_elements_box.style.top = "0px";
+	lock_elements_box.style.left = "4px";
+	lock_elements_box.style.padding = "2px";
+	lock_elements_box.style.position = "absolute";
+	lock_elements_box.style.boxShadow = "2px 2px 0 rgba( 0, 0, 0, 0.6 )";
+	lock_elements_box.style.color = "#ededed";
+	lock_elements_box.title = "To maximise team damage players should max only one element. But distributions of elements through people should be equal. So we calculated your element using your unique ID. Upgrade your element to make maximum performance or disable this checkbox.";
+	var lock_elements_checkbox = makeCheckBox("enableElementLock", "Lock element upgrades for more team dps", enableElementLock, toggleElementLock);
+	lock_elements_box.appendChild(lock_elements_checkbox);
+	ab_box.appendChild(lock_elements_box);
+	
 	enhanceTooltips();
 }
 
+function disableParticles() {
+	if (w.CSceneGame) {
+		w.CSceneGame.prototype.DoScreenShake = function() {};
+
+		if(removeParticles) {
+			w.CSceneGame.prototype.SpawnEmitter = function(emitter) {
+				emitter.emit = false;
+				return emitter;
+			};
+		}
+	}
+}
+
 function MainLoop() {
+	var level = getGameLevel();
+
+	if( level < 10 ) {
+		return;
+	}
+
 	if (!isAlreadyRunning) {
 		isAlreadyRunning = true;
 
@@ -225,55 +273,103 @@ function MainLoop() {
 		updatePlayersInGame();
 		attemptRespawn();
 
+		if( level !== lastLevel )
+		{
+			lastLevel = level;
+
+			refreshPlayerData();
+		}
+
 		s().m_nClicks += currentClickRate;
-		g_msTickRate = 1000;
+		w.g_msTickRate = 1000;
 
 		var damagePerClick = s().CalculateDamage(
 			s().m_rgPlayerTechTree.damage_per_click,
 			s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].element
-			);
+		);
 
 		advLog("Ticked. Current clicks per second: " + currentClickRate + ". Current damage per second: " + (damagePerClick * currentClickRate), 4);
 
 		isAlreadyRunning = false;
 
-		var enemy = s().GetEnemy(
-			s().m_rgPlayerData.current_lane,
-			s().m_rgPlayerData.target);
+		if( currentClickRate > 0 ) {
+			var enemy = s().GetEnemy(
+				s().m_rgPlayerData.current_lane,
+				s().m_rgPlayerData.target);
 
-		if (enemy) {
-			displayText(
-				enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
-				enemy.m_Sprite.position.y - 52,
-				"-" + FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
-				"#aaf"
-				);
-
-			if( s().m_rgStoredCrits.length > 0 )
-			{
-				var rgDamage = s().m_rgStoredCrits.splice(0,1);
-
-				s().DoCritEffect( rgDamage[0], enemy.m_Sprite.position.x - (enemy.m_nLane * 440), enemy.m_Sprite.position.y - 52, 'Crit!' );
-			}
-
-			var goldPerClickPercentage = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
-			if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0)
-			{
-				var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
-				advLog(
-					"Raining gold ability is active in current lane. Percentage per click: " + goldPerClickPercentage
-					+ "%. Approximately gold per second: " + goldPerSecond,
-					4
-					);
+			if (enemy) {
 				displayText(
 					enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
-					enemy.m_Sprite.position.y - 17,
-					"+" + FormatNumberForDisplay(goldPerSecond, 5),
-					"#e1b21e"
+					enemy.m_Sprite.position.y - 52,
+					"-" + w.FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
+					"#aaf"
+				);
+
+				if( s().m_rgStoredCrits.length > 0 )
+				{
+					var rgDamage = s().m_rgStoredCrits.reduce(function(a,b){return a + b});
+					s().m_rgStoredCrits.length = 0;
+
+					s().DoCritEffect( rgDamage, enemy.m_Sprite.position.x - (enemy.m_nLane * 440), enemy.m_Sprite.position.y + 17, 'Crit!' );
+				}
+
+				var goldPerClickPercentage = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
+				if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0)
+				{
+					var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
+
+					s().ClientOverride('player_data', 'gold', s().m_rgPlayerData.gold + goldPerSecond);
+					s().ApplyClientOverrides('player_data', true);
+
+					advLog(
+						"Raining gold ability is active in current lane. Percentage per click: " + goldPerClickPercentage
+						+ "%. Approximately gold per second: " + goldPerSecond,
+						4
 					);
+					displayText(
+						enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
+						enemy.m_Sprite.position.y - 17,
+						"+" + w.FormatNumberForDisplay(goldPerSecond, 5),
+						"#e1b21e"
+					);
+				}
 			}
 		}
 	}
+}
+
+function refreshPlayerData()
+{
+	advLog("Refreshing player data", 2);
+
+	w.g_Server.GetPlayerData(
+		function(rgResult) {
+			var instance = s();
+
+			if( rgResult.response.player_data )
+			{
+				instance.m_rgPlayerData = rgResult.response.player_data;
+				instance.ApplyClientOverrides('player_data');
+				instance.ApplyClientOverrides('ability');
+			}
+
+			if( rgResult.response.tech_tree )
+			{
+				instance.m_rgPlayerTechTree = rgResult.response.tech_tree;
+				if( rgResult.response.tech_tree.upgrades ) {
+					instance.m_rgPlayerUpgrades = w.V_ToArray( rgResult.response.tech_tree.upgrades );
+				} else {
+					instance.m_rgPlayerUpgrades = [];
+				}
+			}
+
+			instance.OnReceiveUpdate();
+		},
+		function()
+		{
+		},
+		true
+	);
 }
 
 function makeNumber(name, desc, width, value, min, max, listener) {
@@ -328,9 +424,11 @@ function handleCheckBox(event) {
 
 function toggleAutoClicker(event) {
 	var value = enableAutoClicker;
+
 	if(event !== undefined) {
 		value = handleCheckBox(event);
 	}
+
 	if(value) {
 		currentClickRate = clickRate;
 	} else {
@@ -339,19 +437,37 @@ function toggleAutoClicker(event) {
 }
 
 function toggleAutoRefresh(event) {
-    var value = enableAutoRefresh;
-    if(event !== undefined)
-        value = handleCheckBox(event);
-    if(value) {
-        autoRefreshPage(autoRefreshMinutes);
-    } else {
+	var value = enableAutoRefresh;
+
+	if(event !== undefined) {
+		value = handleCheckBox(event);
+	}
+
+	if(value) {
+		autoRefreshPage(autoRefreshMinutes);
+	} else {
 		clearTimeout(refreshTimer);
-    }
-}
-function autoRefreshPage(autoRefreshMinutes){
-	refreshTimer = setTimeout(function(){w.location.reload(true);},autoRefreshMinutes*1000*60);
+	}
 }
 
+function toggleRenderer(event) {
+	var value = enableRenderer;
+	
+	if (event !== undefined) {
+		value = handleCheckBox(event);
+	}
+	
+	if (value) {
+		w.g_Minigame.Renderer.render = trt_oldRender;
+	} else {
+		w.g_Minigame.Renderer.render = function() {}
+	}
+}
+
+function autoRefreshPage(autoRefreshMinutes){
+	var timerValue = (autoRefreshMinutes + autoRefreshMinutesRandomDelay * Math.random()) * 60 * 1000;
+	refreshTimer = setTimeout(function(){w.location.reload(true);}, timerValue);
+}
 
 function toggleElementLock(event) {
 	var value = enableElementLock;
@@ -366,15 +482,18 @@ function toggleElementLock(event) {
 
 function toggleCritText(event) {
 	var value = removeCritText;
-	if(event !== undefined)
+
+	if(event !== undefined) {
 		value = handleCheckBox(event);
-	if (value) {
-			// Replaces the entire crit display function.
-			s().DoCritEffect = function( nDamage, x, y, additionalText ) {};
-		} else {
-			s().DoCritEffect = trt_oldCrit;
-		}
 	}
+
+	if (value) {
+		// Replaces the entire crit display function.
+		s().DoCritEffect = function() {};
+	} else {
+		s().DoCritEffect = trt_oldCrit;
+	}
+}
 
 function toggleAllText(event) {
 	var value = removeAllText;
@@ -435,6 +554,11 @@ function unlockElements() {
 	}
 }
 
+function getGameLevel()
+{
+	return s().m_rgGameData.level + 1;
+}
+
 function lockElements() {
 	var elementMultipliers = [
 	s().m_rgPlayerTechTree.damage_multiplier_fire,
@@ -458,7 +582,7 @@ function lockElements() {
 		return t;
 	};
 
-	var elem = Math.abs(hashCode(g_steamID)%4);
+	var elem = Math.abs(hashCode(w.g_steamID) % 4);
 
 	// If more than two elements are leveled to 3 or higher, do not enable lock
 	var leveled = 0;
@@ -503,7 +627,7 @@ function lockToElement(element) {
 }
 
 function displayText(x, y, strText, color) {
-	var text = new PIXI.Text(strText, {font: "35px 'Press Start 2P'", fill: color, stroke: '#000', strokeThickness: 2 });
+	var text = new w.PIXI.Text(strText, {font: "35px 'Press Start 2P'", fill: color, stroke: '#000', strokeThickness: 2 });
 
 	text.x = x;
 	text.y = y;
@@ -511,11 +635,11 @@ function displayText(x, y, strText, color) {
 	s().m_containerUI.addChild( text );
 	text.container = s().m_containerUI;
 
-	var e = new CEasingSinOut( text.y, -200, 1000 );
+	var e = new w.CEasingSinOut( text.y, -200, 1000 );
 	e.parent = text;
 	text.m_easeY = e;
 
-	e = new CEasingSinOut( 2, -2, 1000 );
+	e = new w.CEasingSinOut( 2, -2, 1000 );
 	e.parent = text;
 	text.m_easeAlpha = e;
 
@@ -749,7 +873,7 @@ function useCrippleMonsterIfRelevant() {
 	}
    }
 
-   var level = s().m_rgGameData.level + 1;
+   var level = getGameLevel();
 	// Use nukes on boss when level >3000 for faster kills
 	if (level > 1000 && level % 200 !== 0 && level % 10 === 0) {
 		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
@@ -778,7 +902,7 @@ function useMedicsIfRelevant() {
 		advLog('Medics is purchased, cooled down, and needed. Trigger it.', 2);
 		triggerAbility(ABILITIES.MEDIC);
 	}
-	
+
 	// check if God Mode is purchased and cooled down
 	if (hasItem(ITEMS.GOD_MODE) && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
 
@@ -983,7 +1107,8 @@ function useMetalDetectorIfRelevant() {
 		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
 			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 
-			if (enemyBossHealthPercent >= 0.9) { // We want sufficient time for the metal detector to be applicable
+			// we want to use metal detector at 25% hp, or even less
+			if (enemyBossHealthPercent <= 0.25) { // We want sufficient time for the metal detector to be applicable
 				// Metal Detector is purchased, cooled down, and needed. Trigger it.
 				advLog('Metal Detector is purchased and cooled down, Triggering it on boss', 2);
 				triggerAbility(ABILITIES.METAL_DETECTOR);
@@ -993,10 +1118,9 @@ function useMetalDetectorIfRelevant() {
 }
 
 function attemptRespawn() {
-	if ((s().m_bIsDead) &&
-		((s().m_rgPlayerData.time_died) + 5) < (s().m_nTime)) {
-		RespawnPlayer();
-}
+	if ((s().m_bIsDead) && ((s().m_rgPlayerData.time_died) + 5) < (s().m_nTime)) {
+		w.RespawnPlayer();
+	}
 }
 
 function isAbilityActive(abilityId) {
@@ -1015,11 +1139,6 @@ function hasItem(itemId) {
 
 function isAbilityCoolingDown(abilityId) {
 	return s().GetCooldownForAbility(abilityId) > 0;
-}
-
-function hasOneUseAbility(abilityId) {
-	var elem = document.getElementById('abilityitem_' + abilityId);
-	return elem !== null;
 }
 
 function hasPurchasedAbility(abilityId) {
@@ -1081,14 +1200,6 @@ function enableAbilityItem(abilityId) {
 	toggleAbilityItemVisibility(abilityId, true);
 }
 
-function isAbilityItemEnabled(abilityId) {
-	var elem = document.getElementById('abilityitem_' + abilityId);
-	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		return elem.childElements()[0].style.visibility == "visible";
-	}
-	return false;
-}
-
 function getActiveAbilityNum(ability) {
 	var abilities = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_abilities;
 	var count = 0;
@@ -1143,7 +1254,10 @@ if(w.SteamDB_Minigame_Timer) {
 }
 
 w.SteamDB_Minigame_Timer = w.setInterval(function(){
-	if (g_Minigame && s().m_bRunning && s().m_rgPlayerTechTree) {
+	if (w.g_Minigame
+	&& s().m_bRunning
+	&& s().m_rgPlayerTechTree
+	&& s().m_rgGameData) {
 		w.clearInterval(w.SteamDB_Minigame_Timer);
 		firstRun();
 		w.SteamDB_Minigame_Timer = w.setInterval(MainLoop, 1000);
@@ -1161,7 +1275,7 @@ if(breadcrumbs) {
 	element = document.createElement('span');
 	element.style.color = '#D4E157';
 	element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-	element.textContent = 'Room ' + g_GameID;
+	element.textContent = 'Room ' + w.g_GameID;
 	breadcrumbs.appendChild(element);
 }
 
@@ -1200,29 +1314,12 @@ function startFingering() {
 }
 
 function getClickDamageMultiplier(){
-    return s().m_rgPlayerTechTree.damage_per_click_multiplier;
+	return s().m_rgPlayerTechTree.damage_per_click_multiplier;
 }
 
-// These are the upgrade types.
-//
-//3: fire, 4: water, 6: earth, 5: water
-// This differs from the order shown on the UI.
-function getElementMultiplierById(index){
-	switch( index )
-	{
-		case 3: // fire
-			return s().m_rgPlayerTechTree.damage_multiplier_fire;
-		case 4: // water
-			return s().m_rgPlayerTechTree.damage_multiplier_water;
-		case 5: // air
-			return s().m_rgPlayerTechTree.damage_multiplier_air;
-		case 6: // earth
-		return s().m_rgPlayerTechTree.damage_multiplier_earth;
-	}
-}
-
-function enhanceTooltips(){
+function enhanceTooltips() {
 	var trt_oldTooltip = w.fnTooltipUpgradeDesc;
+
 	w.fnTooltipUpgradeDesc = function(context){
 		var $context = $J(context);
 		var desc = $context.data('desc');
@@ -1230,68 +1327,68 @@ function enhanceTooltips(){
 		var multiplier = parseFloat( $context.data('multiplier') );
 		switch( $context.data('upgrade_type') )
 		{
-		case 2: // Type for click damage. All tiers.
-			strOut = trt_oldTooltip(context);
-			var currentCrit = getClickDamage() * getCritMultiplier();
-			var newCrit = s().m_rgTuningData.player.damage_per_click *(getClickDamageMultiplier() + multiplier) * getCritMultiplier();
-			strOut += '<br><br>Crit Click: ' + FormatNumberForDisplay( currentCrit ) + ' => ' + FormatNumberForDisplay( newCrit );
+			case 2: // Type for click damage. All tiers.
+				strOut = trt_oldTooltip(context);
+				var currentCrit = getClickDamage() * getCritMultiplier();
+				var newCrit = s().m_rgTuningData.player.damage_per_click *(getClickDamageMultiplier() + multiplier) * getCritMultiplier();
+				strOut += '<br><br>Crit Click: ' + w.FormatNumberForDisplay( currentCrit ) + ' => ' + w.FormatNumberForDisplay( newCrit );
+				break;
+			case 7: // Lucky Shot's type.
+				var currentMultiplier = getCritMultiplier();
+				var newMultiplier = currentMultiplier + multiplier;
+				var dps = getDPS();
+				var clickDamage = getClickDamage();
+
+				strOut += '<br><br>You can have multiple crits in a second. The server combines them into one.';
+
+				strOut += '<br><br>Crit Percentage: ' + getCritChance().toFixed(1) + '%';
+
+				strOut += '<br><br>Critical Damage Multiplier:';
+				strOut += '<br>Current: ' + ( currentMultiplier ) + 'x';
+				strOut += '<br>Next Level: ' + ( newMultiplier ) + 'x';
+
+				strOut += '<br><br>Damage with one crit:';
+				strOut += '<br>DPS: ' + w.FormatNumberForDisplay( currentMultiplier * dps ) + ' => ' + w.FormatNumberForDisplay( newMultiplier * dps );
+				strOut += '<br>Click: ' + w.FormatNumberForDisplay( currentMultiplier * clickDamage ) + ' => ' + w.FormatNumberForDisplay( newMultiplier * clickDamage );
+				strOut += '<br><br>Base Increased By: ' + w.FormatNumberForDisplay(multiplier) + 'x';
 			break;
-		case 7: // Lucky Shot's type.
-			var currentMultiplier = getCritMultiplier();
-			var newMultiplier = currentMultiplier + multiplier;
-			var dps = getDPS();
-			var clickDamage = getClickDamage();
-
-			strOut += '<br><br>You can have multiple crits in a second. The server combines them into one.';
-
-			strOut += '<br><br>Crit Percentage: ' + getCritChance().toFixed(1) + '%';
-
-			strOut += '<br><br>Critical Damage Multiplier:';
-			strOut += '<br>Current: ' + ( currentMultiplier ) + 'x';
-			strOut += '<br>Next Level: ' + ( newMultiplier ) + 'x';
-
-			strOut += '<br><br>Damage with one crit:';
-			strOut += '<br>DPS: ' + FormatNumberForDisplay( currentMultiplier * dps ) + ' => ' + FormatNumberForDisplay( newMultiplier * dps );
-			strOut += '<br>Click: ' + FormatNumberForDisplay( currentMultiplier * clickDamage ) + ' => ' + FormatNumberForDisplay( newMultiplier * clickDamage );
-			strOut += '<br><br>Base Increased By: ' + FormatNumberForDisplay(multiplier) + 'x';
-		break;
-			case 9: // Boss Loot Drop's type
-			strOut += '<br><br>Boss Loot Drop Rate:';
-			strOut += '<br>Current: ' + getBossLootChance().toFixed(0) + '%';
-			strOut += '<br>Next Level: ' + (getBossLootChance() + multiplier * 100).toFixed(0) + '%';
-			strOut += '<br><br>Base Increased By: ' + FormatNumberForDisplay(multiplier * 100) + '%';
-			break;
-		default:
-			return trt_oldTooltip(context);
+				case 9: // Boss Loot Drop's type
+				strOut += '<br><br>Boss Loot Drop Rate:';
+				strOut += '<br>Current: ' + getBossLootChance().toFixed(0) + '%';
+				strOut += '<br>Next Level: ' + (getBossLootChance() + multiplier * 100).toFixed(0) + '%';
+				strOut += '<br><br>Base Increased By: ' + w.FormatNumberForDisplay(multiplier * 100) + '%';
+				break;
+			default:
+				return trt_oldTooltip(context);
 		}
 
-	return strOut;
+		return strOut;
 	};
 
 	var trt_oldElemTooltip = w.fnTooltipUpgradeElementDesc;
-		w.fnTooltipUpgradeElementDesc = function (context) {
-			var strOut = trt_oldElemTooltip(context);
+	w.fnTooltipUpgradeElementDesc = function (context) {
+		var strOut = trt_oldElemTooltip(context);
 
-			var $context = $J(context);
-			var upgrades = s().m_rgTuningData.upgrades.slice(0);
-			// Element Upgrade index 3 to 6
-			var idx = $context.data('type');
-			// Is the current tooltip for the recommended element?
-			var isRecommendedElement = (lockedElement == idx - 3);
+		var $context = $J(context);
+		//var upgrades = s().m_rgTuningData.upgrades.slice(0);
+		// Element Upgrade index 3 to 6
+		var idx = $context.data('type');
+		// Is the current tooltip for the recommended element?
+		var isRecommendedElement = (lockedElement == idx - 3);
 
-			if (isRecommendedElement){
-				strOut += "<br><br>This is your recommended element. Please upgrade this.";
+		if (isRecommendedElement){
+			strOut += "<br><br>This is your recommended element. Please upgrade this.";
 
-				if (w.enableElementLock){
-					strOut += "<br><br>Other elements are LOCKED to prevent accidentally upgrading.";
-				}
-
-			} else if (-1 != lockedElement){
-				strOut += "<br><br>This is NOT your recommended element. DO NOT upgrade this.";
+			if (w.enableElementLock){
+				strOut += "<br><br>Other elements are LOCKED to prevent accidentally upgrading.";
 			}
 
-			return strOut;
-		};
+		} else if (-1 != lockedElement){
+			strOut += "<br><br>This is NOT your recommended element. DO NOT upgrade this.";
+		}
+
+		return strOut;
+	};
 }
 
 }(window));

@@ -42,7 +42,7 @@
  - 7 "Lucky Shot"
  - 8 "Heavy Armor"
  - 9 "Advanced Targeting"
- - 10 "Explosi ve Rounds"
+ - 10 "Explosive Rounds"
  - 11 "Medics"
  - 12 "Morale Booster"
  - 13 "Good Luck Charms"
@@ -55,3 +55,6 @@
  - 20 "Energy Shields"
  - 21 "Farming Equipment"
  - 22 "Railgun"
+ - 23 "Personal Training"
+ - 24 "AFK Equipment
+ - 25 "New Mouse Button"
