@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 3.8.4
+// @version 3.8.5
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -964,7 +964,11 @@ function getAbilityButton(name) {
 function triggerAbility(name) {
     var elem = getAbilityButton(name);
     if(elem) {
-        s().TryAbility(elem);
+    	try {
+        	s().TryAbility(elem);
+    	} catch (e) {
+    		console.log("Error using ability " + name + ": " + e);
+    	}
     }
 }
 
