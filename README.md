@@ -7,7 +7,7 @@
 It cheats for you.
 
 This fork has:
-* Elemental damage prioritizing, gold prioritizing
+* Elemental damage and gold prioritization
 * Auto clicking (change `clickRate` in console)
 * Tickrate set to 1000ms every second
 * Disable most particles
@@ -19,7 +19,7 @@ This fork has:
 
 **DISCLAIMER:** This autoscript *will* include an auto-clicker. Automatic clicking pushes into the area of cheating, and this script is designed for cheating and automating the process of collecting gold.
 
-**Notice:** The script 'auto-clicks' a combined ammount once a second, so it may seems as if it isn't auto-clicking. The Raining Gold and damage values are combined and processed once a second to be more efficient and reduce client load (as compared to the previous method of simulating 20 clicks-per-second). As long as the 'Enable autoclicker' is checked at the bottom of the screen in the options box, it is autoclicking.
+**Notice:** The script 'auto-clicks' a combined amount once a second, so it may seems as if it isn't auto-clicking. The Raining Gold and damage values are combined and processed once a second to be more efficient and reduce client load (as compared to the previous method of simulating 20 clicks-per-second). As long as the 'Enable autoclicker' is checked at the bottom of the screen in the options box, it is autoclicking.
 
 ## Features ##
 
@@ -88,7 +88,7 @@ The game should now play itself, you should leave it running in the background. 
 
 ## I want to contribute! ##
 
-This project is open-source on github. There are different ways you can help:
+This project is open-source on GitHub. There are different ways you can help:
 
 - Find a Pull Request that's marked `needs testing`. Run that version of the script for a while and watch the console for errors. If there's no errors, pay attention to what the changes are doing gameplay-wise, and make sure it's doing what it's supposed to do.
 - Find an Issue that's marked `help wanted`. Make the changes needed by that issue, and create a Pull Request with your enhancement or bugfix.
