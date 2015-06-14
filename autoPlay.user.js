@@ -28,6 +28,7 @@ var removeInterface = getPreferenceBoolean("removeInterface", true); // get rid 
 var removeParticles = getPreferenceBoolean("removeParticles", true);
 var removeFlinching = getPreferenceBoolean("removeFlinching", true);
 var removeCritText = getPreferenceBoolean("removeCritText", false);
+var removeGoldText = getPreferenceBoolean("removeGoldText", false);
 var removeAllText = getPreferenceBoolean("removeAllText", false);
 var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 var enableFingering = getPreferenceBoolean("enableFingering", true);
@@ -243,6 +244,7 @@ if (node && node.parentNode) {
     options.appendChild(makeCheckBox("removeParticles", "Remove particle effects (needs refresh)", removeParticles, handleEvent));
     options.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects (needs refresh)", removeFlinching, handleEvent));
     options.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText));
+    options.appendChild(makeCheckBox("removeGoldText", "Remove gold text", removeGoldText, handleEvent));
     options.appendChild(makeCheckBox("removeAllText", "Remove all text (overrides above)", removeAllText, toggleAllText));
     options.appendChild(makeCheckBox("enableElementLock", "Lock element upgrades", enableElementLock, toggleElementLock));
     options.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer (needs refresh)", enableFingering, handleEvent));
@@ -256,7 +258,7 @@ function MainLoop() {
     if (!isAlreadyRunning) {
         isAlreadyRunning = true;
 
-        var level = s().m_rgGameData.level + 1;
+        var level = getGameLevel();
         readTickData();
 
         goToLaneWithBestTarget();
@@ -312,16 +314,20 @@ function MainLoop() {
                 var goldPerClickPercentage = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
                 if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0) {
                     var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
+                    s().ClientOverride('player_data', 'gold', s().m_rgPlayerData.gold + goldPerSecond);
+                    s().ApplyClientOverrides('player_data', true);
                     advLog(
                         "Raining gold ability is active in current lane. Percentage per click: " + goldPerClickPercentage + "%. Approximately gold per second: " + goldPerSecond,
                         4
                     );
-                    displayText(
-                        enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
-                        enemy.m_Sprite.position.y - 17,
-                        "+" + FormatNumberForDisplay(goldPerSecond, 5),
-                        "#e1b21e"
-                    );
+                    if (!removeGoldText) {
+                        displayText(
+                            enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
+                            enemy.m_Sprite.position.y - 17,
+                            "+" + FormatNumberForDisplay(goldPerSecond, 5),
+                            "#e1b21e"
+                        );
+                    }
                 }
             }
         }
@@ -715,7 +721,7 @@ function goToLaneWithBestTarget() {
         }
 
         // Prevent attack abilities and items if up against a boss or treasure minion
-        var level = s().m_rgGameData.level + 1; 
+        var level = getGameLevel();
         if (targetIsTreasure || (targetIsBoss && (level < speedThreshold || level % rainingRounds == 0))) {
             BOSS_DISABLED_ABILITIES.each(disableAbility);
         } else {
@@ -798,7 +804,7 @@ function useClusterBombIfRelevant() {
         var currentLane = s().m_nExpectedLane;
         var enemyCount = 0;
         var enemySpawnerExists = false;
-        var level = s().m_rgGameData.level + 1; 
+        var level = getGameLevel();
         //Count each slot in lane
         for (var i = 0; i < 4; i++) {
             var enemy = s().GetEnemy(currentLane, i);
@@ -824,7 +830,7 @@ function useNapalmIfRelevant() {
         var currentLane = s().m_nExpectedLane;
         var enemyCount = 0;
         var enemySpawnerExists = false;
-        var level = s().m_rgGameData.level + 1; 
+        var level = getGameLevel();
         //Count each slot in lane
         for (var i = 0; i < 4; i++) {
             var enemy = s().GetEnemy(currentLane, i);
@@ -869,7 +875,7 @@ function useTacticalNukeIfRelevant() {
         var currentLane = s().m_nExpectedLane;
         var enemySpawnerExists = false;
         var enemySpawnerHealthPercent = 0.0;
-        var level = s().m_rgGameData.level + 1;
+        var level = getGameLevel();
         //Count each slot in lane
         for (var i = 0; i < 4; i++) {
             var enemy = s().GetEnemy(currentLane, i);
@@ -893,7 +899,7 @@ function useCrippleMonsterIfRelevant() {
     // Check if Cripple Spawner is available
     if(hasAbility('CRIPPLE_MONSTER')) {
 
-        var level = s().m_rgGameData.level + 1;
+        var level = getGameLevel();
         // Use nukes on boss when level >3000 for faster kills
         if (level > speedThreshold && level % rainingRounds != 0 && level % 10 == 0) {
             var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
@@ -1252,6 +1258,10 @@ function enhanceTooltips() {
 
         return strOut;
     };
+}
+
+function getGameLevel() {
+    return s().m_rgGameData.level + 1;
 }
 
 }(window));
