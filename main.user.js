@@ -32,6 +32,7 @@ var clickRate = 10; // change to number of desired clicks per second
 var timer = 0;
 var lastAction = 500; //start with the max. Array length
 var clickTimer;
+var goldLevel = 200; // Level to start using raining gold (lower levels don't return as much gold.) ADJUST AS NEEDED.
 
 var ABILITIES = {
 	"MORALE_BOOSTER": 5,
@@ -465,13 +466,16 @@ function useGoldRainIfRelevant() {
 		if (isAbilityCoolingDown(ITEMS.GOLD_RAIN)) {
 			return;
 		}
+		if(g_Minigame.CurrentScene().m_nCurrentLevel <= goldLevel){
+        		return;
+        	}
 
 		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
 		// check if current target is a boss, otherwise its not worth using the gold rain
 		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {	
 			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 
-		  if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
+		  if (enemyBossHealthPercent >= 0.3) { // We want sufficient time for the gold rain to be applicable
 				// Gold Rain is purchased, cooled down, and needed. Trigger it.
 				console.log('Gold rain is purchased and cooled down, Triggering it on boss');
 				triggerItem(ITEMS.GOLD_RAIN);
