@@ -952,7 +952,7 @@ function useGoldRainIfRelevant() {
 
 function useMetalDetectorIfRelevant() {
     // Check if metal detector is purchased
-    if (hasAbility('METAL_DETECTOR')) {
+    if (hasAbility('METAL_DETECTOR') || hasAbility('TREASURE')) {
         if (isAbilityActive('METAL_DETECTOR')) {
             return;
         }
@@ -964,8 +964,13 @@ function useMetalDetectorIfRelevant() {
 
             if (enemyBossHealthPercent >= 0.9) { // We want sufficient time for the metal detector to be applicable
                 // Metal Detector is purchased, cooled down, and needed. Trigger it.
-                advLog('Metal Detector is purchased and cooled down, Triggering it on boss', 2);
-                triggerAbility('METAL_DETECTOR');
+                if (hasAbility('METAL_DETECTOR')) {
+                	advLog('Metal Detector is purchased and cooled down, Triggering it on boss', 2);
+                	triggerAbility('METAL_DETECTOR');
+                } else if (hasAbility('TREASURE')) {
+                	advLog('Treasure is available and cooled down, Triggering it on boss', 2);
+                	triggerAbility('TREASURE');
+                }
             }
         }
     }
