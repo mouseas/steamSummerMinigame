@@ -292,33 +292,37 @@ function MainLoop() {
             s().m_rgPlayerData.current_lane,
             s().m_rgPlayerData.target);
 
-        if (enemy) {
-            displayText(
-                enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
-                enemy.m_Sprite.position.y - 52,
-                "-" + FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
-                "#aaf"
-            );
+        if (currentClickRate > 0) {
 
-            if (s().m_rgStoredCrits.length > 0) {
-                var rgDamage = s().m_rgStoredCrits.splice(0, 1);
-
-                s().DoCritEffect(rgDamage[0], enemy.m_Sprite.position.x - (enemy.m_nLane * 440), enemy.m_Sprite.position.y - 52, 'Crit!');
-            }
-
-            var goldPerClickPercentage = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
-            if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0) {
-                var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
-                advLog(
-                    "Raining gold ability is active in current lane. Percentage per click: " + goldPerClickPercentage + "%. Approximately gold per second: " + goldPerSecond,
-                    4
-                );
+            if (enemy) {
                 displayText(
                     enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
-                    enemy.m_Sprite.position.y - 17,
-                    "+" + FormatNumberForDisplay(goldPerSecond, 5),
-                    "#e1b21e"
+                    enemy.m_Sprite.position.y - 52,
+                    "-" + FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
+                    "#aaf"
                 );
+
+                if (s().m_rgStoredCrits.length > 0) {
+                    var rgDamage = s().m_rgStoredCrits.reduce(function(a,b) {return a+b;});
+                    s().m_rgStoredCrits.length = 0;
+
+                    s().DoCritEffect(rgDamage[0], enemy.m_Sprite.position.x - (enemy.m_nLane * 440), enemy.m_Sprite.position.y - 52, 'Crit!');
+                }
+
+                var goldPerClickPercentage = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
+                if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0) {
+                    var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
+                    advLog(
+                        "Raining gold ability is active in current lane. Percentage per click: " + goldPerClickPercentage + "%. Approximately gold per second: " + goldPerSecond,
+                        4
+                    );
+                    displayText(
+                        enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
+                        enemy.m_Sprite.position.y - 17,
+                        "+" + FormatNumberForDisplay(goldPerSecond, 5),
+                        "#e1b21e"
+                    );
+                }
             }
         }
     }
@@ -386,7 +390,6 @@ function toggleRenderer(event) {
         w.g_Minigame.Renderer.renderer = trt_oldRender;
     } else {
         w.g_Minigame.Renderer.render = function() {}
-    }
     }
 }
 
@@ -1093,7 +1096,7 @@ if (w.SteamDB_Minigame_Timer) {
 }
 
 w.SteamDB_Minigame_Timer = w.setInterval(function() {
-    if (g_Minigame && s().m_bRunning && s().m_rgPlayerTechTree) {
+    if (g_Minigame && s().m_bRunning && s().m_rgPlayerTechTree && s().m_rgGameData) {
         w.clearInterval(w.SteamDB_Minigame_Timer);
         firstRun();
         w.SteamDB_Minigame_Timer = w.setInterval(MainLoop, 1000);
