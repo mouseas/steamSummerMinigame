@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.3.2
+// @version 2.3.3
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match *://steamcommunity.com/minigame/towerattack*
@@ -74,10 +74,10 @@ function firstRun() {
 	if (g_Minigame !== undefined) {
 		g_Minigame.CurrentScene().DoClickEffect = function() {};
 		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
-		g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
+		g_Minigame.CurrentScene().SpawnEmitter = function (emitter) {
 			emitter.emit = false;
 			return emitter;
-		}
+		};
 	}
 
 	// disable enemy flinching animation when they get hit
@@ -274,7 +274,7 @@ function useMedicsIfRelevant() {
 		console.log('We have god mode, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.GOD_MODE);
 	}
-};
+}
 
 // Use Good Luck Charm if doable
 function useGoodLuckCharmIfRelevant() {
@@ -593,7 +593,7 @@ function clickTheThing() {
 					return {
 						x: enemy.m_Sprite.position.x - laneOffset,
 						y: enemy.m_Sprite.position.y - 52
-					}
+					};
 				}
 			}
 		}
