@@ -56,6 +56,8 @@ var ENEMY_TYPE = {
     "TREASURE": 4
 };
 
+var SCRIPT_VERSION = getVersionNumber();
+
 function s() {
     return g_Minigame.m_CurrentScene;
 }
@@ -155,7 +157,7 @@ if (node && node.parentNode) {
     document.getElementsByClassName("title_activity")[0].innerHTML = "<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br />" + oldHTML;
 
     var info_box = document.querySelector(".leave_game_helper");
-    info_box.innerHTML = '<b>OPTIONS</b><br/>Some of these may need a refresh to take effect.<br/>';
+    info_box.innerHTML = '<b>OPTIONS</b><br/>Some of these may need a refresh to take effect.<br/>Version: ' + SCRIPT_VERSION +'<br/>';
 
     // reset the CSS for the info box for aesthetics
     info_box.className = "options_box";
@@ -1184,6 +1186,18 @@ function enhanceTooltips() {
 
         return strOut;
     };
+}
+
+function getVersionNumber()
+{
+	if(typeof GM_info !== 'undefined' && typeof GM_info.script !== 'undefined')
+	{
+		return GM_info.script.version;
+	}
+	else
+	{
+		return 'Manually Launched';
+	}
 }
 
 }(window));
