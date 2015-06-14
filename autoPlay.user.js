@@ -961,7 +961,7 @@ function getAbilityButton(name) {
 function triggerAbility(name) {
     var elem = getAbilityButton(name);
     if(elem) {
-        w.s().TryAbility(elem);
+        s().TryAbility(elem);
     }
 }
 
