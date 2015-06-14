@@ -30,6 +30,7 @@ var clickRate = 10; // change to number of desired clicks per second
 var timer = 0;
 var lastAction = 500; //start with the max. Array length
 var clickTimer;
+var purchasedShieldsWhileRespawning = false;
 
 var ABILITIES = {
 	"MORALE_BOOSTER": 5,
@@ -361,20 +362,31 @@ function purchaseUpgrades() {
 			//bestUpgradeForDamage = bestElement; // Not doing this because this values element damage too much
 		}
 	}
-	
+
+	var currentHealth = g_Minigame.CurrentScene().m_rgPlayerData.hp;
 	var myMaxHealth = g_Minigame.CurrentScene().m_rgPlayerTechTree.max_hp;
 	// check if health is below 30%
-	var hpPercent = g_Minigame.CurrentScene().m_rgPlayerData.hp / myMaxHealth;
+	var hpPercent = currentHealth / myMaxHealth;
 	if (hpPercent < 0.3) {
 		// Prioritize armor over damage
 		// - Should we by any armor we can afford or just wait for the best one possible?
 		//	 currently waiting
 		upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestUpgradeForArmor].cost_for_next_level;
-		
+
+		// Prevent purchasing multiple shields while waiting to respawn.
+		if (purchasedShieldsWhileRespawning && currentHealth < 1) {
+			return;
+		}
+
 		if(myGold > upgradeCost && bestUpgradeForArmor) {
 			buyUpgrade(bestUpgradeForArmor);
 			myGold = g_Minigame.CurrentScene().m_rgPlayerData.gold;
+
+			purchasedShieldsWhileRespawning = currentHealth < 1;
 		}
+	}
+	else if (purchasedShieldsWhileRespawning) {
+		purchasedShieldsWhileRespawning = false;
 	}
 	
 	// Try to buy some damage
