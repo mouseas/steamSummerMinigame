@@ -918,7 +918,7 @@ function readTickData() {
     var scene = s();
     if(scene.m_rgPlayerTechTree && scene.m_rgPlayerTechTree.ability_items) {
         scene.m_rgPlayerTechTree.ability_items.each(function(k, v) {
-            loot.push(v.ability);
+            loot.push(k.ability);
         });
     }
     tickData = {
