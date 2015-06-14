@@ -607,12 +607,12 @@ function useMedicsIfRelevant() {
 	}
 
 	// check if Medics is purchased and cooled down
-	if (hasAbility('MEDICS') && !isAbilityCoolingDown('MEDICS')) {
+	if (hasAbility('MEDICS')) {
 
 		// Medics is purchased, cooled down, and needed. Trigger it.
 		advLog('Medics is purchased, cooled down, and needed. Trigger it.', 2);
 		triggerAbility('MEDICS');
-	} else if (hasAbility('GOD_MODE') && !isAbilityCoolingDown('GOD_MODE')) {
+	} else if (hasAbility('GOD_MODE')) {
 
 		advLog('We have god mode, cooled down, and needed. Trigger it.', 2);
 		triggerAbility('GOD_MODE');
@@ -623,7 +623,7 @@ function useMedicsIfRelevant() {
 function useGoodLuckCharmIfRelevant() {
 
 	// check if Crits is purchased and cooled down
-	if (hasAbility('CRIT') && !isAbilityCoolingDown('CRIT')){
+	if (hasAbility('CRIT')){
 		// Crits is purchased, cooled down, and needed. Trigger it.
 		advLog('Crit chance is always good.', 3);
 		triggerAbility('CRIT');
@@ -631,10 +631,6 @@ function useGoodLuckCharmIfRelevant() {
 
 	// check if Good Luck Charms is purchased and cooled down
 	if (hasAbility('GOOD_LUCK_CHARMS')) {
-		if (isAbilityCoolingDown('GOOD_LUCK_CHARMS')) {
-			return;
-		}
-
 		if (!isAbilityEnabled('GOOD_LUCK_CHARMS')) {
 			return;
 		}
@@ -648,9 +644,6 @@ function useGoodLuckCharmIfRelevant() {
 function useClusterBombIfRelevant() {
 	//Check if Cluster Bomb is purchased and cooled down
 	if (hasAbility('CLUSTER_BOMB')) {
-		if (isAbilityCoolingDown('CLUSTER_BOMB')) {
-			return;
-		}
 
 		//Check lane has monsters to explode
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
@@ -677,9 +670,6 @@ function useClusterBombIfRelevant() {
 function useNapalmIfRelevant() {
 	//Check if Napalm is purchased and cooled down
 	if (hasAbility('NAPALM')) {
-		if (isAbilityCoolingDown('NAPALM')) {
-			return;
-		}
 
 		//Check lane has monsters to burn
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
@@ -707,9 +697,6 @@ function useNapalmIfRelevant() {
 function useMoraleBoosterIfRelevant() {
 	// check if Good Luck Charms is purchased and cooled down
 	if (hasAbility('MORALE_BOOSTER')) {
-		if (isAbilityCoolingDown('MORALE_BOOSTER')) {
-			return;
-		}
 		var numberOfWorthwhileEnemies = 0;
 		for(var i = 0; i < g_Minigame.CurrentScene().m_rgGameData.lanes[g_Minigame.CurrentScene().m_nExpectedLane].enemies.length; i++){
 			//Worthwhile enemy is when an enamy has a current hp value of at least 1,000,000
@@ -727,9 +714,6 @@ function useMoraleBoosterIfRelevant() {
 function useTacticalNukeIfRelevant() {
 	// Check if Tactical Nuke is purchased
 	if(hasAbility('TACTICAL_NUKE')) {
-		if (isAbilityCoolingDown('TACTICAL_NUKE')) {
-			return;
-		}
 
 		//Check that the lane has a spawner and record it's health percentage
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
@@ -758,9 +742,6 @@ function useTacticalNukeIfRelevant() {
 function useCrippleMonsterIfRelevant() {
 	// Check if Cripple Spawner is available
 	if(hasAbility('CRIPPLE_MONSTER')) {
-		if (isAbilityCoolingDown('CRIPPLE_MONSTER')) {
-			return;
-		}
   }
   
   var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1;
@@ -779,9 +760,6 @@ function useCrippleMonsterIfRelevant() {
 function useCrippleSpawnerIfRelevant() {
 	// Check if Cripple Spawner is available
 	if(hasAbility('CRIPPLE_SPAWNER')) {
-		if (isAbilityCoolingDown('CRIPPLE_SPAWNER')) {
-			return;
-		}
 
 		//Check that the lane has a spawner and record it's health percentage
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
@@ -809,9 +787,6 @@ function useCrippleSpawnerIfRelevant() {
 function useGoldRainIfRelevant() {
 	// Check if gold rain is purchased
 	if (hasAbility('RAINING_GOLD')) {
-		if (isAbilityCoolingDown('RAINING_GOLD')) {
-			return;
-		}
 
 		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
 		// check if current target is a boss, otherwise its not worth using the gold rain
@@ -830,7 +805,7 @@ function useGoldRainIfRelevant() {
 function useMetalDetectorIfRelevant() {
 	// Check if metal detector is purchased
 	if (hasAbility('METAL_DETECTOR')) {
-		if (isAbilityCoolingDown('METAL_DETECTOR') || isAbilityActive('METAL_DETECTOR')) {
+		if (isAbilityActive('METAL_DETECTOR')) {
 			return;
 		}
 
@@ -892,7 +867,8 @@ function knownAbility(name) {
 function hasAbility(name) {
 	if(knownAbility(name)) {
 		var id = ABILITIES[name];
-		return name in UPGRADES ? g_Minigame.m_CurrentScene.bHaveAbility(id) : tickData.loot.indexOf(id) > -1;
+		var has = name in UPGRADES ? g_Minigame.m_CurrentScene.bHaveAbility(id) : tickData.loot.indexOf(id) > -1;
+		return has && g_Minigame.m_CurrentScene.GetCooldownForAbility(id) <= 0;
 	}
 	return false;
 }
@@ -907,10 +883,6 @@ function isAbilityActive(name, lane) {
 		return scene.bIsAbilityActive(id);
 	}
 	return false;
-}
-
-function isAbilityCoolingDown(name) {
-	return knownAbility(name) && g_Minigame.m_CurrentScene.GetCooldownForAbility(ABILITIES[name]) > 0;
 }
 
 function getAbilityButton(name) {
