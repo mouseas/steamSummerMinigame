@@ -150,6 +150,7 @@ function firstRun() {
     egg.className = "toggle_music_btn";
     egg.innerText = "Easter Egg";
     egg.onclick = SmackTV();
+    SmackTV(); // need to call it again to disable by default as it gets called once for some reason
     document.querySelector(".game_options").insertBefore(egg, document.querySelector(".leave_game_btn"));
 
 	// Add "players in game" label
