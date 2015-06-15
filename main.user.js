@@ -81,7 +81,7 @@ var UPGRADE_TYPES = {
 	"LUCKY_SHOT": 7,
 	"ABILITY": 8,
 	"LOOT": 9
-}
+};
 
 if (thingTimer){
 	window.clearInterval(thingTimer);
@@ -100,7 +100,7 @@ function firstRun() {
 		g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
 			emitter.emit = false;
 			return emitter;
-		}
+		};
 	}
 
 	// disable enemy flinching animation when they get hit
@@ -174,7 +174,7 @@ function purchaseBadgeItems() {
 
 	var buyItem = function(id) {
 		g_Minigame.CurrentScene().TrySpendBadgePoints(document.getElementById('purchase_abilityitem_' + id));
-	}
+	};
 
 	var badgePoints = g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
 
@@ -363,7 +363,7 @@ function purchaseUpgrades() {
 		} else {
 			g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + id).childElements()[0].childElements()[1]);
 		}
-	}
+	};
 	
 	var myGold = g_Minigame.CurrentScene().m_rgPlayerData.gold;
 	
@@ -499,7 +499,7 @@ function useMedicsIfRelevant() {
 		console.log('We have god mode, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.GOD_MODE);
 	}
-};
+}
 
 // Use Good Luck Charm if doable
 function useGoodLuckCharmIfRelevant() {
@@ -590,7 +590,6 @@ function useNapalmIfRelevant() {
 				}
 			}
 		}
-	}
 	}
 }
 
