@@ -264,6 +264,9 @@ function purchaseUpgrades() {
 	var bestElement = -1;
 	var highestElementLevel = 0;
 	
+	var critMultiplier = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_crit;
+	var critChance = g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage;
+	var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
 	
 	var upgrades = g_Minigame.CurrentScene().m_rgTuningData.upgrades.slice(0);
 	
@@ -292,9 +295,9 @@ function purchaseUpgrades() {
 				}
 				break;
 			case UPGRADE_TYPES.CLICK_DAMAGE:
-				if(avgClicksPerSecond * upgrade.multiplier / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+				if((critChance * critMultiplier + 1) * avgClicksPerSecond * upgrade.multiplier / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
 					bestUpgradeForDamage = i;
-					highestUpgradeValueForDamage = avgClicksPerSecond * upgrade.multiplier / upgradeCost;
+					highestUpgradeValueForDamage = (critChance * critMultiplier + 1) * avgClicksPerSecond * upgrade.multiplier / upgradeCost;
 				}
 				break;
 			case UPGRADE_TYPES.DPS:
@@ -313,12 +316,9 @@ function purchaseUpgrades() {
 				}
 				break;
 			case UPGRADE_TYPES.LUCKY_SHOT:
-				//var critMultiplier = ?
-				var critChance = g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage;
-				var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
-				if(upgrade.multiplier /* critMultiplier*/ * dpc * critChance * avgClicksPerSecond / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
-					/*bestUpgradeForDamage = i;
-					highestUpgradeValueForDamage = upgrade.multiplier / upgradeCost;*/
+				if(upgrade.multiplier * dpc * critChance * avgClicksPerSecond / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+					bestUpgradeForDamage = i;
+					highestUpgradeValueForDamage = upgrade.multiplier * dpc * critChance * avgClicksPerSecond / upgradeCost;
 				}
 				break;
 			default:
