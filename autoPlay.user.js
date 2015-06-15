@@ -2,7 +2,7 @@
 // @name [SteamDB] Monster Minigame Script
 // @namespace https://github.com/SteamDatabase/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.0.3
+// @version 4.2.2
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,8 +16,9 @@
 	"use strict";
 
 // OPTIONS
-var clickRate = 10;
+var clickRate = 20;
 var logLevel = 1; // 5 is the most verbose, 0 disables all log
+var minsLeft = 30; // Minutes left before daily reset
 
 var enableAutoClicker = getPreferenceBoolean("enableAutoClicker", true);
 
@@ -27,7 +28,7 @@ var removeFlinching = getPreferenceBoolean("removeFlinching", true);
 var removeCritText = getPreferenceBoolean("removeCritText", false);
 var removeAllText = getPreferenceBoolean("removeAllText", false);
 var enableFingering = getPreferenceBoolean("enableFingering", true);
-var enableRenderer = getPreferenceBoolean("enableRenderer", true);
+var disableRenderer = getPreferenceBoolean("disableRenderer", true);
 
 var enableElementLock = getPreferenceBoolean("enableElementLock", true);
 
@@ -35,6 +36,7 @@ var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info
 
 var autoRefreshMinutes = 30;
 var autoRefreshMinutesRandomDelay = 10;
+var autoRefreshSecondsCheckLoadedDelay = 30;
 
 // DO NOT MODIFY
 var isAlreadyRunning = false;
@@ -46,38 +48,71 @@ var trt_oldCrit = function() {};
 var trt_oldPush = function() {};
 var trt_oldRender = function() {};
 
-var ABILITIES = {
-	"MORALE_BOOSTER": 5,
-	"GOOD_LUCK": 6,
-	"MEDIC": 7,
-	"METAL_DETECTOR": 8,
-	"COOLDOWN": 9,
-	"NUKE": 10,
-	"CLUSTER_BOMB": 11,
-	"NAPALM": 12
+var UPGRADES = {
+	LIGHT_ARMOR: 0,
+	AUTO_FIRE_CANNON: 1,
+	ARMOR_PIERCING_ROUND: 2,
+	DAMAGE_TO_FIRE_MONSTERS: 3,
+	DAMAGE_TO_WATER_MONSTERS: 4,
+	DAMAGE_TO_AIR_MONSTERS: 5,
+	DAMAGE_TO_EARTH_MONSTERS: 6,
+	LUCKY_SHOT: 7,
+	HEAVY_ARMOR: 8,
+	ADVANCED_TARGETING: 9,
+	EXPLOSIVE_ROUNDS: 10,
+	MEDICS: 11,
+	MORALE_BOOSTER: 12,
+	GOOD_LUCK_CHARMS: 13,
+	METAL_DETECTOR: 14,
+	DECREASE_COOLDOWNS: 15,
+	TACTICAL_NUKE: 16,
+	CLUSTER_BOMB: 17,
+	NAPALM: 18,
+	BOSS_LOOT: 19,
+	ENERGY_SHIELDS: 20,
+	FARMING_EQUIPMENT: 21,
+	RAILGUN: 22,
+	PERSONAL_TRAINING: 23,
+	AFK_EQUIPMENT: 24,
+	NEW_MOUSE_BUTTON: 25
 };
 
-var ITEMS = {
-	"REVIVE": 13,
-	"CRIPPLE_SPAWNER": 14,
-	"CRIPPLE_MONSTER": 15,
-	"MAXIMIZE_ELEMENT": 16,
-	"GOLD_RAIN": 17,
-	"CRIT": 18,
-	"PUMPED_UP": 19,
-	"THROW_MONEY": 20,
-	"GOD_MODE": 21,
-	"TREASURE": 22,
-	"STEAL_HEALTH": 23,
-	"REFLECT_DAMAGE": 24
+var ABILITIES = {
+	FIRE_WEAPON: 1,
+	CHANGE_LANE: 2,
+	RESPAWN: 3,
+	CHANGE_TARGET: 4,
+	MORALE_BOOSTER: 5,
+	GOOD_LUCK_CHARMS: 6,
+	MEDICS: 7,
+	METAL_DETECTOR: 8,
+	DECREASE_COOLDOWNS: 9,
+	TACTICAL_NUKE: 10,
+	CLUSTER_BOMB: 11,
+	NAPALM: 12,
+	RESURRECTION: 13,
+	CRIPPLE_SPAWNER: 14,
+	CRIPPLE_MONSTER: 15,
+	MAX_ELEMENTAL_DAMAGE: 16,
+	RAINING_GOLD: 17,
+	CRIT: 18,
+	PUMPED_UP: 19,
+	THROW_MONEY_AT_SCREEN: 20,
+	GOD_MODE: 21,
+	TREASURE: 22,
+	STEAL_HEALTH: 23,
+	REFLECT_DAMAGE: 24,
+	FEELING_LUCKY: 25,
+	WORMHOLE: 26,
+	LIKE_NEW: 27
 };
 
 var ENEMY_TYPE = {
-	"SPAWNER":0,
-	"CREEP":1,
-	"BOSS":2,
-	"MINIBOSS":3,
-	"TREASURE":4
+	SPAWNER: 0,
+	CREEP: 1,
+	BOSS: 2,
+	MINIBOSS: 3,
+	TREASURE: 4
 };
 
 // Try to disable particles straight away,
@@ -93,7 +128,7 @@ function firstRun() {
 
 	trt_oldCrit = s().DoCritEffect;
 	trt_oldPush = s().m_rgClickNumbers.push;
-	trt_oldRender = w.g_Minigame.Renderer.render;
+	trt_oldRender = w.g_Minigame.Render;
 
 	if(enableFingering) {
 		startFingering();
@@ -106,10 +141,8 @@ function firstRun() {
 	if (enableAutoRefresh) {
 		autoRefreshPage(autoRefreshMinutes);
 	}
-	
-	if (enableRenderer) {
-		toggleRenderer();
-	}
+
+	toggleRenderer();
 
 	// disable particle effects - this drastically reduces the game's memory leak
 	disableParticles();
@@ -133,7 +166,6 @@ function firstRun() {
 
 	if( node ) {
 		node.style.textAlign = 'left';
-		node.style.marginLeft = '300px';
 	}
 
 	if( removeInterface ) {
@@ -168,7 +200,7 @@ function firstRun() {
 	activity.style.marginTop = "25px";
 
 	var info_box = document.querySelector(".leave_game_helper");
-	info_box.innerHTML = '<b>OPTIONS</b>' + ((typeof GM_info !==  "undefined") ? ' (v' + GM_info.script.version + ')' : '') + '<br>Some of these may need a refresh to take effect.<br>';
+	info_box.innerHTML = '<b>OPTIONS</b>' + ((typeof GM_info !==  "undefined") ? ' (v' + GM_info.script.version + ')' : '') + '<br>Settings marked with a <span style="color:#FF5252;font-size:22px;line-height:4px;vertical-align:bottom;">*</span> requires a refresh to take effect.<hr>';
 
 	// reset the CSS for the info box for aesthetics
 	info_box.className = "options_box";
@@ -187,11 +219,13 @@ function firstRun() {
 	options1.style.width = "50%";
 	options1.style.float = "left";
 
-	options1.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker));
-	options1.appendChild(makeCheckBox("removeInterface", "Remove interface (needs refresh)", removeInterface, handleEvent));
-	options1.appendChild(makeCheckBox("removeParticles", "Remove particle effects (needs refresh)", removeParticles, handleEvent));
-	options1.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects (needs refresh)", removeFlinching, handleEvent));
-	options1.appendChild(makeCheckBox("enableRenderer", "Enable game renderer", enableRenderer, toggleRenderer));
+	options1.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker, false));
+	options1.appendChild(makeCheckBox("removeInterface", "Remove interface", removeInterface, handleEvent, true));
+	options1.appendChild(makeCheckBox("removeParticles", "Remove particle effects", removeParticles, handleEvent, true));
+	options1.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects", removeFlinching, handleEvent, true));
+	options1.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText, false));
+	options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
+	options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, false));
 
 	info_box.appendChild(options1);
 
@@ -202,12 +236,11 @@ function firstRun() {
 	options1.style.width = "50%";
 
 	if (typeof GM_info !==  "undefined") {
-		options2.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (mitigate memory leak)", enableAutoRefresh, toggleAutoRefresh));
+		options2.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (mitigate memory leak)", enableAutoRefresh, toggleAutoRefresh, false));
 	}
 
-	options2.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer (needs refresh)", enableFingering, handleEvent));
-	options2.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText));
-	options2.appendChild(makeCheckBox("removeAllText", "Remove all text (overrides above)", removeAllText, toggleAllText));
+	options2.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer", enableFingering, handleEvent,true));
+	options2.appendChild(makeNumber("setMinsLeft", "Change the number of minutes before going crazy", "25px", minsLeft, 5, 59, updateEndGameCrazy));
 	options2.appendChild(makeNumber("setLogLevel", "Change the log level (you shouldn't need to touch this)", "25px", logLevel, 0, 5, updateLogLevel));
 
 	info_box.appendChild(options2);
@@ -216,19 +249,19 @@ function firstRun() {
 	var ab_box = document.getElementById("abilities");
 	var lock_elements_box = document.createElement("div");
 	lock_elements_box.className = "lock_elements_box";
-	lock_elements_box.style.backgroundColor = "#000000";
-	lock_elements_box.style.width = "160px";
-	lock_elements_box.style.top = "0px";
-	lock_elements_box.style.left = "4px";
-	lock_elements_box.style.padding = "2px";
+	lock_elements_box.style.width = "165px";
+	lock_elements_box.style.top = "-76px";
+	lock_elements_box.style.left = "303px";
+	lock_elements_box.style.boxSizing = "border-box";
+	lock_elements_box.style.lineHeight = "1rem";
+	lock_elements_box.style.padding = "7px 10px";
 	lock_elements_box.style.position = "absolute";
-	lock_elements_box.style.boxShadow = "2px 2px 0 rgba( 0, 0, 0, 0.6 )";
 	lock_elements_box.style.color = "#ededed";
 	lock_elements_box.title = "To maximise team damage players should max only one element. But distributions of elements through people should be equal. So we calculated your element using your unique ID. Upgrade your element to make maximum performance or disable this checkbox.";
-	var lock_elements_checkbox = makeCheckBox("enableElementLock", "Lock element upgrades for more team dps", enableElementLock, toggleElementLock);
+	var lock_elements_checkbox = makeCheckBox("enableElementLock", "Lock element upgrades for more team dps", enableElementLock, toggleElementLock, false);
 	lock_elements_box.appendChild(lock_elements_checkbox);
 	ab_box.appendChild(lock_elements_box);
-	
+
 	enhanceTooltips();
 }
 
@@ -245,8 +278,21 @@ function disableParticles() {
 	}
 }
 
+function isNearEndGame() {
+	var cTime = new Date();
+	var cHours = cTime.getUTCHours();
+	var cMins = cTime.getUTCMinutes();
+	var timeLeft = 60 - cMins;
+	if (cHours == 15 && timeLeft <= minsLeft) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 function MainLoop() {
-	var level = getGameLevel();
+	var level = s().m_rgGameData.level + 1;
 
 	if( level < 10 ) {
 		return;
@@ -255,10 +301,10 @@ function MainLoop() {
 	if (!isAlreadyRunning) {
 		isAlreadyRunning = true;
 
-		goToLaneWithBestTarget();
+		goToLaneWithBestTarget(level);
 
 		useGoodLuckCharmIfRelevant();
-		useMedicsIfRelevant();
+		useMedicsIfRelevant(level);
 		useMoraleBoosterIfRelevant();
 		useClusterBombIfRelevant();
 		useNapalmIfRelevant();
@@ -266,21 +312,25 @@ function MainLoop() {
 		useCrippleSpawnerIfRelevant();
 		useGoldRainIfRelevant();
 		useMetalDetectorIfRelevant();
-		useCrippleMonsterIfRelevant();
+		useCrippleMonsterIfRelevant(level);
+		useReviveIfRelevant(level);
+		useTreasureIfRelevant(level);
+		useMaxElementalDmgIfRelevant();
+		useWormholeIfRelevant();
 
-		disableCooldownIfRelevant();
+		useCooldownIfRelevant();
 
 		updatePlayersInGame();
 		attemptRespawn();
 
-		if( level !== lastLevel )
-		{
+		if( level !== lastLevel ) {
 			lastLevel = level;
 
 			refreshPlayerData();
 		}
 
 		s().m_nClicks += currentClickRate;
+		s().m_nLastTick = false;
 		w.g_msTickRate = 1000;
 
 		var damagePerClick = s().CalculateDamage(
@@ -289,6 +339,14 @@ function MainLoop() {
 		);
 
 		advLog("Ticked. Current clicks per second: " + currentClickRate + ". Current damage per second: " + (damagePerClick * currentClickRate), 4);
+
+		if(disableRenderer) {
+			s().Tick();
+			
+			requestAnimationFrame(function() {
+				w.g_Minigame.Renderer.render(s().m_Container);
+			});
+		}
 
 		isAlreadyRunning = false;
 
@@ -305,17 +363,17 @@ function MainLoop() {
 					"#aaf"
 				);
 
-				if( s().m_rgStoredCrits.length > 0 )
-				{
-					var rgDamage = s().m_rgStoredCrits.reduce(function(a,b){return a + b});
+				if( s().m_rgStoredCrits.length > 0 ) {
+					var rgDamage = s().m_rgStoredCrits.reduce(function(a,b) {
+						return a + b;
+					});
 					s().m_rgStoredCrits.length = 0;
 
 					s().DoCritEffect( rgDamage, enemy.m_Sprite.position.x - (enemy.m_nLane * 440), enemy.m_Sprite.position.y + 17, 'Crit!' );
 				}
 
 				var goldPerClickPercentage = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
-				if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0)
-				{
+				if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0) {
 					var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
 
 					s().ClientOverride('player_data', 'gold', s().m_rgPlayerData.gold + goldPerSecond);
@@ -338,23 +396,20 @@ function MainLoop() {
 	}
 }
 
-function refreshPlayerData()
-{
+function refreshPlayerData() {
 	advLog("Refreshing player data", 2);
 
 	w.g_Server.GetPlayerData(
 		function(rgResult) {
 			var instance = s();
 
-			if( rgResult.response.player_data )
-			{
+			if( rgResult.response.player_data ) {
 				instance.m_rgPlayerData = rgResult.response.player_data;
 				instance.ApplyClientOverrides('player_data');
 				instance.ApplyClientOverrides('ability');
 			}
 
-			if( rgResult.response.tech_tree )
-			{
+			if( rgResult.response.tech_tree ) {
 				instance.m_rgPlayerTechTree = rgResult.response.tech_tree;
 				if( rgResult.response.tech_tree.upgrades ) {
 					instance.m_rgPlayerUpgrades = w.V_ToArray( rgResult.response.tech_tree.upgrades );
@@ -365,9 +420,7 @@ function refreshPlayerData()
 
 			instance.OnReceiveUpdate();
 		},
-		function()
-		{
-		},
+		function() {},
 		true
 	);
 }
@@ -393,7 +446,14 @@ function makeNumber(name, desc, width, value, min, max, listener) {
 	return label;
 }
 
-function makeCheckBox(name, desc, state, listener) {
+function makeCheckBox(name, desc, state, listener, reqRefresh) {
+	var asterisk = document.createElement('span');
+	asterisk.appendChild(document.createTextNode("*"));
+	asterisk.style.color = "#FF5252";
+	asterisk.style.fontSize = "22px";
+	asterisk.style.lineHeight = "14px";
+	asterisk.style.verticalAlign = "bottom";
+
 	var label= document.createElement("label");
 	var description = document.createTextNode(desc);
 	var checkbox = document.createElement("input");
@@ -406,6 +466,9 @@ function makeCheckBox(name, desc, state, listener) {
 
 	label.appendChild(checkbox);
 	label.appendChild(description);
+	if(reqRefresh) {
+		label.appendChild(asterisk);
+	}
 	label.appendChild(document.createElement("br"));
 	return label;
 }
@@ -451,28 +514,59 @@ function toggleAutoRefresh(event) {
 }
 
 function toggleRenderer(event) {
-	var value = enableRenderer;
-	
+	var value = disableRenderer;
+
 	if (event !== undefined) {
-		value = handleCheckBox(event);
+		value = disableRenderer = handleCheckBox(event);
 	}
-	
-	if (value) {
-		w.g_Minigame.Renderer.render = trt_oldRender;
+
+	var ticker = w.PIXI.ticker.shared;
+
+	if (!value) {
+		ticker.autoStart = true;
+		ticker.start();
+
+		w.g_Minigame.Render = trt_oldRender;
+		w.g_Minigame.Render();
 	} else {
-		w.g_Minigame.Renderer.render = function() {}
+		ticker.autoStart = false;
+		ticker.stop();
+
+		w.g_Minigame.Render = function() {};
 	}
 }
 
 function autoRefreshPage(autoRefreshMinutes){
 	var timerValue = (autoRefreshMinutes + autoRefreshMinutesRandomDelay * Math.random()) * 60 * 1000;
-	refreshTimer = setTimeout(function(){w.location.reload(true);}, timerValue);
+	refreshTimer = setTimeout(function() {
+		autoRefreshHandler();
+	}, timerValue);
+}
+
+function autoRefreshHandler() {
+	var enemyData = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target).m_data;
+	if(typeof enemyData !== "undefined"){
+		var enemyType = enemyData.type;
+		if(enemyType != ENEMY_TYPE.BOSS) {
+			advLog('Refreshing, not boss', 5);
+			w.location.reload(true);
+		}else {
+			advLog('Not refreshing, A boss!', 5);
+			setTimeout(autoRefreshHandler, 3000);
+		}
+	}else{
+		//Wait until it is defined
+		setTimeout(autoRefreshHandler, 1000);
+	}
 }
 
 function toggleElementLock(event) {
 	var value = enableElementLock;
-	if(event !== undefined)
+
+	if(event !== undefined) {
 		value = handleCheckBox(event);
+	}
+
 	if(value) {
 		lockElements();
 	} else {
@@ -497,8 +591,11 @@ function toggleCritText(event) {
 
 function toggleAllText(event) {
 	var value = removeAllText;
-	if(event !== undefined)
+
+	if(event !== undefined) {
 		value = handleCheckBox(event);
+	}
+
 	if (value) {
 		// Replaces the entire text function.
 		s().m_rgClickNumbers.push = function(elem){
@@ -506,6 +603,12 @@ function toggleAllText(event) {
 		};
 	} else {
 		s().m_rgClickNumbers.push = trt_oldPush;
+	}
+}
+
+function updateEndGameCrazy(event) {
+	if(event !== undefined) {
+		minsLeft = event.target.value;
 	}
 }
 
@@ -552,11 +655,6 @@ function unlockElements() {
 	for (var i=0; i < elems.length; i++) {
 		elems[i].style.visibility = "visible";
 	}
-}
-
-function getGameLevel()
-{
-	return s().m_rgGameData.level + 1;
 }
 
 function lockElements() {
@@ -653,7 +751,7 @@ function updatePlayersInGame() {
 	document.getElementById("players_in_game").innerHTML = totalPlayers + "/1500";
 }
 
-function goToLaneWithBestTarget() {
+function goToLaneWithBestTarget(level) {
 	// We can overlook spawners if all spawners are 40% hp or higher and a creep is under 10% hp
 	var spawnerOKThreshold = 0.4;
 	var creepSnagThreshold = 0.1;
@@ -740,8 +838,8 @@ function goToLaneWithBestTarget() {
 						s().m_rgPlayerTechTree.dps,
 						element
 						);
-					if(mostHPDone <= dmg)
-					{
+
+					if(mostHPDone <= dmg) {
 						mostHPDone = dmg;
 					} else {
 						continue;
@@ -799,81 +897,112 @@ function goToLaneWithBestTarget() {
 			s().TryChangeTarget(lowTarget);
 		}
 
+		if(level >= 5000) {
+			// Only disable abilities on non-boss and as long as the game level is over 5000
+				// Nuke
+				enableAbility(ABILITIES.TACTICAL_NUKE);
+				// Clusterbomb
+				enableAbility(ABILITIES.CLUSTER_BOMB);
+				// Napalm
+				enableAbility(ABILITIES.NAPALM);
+		} else {
+			if(targetIsTreasureOrBoss) {
+				// Morale
+				disableAbility(ABILITIES.MORALE_BOOSTER);
+				// Luck
+				disableAbility(ABILITIES.GOOD_LUCK_CHARMS);
+				// Nuke
+				disableAbility(ABILITIES.TACTICAL_NUKE);
+				// Clusterbomb
+				disableAbility(ABILITIES.CLUSTER_BOMB);
+				// Napalm
+				disableAbility(ABILITIES.NAPALM);
+				// Crit
+				disableAbilityItem(ABILITIES.CRIT);
+				// Cripple Spawner
+				disableAbilityItem(ABILITIES.CRIPPLE_SPAWNER);
+				// Cripple Monster
+				disableAbilityItem(ABILITIES.CRIPPLE_MONSTER);
+				// Max Elemental Damage
+				disableAbilityItem(ABILITIES.MAX_ELEMENTAL_DAMAGE);
+				// Reflect Damage
+				disableAbilityItem(ABILITIES.REFLECT_DAMAGE);
+				// Throw Money at Screen
+				disableAbilityItem(ABILITIES.THROW_MONEY);
+			} else {
+				// Morale
+				enableAbility(ABILITIES.MORALE_BOOSTER);
+				// Luck
+				enableAbility(ABILITIES.GOOD_LUCK_CHARMS);
+				// Nuke
+				enableAbility(ABILITIES.TACTICAL_NUKE);
+				// Clusterbomb
+				enableAbility(ABILITIES.CLUSTER_BOMB);
+				// Napalm
+				enableAbility(ABILITIES.NAPALM);
+				// Crit
+				enableAbilityItem(ABILITIES.CRIT);
+				// Cripple Spawner
+				enableAbilityItem(ABILITIES.CRIPPLE_SPAWNER);
+				// Cripple Monster
+				enableAbilityItem(ABILITIES.CRIPPLE_MONSTER);
+				// Max Elemental Damage
+				enableAbilityItem(ABILITIES.MAX_ELEMENTAL_DAMAGE);
+				// Reflect Damage
+				enableAbilityItem(ABILITIES.REFLECT_DAMAGE);
+				// Throw Money at Screen
+				enableAbilityItem(ABILITIES.THROW_MONEY);
+			}
+
+
+		}
 
 		// Prevent attack abilities and items if up against a boss or treasure minion
-		if (targetIsTreasureOrBoss) {
-			// Morale
-			disableAbility(ABILITIES.MORALE_BOOSTER);
-			// Luck
-			disableAbility(ABILITIES.GOOD_LUCK);
-			// Nuke
-			disableAbility(ABILITIES.NUKE);
-			// Clusterbomb
-			disableAbility(ABILITIES.CLUSTER_BOMB);
-			// Napalm
-			disableAbility(ABILITIES.NAPALM);
-			// Crit
-			disableAbilityItem(ITEMS.CRIT);
-			// Cripple Spawner
-			disableAbilityItem(ITEMS.CRIPPLE_SPAWNER);
-			// Cripple Monster
-			disableAbilityItem(ITEMS.CRIPPLE_MONSTER);
-			// Max Elemental Damage
-			disableAbilityItem(ITEMS.MAXIMIZE_ELEMENT);
-			// Reflect Damage
-			disableAbilityItem(ITEMS.REFLECT_DAMAGE);
-			// Throw Money at Screen
-			disableAbilityItem(ITEMS.THROW_MONEY);
+		if (targetIsTreasureOrBoss && level < 5000) {
+
 		} else {
+
+
+
 			// Morale
 			enableAbility(ABILITIES.MORALE_BOOSTER);
 			// Luck
-			enableAbility(ABILITIES.GOOD_LUCK);
-			// Nuke
-			enableAbility(ABILITIES.NUKE);
-			// Clusterbomb
-			enableAbility(ABILITIES.CLUSTER_BOMB);
-			// Napalm
-			enableAbility(ABILITIES.NAPALM);
+			enableAbility(ABILITIES.GOOD_LUCK_CHARMS);
 			// Crit
-			enableAbilityItem(ITEMS.CRIT);
+			enableAbilityItem(ABILITIES.CRIT);
 			// Cripple Spawner
-			enableAbilityItem(ITEMS.CRIPPLE_SPAWNER);
+			enableAbilityItem(ABILITIES.CRIPPLE_SPAWNER);
 			// Cripple Monster
-			enableAbilityItem(ITEMS.CRIPPLE_MONSTER);
+			enableAbilityItem(ABILITIES.CRIPPLE_MONSTER);
 			// Max Elemental Damage
-			enableAbilityItem(ITEMS.MAXIMIZE_ELEMENT);
+			enableAbilityItem(ABILITIES.MAX_ELEMENTAL_DAMAGE);
 			// Reflect Damage
-			enableAbilityItem(ITEMS.REFLECT_DAMAGE);
+			enableAbilityItem(ABILITIES.REFLECT_DAMAGE);
 			// Throw Money at Screen
-			enableAbilityItem(ITEMS.THROW_MONEY);
+			enableAbilityItem(ABILITIES.THROW_MONEY);
 		}
 	}
 }
 
-function disableCooldownIfRelevant() {
-	if(getActiveAbilityNum(ABILITIES.COOLDOWN) > 0)
-	{
-		disableAbility(ABILITIES.COOLDOWN);
+function useCooldownIfRelevant() {
+	if(getActiveAbilityLaneCount(ABILITIES.DECREASE_COOLDOWNS) > 0) {
+		disableAbility(ABILITIES.DECREASE_COOLDOWNS);
 		return;
 	}
 
-	if(!isAbilityActive(ABILITIES.COOLDOWN))
-	{
-		enableAbility(ABILITIES.COOLDOWN);
+	if(!isAbilityActive(ABILITIES.DECREASE_COOLDOWNS)) {
+		enableAbility(ABILITIES.DECREASE_COOLDOWNS);
 	}
 
+	tryUsingAbility(ABILITIES.DECREASE_COOLDOWNS);
 }
 
-function useCrippleMonsterIfRelevant() {
-   // Check if Cripple Spawner is available
-   if(hasItem(ITEMS.CRIPPLE_MONSTER)) {
-	if (isAbilityCoolingDown(ITEMS.CRIPPLE_MONSTER)) {
+function useCrippleMonsterIfRelevant(level) {
+	// Check if Cripple Spawner is available
+	if(!canUseItem(ABILITIES.CRIPPLE_MONSTER)) {
 		return;
 	}
-   }
 
-   var level = getGameLevel();
 	// Use nukes on boss when level >3000 for faster kills
 	if (level > 1000 && level % 200 !== 0 && level % 10 === 0) {
 		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
@@ -881,239 +1010,272 @@ function useCrippleMonsterIfRelevant() {
 			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 			if (enemyBossHealthPercent>0.5){
 				advLog("Cripple Monster available and used on boss", 2);
-				triggerItem(ITEMS.CRIPPLE_MONSTER);
+				triggerItem(ABILITIES.CRIPPLE_MONSTER);
 			}
 		}
 	}
 }
 
-function useMedicsIfRelevant() {
-	if (hasItem(ITEMS.PUMPED_UP) && !isAbilityCoolingDown(ITEMS.PUMPED_UP)){
+function useMedicsIfRelevant(level) {
+	if (tryUsingItem(ABILITIES.PUMPED_UP)){
 		// Pumped Up is purchased, cooled down, and needed. Trigger it.
 		advLog('Pumped up is always good.', 2);
-		triggerItem(ITEMS.PUMPED_UP);
 		return;
 	}
 
 	// check if Medics is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
-
-		// Medics is purchased, cooled down, and needed. Trigger it.
-		advLog('Medics is purchased, cooled down, and needed. Trigger it.', 2);
-		triggerAbility(ABILITIES.MEDIC);
+	if (tryUsingAbility(ABILITIES.MEDICS)) {
+		advLog('Medics is purchased, cooled down. Trigger it.', 2);
 	}
 
-	// check if God Mode is purchased and cooled down
-	if (hasItem(ITEMS.GOD_MODE) && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
-
-		advLog('We have god mode, cooled down, and needed. Trigger it.', 2);
-		triggerItem(ITEMS.GOD_MODE);
+	if(level > 5000 && tryUsingItem(ABILITIES.REFLECT_DAMAGE)) {
+		advLog('We have reflect damage, cooled down. Trigger it.', 2);
+	}
+	else if(level > 2500 && tryUsingItem(ABILITIES.STEAL_HEALTH)) {
+		advLog('We have steal health, cooled down. Trigger it.', 2);
+	}
+	else if (tryUsingItem(ABILITIES.GOD_MODE)) {
+		advLog('We have god mode, cooled down. Trigger it.', 2);
 	}
 }
 
 // Use Good Luck Charm if doable
 function useGoodLuckCharmIfRelevant() {
-
 	// check if Crits is purchased and cooled down
-	if (hasItem(ITEMS.CRIT) && !isAbilityCoolingDown(ITEMS.CRIT)){
+	if (tryUsingItem(ABILITIES.CRIT)){
 		// Crits is purchased, cooled down, and needed. Trigger it.
 		advLog('Crit chance is always good.', 3);
-		triggerItem(ITEMS.CRIT);
 	}
 
 	// check if Good Luck Charms is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.GOOD_LUCK)) {
-		if (isAbilityCoolingDown(ABILITIES.GOOD_LUCK)) {
-			return;
-		}
-
-		if (! isAbilityEnabled(ABILITIES.GOOD_LUCK)) {
-			return;
-		}
-
-		// Good Luck Charms is purchased, cooled down, and needed. Trigger it.
+	if (tryUsingAbility(ABILITIES.GOOD_LUCK_CHARMS)) {
 		advLog('Good Luck Charms is purchased, cooled down, and needed. Trigger it.', 2);
-		triggerAbility(ABILITIES.GOOD_LUCK);
 	}
 }
 
 function useClusterBombIfRelevant() {
 	//Check if Cluster Bomb is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.CLUSTER_BOMB)) {
-		if (isAbilityCoolingDown(ABILITIES.CLUSTER_BOMB)) {
-			return;
-		}
+	if (!canUseAbility(ABILITIES.CLUSTER_BOMB)) {
+		return;
+	}
 
-		//Check lane has monsters to explode
-		var currentLane = s().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type === 0) {
-					enemySpawnerExists = true;
-				}
+	//Check lane has monsters to explode
+	var currentLane = s().m_nExpectedLane;
+	var enemyCount = 0;
+	var enemySpawnerExists = false;
+	//Count each slot in lane
+	for (var i = 0; i < 4; i++) {
+		var enemy = s().GetEnemy(currentLane, i);
+		if (enemy) {
+			enemyCount++;
+			if (enemy.m_data.type === 0) {
+				enemySpawnerExists = true;
 			}
 		}
-		//Bombs away if spawner and 2+ other monsters
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.CLUSTER_BOMB);
-		}
+	}
+	//Bombs away if spawner and 2+ other monsters
+	if (enemySpawnerExists && enemyCount >= 3) {
+		triggerAbility(ABILITIES.CLUSTER_BOMB);
 	}
 }
 
 function useNapalmIfRelevant() {
 	//Check if Napalm is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.NAPALM)) {
-		if (isAbilityCoolingDown(ABILITIES.NAPALM)) {
-			return;
-		}
+	if (!canUseAbility(ABILITIES.NAPALM)) {
+		return;
+	}
 
-		//Check lane has monsters to burn
-		var currentLane = s().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type === 0) {
-					enemySpawnerExists = true;
-				}
+	//Check lane has monsters to burn
+	var currentLane = s().m_nExpectedLane;
+	var enemyCount = 0;
+	var enemySpawnerExists = false;
+	//Count each slot in lane
+	for (var i = 0; i < 4; i++) {
+		var enemy = s().GetEnemy(currentLane, i);
+		if (enemy) {
+			enemyCount++;
+			if (enemy.m_data.type === 0) {
+				enemySpawnerExists = true;
 			}
 		}
-		//Burn them all if spawner and 2+ other monsters
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.NAPALM);
-		}
+	}
+	//Burn them all if spawner and 2+ other monsters
+	if (enemySpawnerExists && enemyCount >= 3) {
+		triggerAbility(ABILITIES.NAPALM);
 	}
 }
 
 // Use Moral Booster if doable
 function useMoraleBoosterIfRelevant() {
 	// check if Good Luck Charms is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.MORALE_BOOSTER)) {
-		if (isAbilityCoolingDown(ABILITIES.MORALE_BOOSTER)) {
-			return;
-		}
-		var numberOfWorthwhileEnemies = 0;
-		for(var i = 0; i < s().m_rgGameData.lanes[s().m_nExpectedLane].enemies.length; i++){
-			//Worthwhile enemy is when an enamy has a current hp value of at least 1,000,000
-			if(s().m_rgGameData.lanes[s().m_nExpectedLane].enemies[i].hp > 1000000) {
-				numberOfWorthwhileEnemies++;
-			}
-		}
-		if(numberOfWorthwhileEnemies >= 2){
-			// Moral Booster is purchased, cooled down, and needed. Trigger it.
-			advLog('Moral Booster is purchased, cooled down, and needed. Trigger it.', 2);
-			triggerAbility(ABILITIES.MORALE_BOOSTER);
+	if (!canUseAbility(ABILITIES.MORALE_BOOSTER)) {
+		return;
+	}
+
+	var numberOfWorthwhileEnemies = 0;
+	for(var i = 0; i < s().m_rgGameData.lanes[s().m_nExpectedLane].enemies.length; i++) {
+		//Worthwhile enemy is when an enamy has a current hp value of at least 1,000,000
+		if(s().m_rgGameData.lanes[s().m_nExpectedLane].enemies[i].hp > 1000000) {
+			numberOfWorthwhileEnemies++;
 		}
 	}
+
+	if(numberOfWorthwhileEnemies >= 2) {
+		// Moral Booster is purchased, cooled down, and needed. Trigger it.
+		advLog('Moral Booster is purchased, cooled down, and needed. Trigger it.', 2);
+		triggerAbility(ABILITIES.MORALE_BOOSTER);
+	}
 }
+
 function useTacticalNukeIfRelevant() {
 	// Check if Tactical Nuke is purchased
-	if(hasPurchasedAbility(ABILITIES.NUKE)) {
-		if (isAbilityCoolingDown(ABILITIES.NUKE)) {
-			return;
-		}
+	if(!canUseAbility(ABILITIES.TACTICAL_NUKE)) {
+		return;
+	}
 
 		//Check that the lane has a spawner and record it's health percentage
-		var currentLane = s().m_nExpectedLane;
-		var enemySpawnerExists = false;
-		var enemySpawnerHealthPercent = 0.0;
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				if (enemy.m_data.type === 0) {
-					enemySpawnerExists = true;
-					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-				}
+	var currentLane = s().m_nExpectedLane;
+	var enemySpawnerExists = false;
+	var enemySpawnerHealthPercent = 0.0;
+	//Count each slot in lane
+	for (var i = 0; i < 4; i++) {
+		var enemy = s().GetEnemy(currentLane, i);
+		if (enemy) {
+			if (enemy.m_data.type === 0) {
+				enemySpawnerExists = true;
+				enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 			}
 		}
+	}
 
-		// If there is a spawner and it's health is between 60% and 30%, nuke it!
-		if (enemySpawnerExists && enemySpawnerHealthPercent < 0.6 && enemySpawnerHealthPercent > 0.3) {
-			advLog("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.", 2);
-			triggerAbility(ABILITIES.NUKE);
-		}
+	// If there is a spawner and it's health is between 60% and 30%, nuke it!
+	if (enemySpawnerExists && enemySpawnerHealthPercent < 0.6 && enemySpawnerHealthPercent > 0.3) {
+		advLog("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.", 2);
+		triggerAbility(ABILITIES.TACTICAL_NUKE);
 	}
 }
 
 function useCrippleSpawnerIfRelevant() {
 	// Check if Cripple Spawner is available
-	if(hasItem(ITEMS.CRIPPLE_SPAWNER)) {
-		if (isAbilityCoolingDown(ITEMS.CRIPPLE_SPAWNER)) {
-			return;
-		}
+	if(!canUseItem(ABILITIES.CRIPPLE_SPAWNER)) {
+		return;
+	}
 
-		//Check that the lane has a spawner and record it's health percentage
-		var currentLane = s().m_nExpectedLane;
-		var enemySpawnerExists = false;
-		var enemySpawnerHealthPercent = 0.0;
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				if (enemy.m_data.type === 0) {
-					enemySpawnerExists = true;
-					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-				}
+	//Check that the lane has a spawner and record it's health percentage
+	var currentLane = s().m_nExpectedLane;
+	var enemySpawnerExists = false;
+	var enemySpawnerHealthPercent = 0.0;
+	//Count each slot in lane
+	for (var i = 0; i < 4; i++) {
+		var enemy = s().GetEnemy(currentLane, i);
+		if (enemy) {
+			if (enemy.m_data.type === 0) {
+				enemySpawnerExists = true;
+				enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 			}
 		}
+	}
 
-		// If there is a spawner and it's health is above 95%, cripple it!
-		if (enemySpawnerExists && enemySpawnerHealthPercent > 0.95) {
-			advLog("Cripple Spawner available, and needed. Cripple 'em.", 2);
-			triggerItem(ITEMS.CRIPPLE_SPAWNER);
-		}
+	// If there is a spawner and it's health is above 95%, cripple it!
+	if (enemySpawnerExists && enemySpawnerHealthPercent > 0.95) {
+		advLog("Cripple Spawner available, and needed. Cripple 'em.", 2);
+		triggerItem(ABILITIES.CRIPPLE_SPAWNER);
 	}
 }
 
 function useGoldRainIfRelevant() {
 	// Check if gold rain is purchased
-	if (hasItem(ITEMS.GOLD_RAIN)) {
-		if (isAbilityCoolingDown(ITEMS.GOLD_RAIN)) {
-			return;
-		}
+	if (!canUseItem(ABILITIES.RAINING_GOLD)) {
+		return;
+	}
 
-		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-		// check if current target is a boss, otherwise its not worth using the gold rain
-		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+	var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
+	// check if current target is a boss, otherwise its not worth using the gold rain
+	if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+		var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 
-			if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
-				// Gold Rain is purchased, cooled down, and needed. Trigger it.
-				advLog('Gold rain is purchased and cooled down, Triggering it on boss', 2);
-				triggerItem(ITEMS.GOLD_RAIN);
-			}
+		if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
+			// Gold Rain is purchased, cooled down, and needed. Trigger it.
+			advLog('Gold rain is purchased and cooled down, Triggering it on boss', 2);
+			triggerItem(ABILITIES.RAINING_GOLD);
 		}
 	}
 }
 
 function useMetalDetectorIfRelevant() {
 	// Check if metal detector is purchased
-	if (hasPurchasedAbility(ABILITIES.METAL_DETECTOR)) {
-		if (isAbilityCoolingDown(ABILITIES.METAL_DETECTOR) || isAbilityActive(ABILITIES.METAL_DETECTOR)) {
-			return;
+	if(!canUseAbility(ABILITIES.METAL_DETECTOR)) {
+		return;
+	}
+
+	var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
+	// check if current target is a boss, otherwise we won't use metal detector
+	if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+		var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+
+		// we want to use metal detector at 25% hp, or even less
+		if (enemyBossHealthPercent <= 0.25) { // We want sufficient time for the metal detector to be applicable
+			// Metal Detector is purchased, cooled down, and needed. Trigger it.
+			advLog('Metal Detector is purchased and cooled down, Triggering it on boss', 2);
+			triggerAbility(ABILITIES.METAL_DETECTOR);
 		}
+	}
+}
 
-		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
+function useTreasureIfRelevant(level) {
+	// Check if Treasure is purchased
+	if (!canUseItem(ABILITIES.TREASURE)) {
+		return;
+	}
+
+	// check if current level is higher than 50
+	if (level > 50) {
+		var enemy = s().GetTargetedEnemy();
 		// check if current target is a boss, otherwise we won't use metal detector
-		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+		if (enemy && enemy.type == ENEMY_TYPE.BOSS) {
+			var enemyBossHealthPercent = enemy.hp / enemy.max_hp;
 
-			// we want to use metal detector at 25% hp, or even less
+			// we want to use Treasure at 25% hp, or even less
 			if (enemyBossHealthPercent <= 0.25) { // We want sufficient time for the metal detector to be applicable
-				// Metal Detector is purchased, cooled down, and needed. Trigger it.
-				advLog('Metal Detector is purchased and cooled down, Triggering it on boss', 2);
-				triggerAbility(ABILITIES.METAL_DETECTOR);
+				// Treasure is purchased, cooled down, and needed. Trigger it.
+				advLog('Treasure is purchased and cooled down, triggering it.', 2);
+				triggerItem(ABILITIES.TREASURE);
 			}
 		}
+	}
+	else {
+		// Treasure is purchased, cooled down, and needed. Trigger it.
+		advLog('Treasure is purchased and cooled down, triggering it.', 2);
+		triggerItem(ABILITIES.TREASURE);
+	}
+}
+
+function useMaxElementalDmgIfRelevant() {
+	// Check if Max Elemental Damage is purchased
+	if (tryUsingItem(ABILITIES.MAX_ELEMENTAL_DAMAGE, true)) {
+		// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
+		advLog('Max Elemental Damage is purchased and cooled down, triggering it.', 2);
+	}
+}
+
+function useWormholeIfRelevant() {
+	// Check the time before using wormhole.
+	if (!isNearEndGame()) {
+		return;
+	}
+	// Check if Wormhole is purchased
+	if (tryUsingItem(ABILITIES.WORMHOLE, true)) {
+		advLog('Less than ' + minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
+	}
+	else if (tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
+		advLog('Less than ' + minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
+	}
+}
+
+function useReviveIfRelevant(level) {
+	if(level % 10 === 9 && tryUsingItem(ABILITIES.RESURRECTION)) {
+		// Resurrect is purchased and we are using it.
+		advLog('Triggered Resurrect.');
 	}
 }
 
@@ -1139,6 +1301,34 @@ function hasItem(itemId) {
 
 function isAbilityCoolingDown(abilityId) {
 	return s().GetCooldownForAbility(abilityId) > 0;
+}
+
+function canUseAbility(abilityId) {
+	return hasPurchasedAbility(abilityId) && !isAbilityCoolingDown(abilityId) && isAbilityEnabled(abilityId);
+}
+
+function canUseItem(itemId) {
+	return hasItem(itemId) && !isAbilityCoolingDown(itemId) && isAbilityItemEnabled(itemId);
+}
+
+function tryUsingAbility(abilityId) {
+	if(!canUseAbility(abilityId)) {
+		return false;
+	}
+
+	triggerAbility(abilityId);
+	return true;
+}
+
+function tryUsingItem(itemId, checkInLane) {
+	if (!canUseItem(itemId)) {
+		return false;
+	}
+	if (checkInLane && getActiveAbilityLaneCount(itemId) > 0) {
+		return false;
+	}
+	triggerItem(itemId);
+	return true;
 }
 
 function hasPurchasedAbility(abilityId) {
@@ -1180,7 +1370,15 @@ function enableAbility(abilityId) {
 function isAbilityEnabled(abilityId) {
 	var elem = document.getElementById('ability_' + abilityId);
 	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		return elem.childElements()[0].style.visibility == "visible";
+		return elem.childElements()[0].style.visibility !== "hidden";
+	}
+	return false;
+}
+
+function isAbilityItemEnabled(abilityId) {
+	var elem = document.getElementById('abilityitem_' + abilityId);
+	if (elem && elem.childElements() && elem.childElements().length >= 1) {
+		return elem.childElements()[0].style.visibility !== "hidden";
 	}
 	return false;
 }
@@ -1200,17 +1398,11 @@ function enableAbilityItem(abilityId) {
 	toggleAbilityItemVisibility(abilityId, true);
 }
 
-function getActiveAbilityNum(ability) {
+function getActiveAbilityLaneCount(ability) {
 	var abilities = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_abilities;
 	var count = 0;
-	for(var i = 0; i < abilities.length; i++)
-	{
-		if(abilities[i].ability != ability)
-		{
-			continue;
-		}
-		if(abilities[i].timestamp_done < Date.now())
-		{
+	for(var i = 0; i < abilities.length; i++) {
+		if(abilities[i].ability != ability || abilities[i].timestamp_done < Date.now()) {
 			continue;
 		}
 		count++;
@@ -1264,6 +1456,16 @@ w.SteamDB_Minigame_Timer = w.setInterval(function(){
 	}
 }, 1000);
 
+// reload page if game isn't fully loaded, regardless of autoRefresh setting
+w.setTimeout(function() {
+	// m_rgGameData is 'undefined' if stuck at 97/97 or below
+	if (!w.g_Minigame
+	||  !w.g_Minigame.m_CurrentScene
+	||  !w.g_Minigame.m_CurrentScene.m_rgGameData) {
+		w.location.reload(true);
+	}
+}, autoRefreshSecondsCheckLoadedDelay * 1000);
+
 // Append gameid to breadcrumbs
 var breadcrumbs = document.querySelector('.breadcrumbs');
 
@@ -1303,8 +1505,7 @@ function getClickDamage(){
 function startFingering() {
 	w.CSceneGame.prototype.ClearNewPlayer = function(){};
 
-	if(!s().m_spriteFinger)
-	{
+	if(!s().m_spriteFinger) {
 		w.WebStorage.SetLocal('mg_how2click', 0);
 		s().CheckNewPlayer();
 		w.WebStorage.SetLocal('mg_how2click', 1);
@@ -1321,12 +1522,11 @@ function enhanceTooltips() {
 	var trt_oldTooltip = w.fnTooltipUpgradeDesc;
 
 	w.fnTooltipUpgradeDesc = function(context){
-		var $context = $J(context);
+		var $context = w.$J(context);
 		var desc = $context.data('desc');
 		var strOut = desc;
 		var multiplier = parseFloat( $context.data('multiplier') );
-		switch( $context.data('upgrade_type') )
-		{
+		switch( $context.data('upgrade_type') ) {
 			case 2: // Type for click damage. All tiers.
 				strOut = trt_oldTooltip(context);
 				var currentCrit = getClickDamage() * getCritMultiplier();
@@ -1369,7 +1569,7 @@ function enhanceTooltips() {
 	w.fnTooltipUpgradeElementDesc = function (context) {
 		var strOut = trt_oldElemTooltip(context);
 
-		var $context = $J(context);
+		var $context = w.$J(context);
 		//var upgrades = s().m_rgTuningData.upgrades.slice(0);
 		// Element Upgrade index 3 to 6
 		var idx = $context.data('type');
