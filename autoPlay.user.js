@@ -520,14 +520,14 @@ function lockElements() {
 
     var hashCode = function(str) {
         var t = 0,
-            i, char;
+            i, ch;
         if (0 === str.length) {
             return t;
         }
 
         for (i = 0; i < str.length; i++) {
-            char = str.charCodeAt(i);
-            t = (t << 5) - t + char;
+            ch = str.charCodeAt(i);
+            t = (t << 5) - t + ch;
             t &= t;
         }
 
