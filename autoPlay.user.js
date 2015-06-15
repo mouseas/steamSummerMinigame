@@ -754,9 +754,9 @@ function goToLaneWithBestTarget() {
         // Prevent attack abilities and items if up against a boss or treasure minion
         var level = getGameLevel();
         if (targetIsTreasure || (targetIsBoss && (level < speedThreshold || level % rainingRounds == 0))) {
-            BOSS_DISABLED_ABILITIES.each(disableAbility);
+            BOSS_DISABLED_ABILITIES.forEach(disableAbility);
         } else {
-            BOSS_DISABLED_ABILITIES.each(enableAbility);
+            BOSS_DISABLED_ABILITIES.forEach(enableAbility);
         }
     }
 }
@@ -1031,8 +1031,8 @@ function readTickData() {
     var loot = [];
     var scene = s();
     if(scene.m_rgPlayerTechTree && scene.m_rgPlayerTechTree.ability_items) {
-        scene.m_rgPlayerTechTree.ability_items.each(function(k, v) {
-            loot.push(k.ability);
+        scene.m_rgPlayerTechTree.ability_items.forEach(function(l) {
+            loot.push(l.ability);
         });
     }
     tickData = {
