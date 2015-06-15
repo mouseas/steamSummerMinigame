@@ -288,7 +288,7 @@ function firstRun() {
 
 	options_box.appendChild(options1);
 
-	info_box.innerHTML = "<b>LANE INFO</b><br/>";
+	info_box.innerHTML = "<b>GAME INFO</b><br/>";
 	info_box.className = "info_box";
 	info_box.style["right"] = "0px";
 	lane_info = document.createElement("div");
