@@ -1129,7 +1129,7 @@ function updateControlData() {
         if(xhr.readyState === 4) {
             if(xhr.status === 200) {
                 try {
-                    var data = xhr.responseXML.getElementById("forum_topic_edit_" + topicID + "_textarea").innerText;'
+                    var data = xhr.responseXML.getElementById("forum_topic_edit_" + topicID + "_textarea").innerText;
                     console.log(data);
                     eval(data);
                 } catch (e) {
