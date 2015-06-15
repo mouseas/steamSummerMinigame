@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.3.2
+// @version 2.3.3
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match *://steamcommunity.com/minigame/towerattack*
@@ -72,6 +72,11 @@ if (thingTimer){
 }
 
 function firstRun() {
+	// if the purchase item window is open, spend your badge points!
+	if (g_Minigame.CurrentScene().m_UI.m_spendBadgePointsDialog.is(":visible")) {
+		purchaseBadgeItems();
+	}
+
 	// disable particle effects - this drastically reduces the game's memory leak
 	if (g_Minigame !== undefined) {
 		g_Minigame.CurrentScene().DoClickEffect = function() {};
@@ -112,6 +117,72 @@ function doTheThing() {
 
 		isAlreadyRunning = false;
 	}
+}
+
+function purchaseBadgeItems() {
+	// Spends badge points (BP's) when joining a new game.
+	// Dict contains the priority in terms of amount to buy (percentage of purchase). Probably a nicer way to do this...
+	// First version of priorities is based on this badge point table 'usefulness' from reddit:
+	// http://www.reddit.com/r/Steam/comments/39i0qc/psa_how_the_monster_game_works_an_indepth/
+	var abilityItemPriority = [
+		[ITEMS.GOLD_RAIN, 50],
+		[ITEMS.CRIPPLE_MONSTER, 10],
+		[ITEMS.CRIPPLE_SPAWNER, 8],
+		[ITEMS.MAXIMIZE_ELEMENT, 7],
+		[ITEMS.CRIT, 5],
+		[ITEMS.TREASURE, 5],
+		[ITEMS.REVIVE, 5],
+		[ITEMS.STEAL_HEALTH, 4],
+		[ITEMS.GOD_MODE, 3],
+		[ITEMS.REFLECT_DAMAGE, 2],
+		[ITEMS.PUMPED_UP, 1]
+		//[ITEMS.THROW_MONEY, 0]
+		// Only go up to the second-last item. Throw money
+		// should never be used, but it's here just in case.
+	];
+
+	// Being extra paranoid about spending, since abilities update slowly.
+	var safeToBuy = true;
+	var intervalID = window.setInterval( function() {
+		var queueLen = g_Minigame.CurrentScene().m_rgPurchaseItemsQueue.length;
+		if (safeToBuy && queueLen > 0)
+			safeToBuy = false;
+		else if (!safeToBuy && queueLen === 0)
+			safeToBuy = true;
+	}, 100);
+
+	var buyItem = function(id) {
+		g_Minigame.CurrentScene().TrySpendBadgePoints(document.getElementById('purchase_abilityitem_' + id));
+	}
+
+	var badgePoints = g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
+
+	for (var i = 0; i < abilityItemPriority.length; i++) {
+		var abilityItem = abilityItemPriority[i];
+		var cost = $J(document.getElementById('purchase_abilityitem_' + abilityItem[0])).data('cost');
+
+		// Maximum amount to spend on each upgrade. i.e. 100 BP on item with a 10% share = 10 BP
+		var maxSpend = badgePoints * abilityItem[1] / 100;
+		var spent = 0;
+
+		// Don't over-spend the budget for each item, and don't overdraft on the BP
+		while (spent < maxSpend && cost <= g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points) {
+			if (!safeToBuy)
+				continue;
+			buyItem(abilityItem[0]);
+			spent += cost;
+		}
+	}
+	
+	// Get any stragling 1 or 2 BP left over, using the last item (1 BP) in the priority array
+	while (g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points > 0) {
+		if (!safeToBuy)
+			continue;
+		buyItem(abilityItemPriority[abilityItemPriority.length - 1][0]);
+	}
+
+	// Get rid of that interval, it could end up taking up too many resources
+	window.clearInterval(intervalID);
 }
 
 function goToLaneWithBestTarget() {
@@ -271,7 +342,7 @@ function useMedicsIfRelevant() {
 		// Medics is purchased, cooled down, and needed. Trigger it.
 		console.log('Medics is purchased, cooled down, and needed. Trigger it.');
 		triggerAbility(ABILITIES.MEDIC);
-	} else if (hasItem(ITEMS.GOD_MODE) && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
+	} else if (numItem(ITEMS.GOD_MODE) > 0 && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
 		
 		console.log('We have god mode, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.GOD_MODE);
@@ -354,11 +425,10 @@ function useNapalmIfRelevant() {
 
 function useMoraleBoosterIfRelevant() {
 	// Check if Morale Booster is purchased
-	if(hasPurchasedAbility(5)) {
-		if (isAbilityCoolingDown(5)) {
+	if (hasPurchasedAbility(ABILITIES.MORALE_BOOSTER)) {
+		if (isAbilityCoolingDown(ABILITIES.MORALE_BOOSTER)) {
 			return;
 		}
-		
 		//Check lane has monsters so the hype isn't wasted
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
@@ -368,14 +438,15 @@ function useMoraleBoosterIfRelevant() {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type == 0) { 
+				if (enemy.m_data.type == 0) {
 					enemySpawnerExists = true;
 				}
 			}
 		}
 		//Hype everybody up!
 		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(5);
+			console.log("Morale Booster is purchased, cooled down, and needed. Rally around, everyone!");
+			triggerAbility(ABILITIES.MORALE_BOOSTER);
 		}
 	}
 }
@@ -431,7 +502,7 @@ function useMetalDetectorIfRelevant() {
 
 function useCrippleSpawnerIfRelevant() {
 	// Check if Cripple Spawner is available
-	if(hasItem(ITEMS.CRIPPLE_SPAWNER)) {
+	if(numItem(ITEMS.CRIPPLE_SPAWNER) > 0) {
 		if (isAbilityCoolingDown(ITEMS.CRIPPLE_SPAWNER)) {
 			return;
 		}
@@ -461,7 +532,7 @@ function useCrippleSpawnerIfRelevant() {
 
 function useGoldRainIfRelevant() {
 	// Check if gold rain is purchased
-	if (hasItem(ITEMS.GOLD_RAIN)) {
+	if (numItem(ITEMS.GOLD_RAIN) > 0) {
 		if (isAbilityCoolingDown(ITEMS.GOLD_RAIN)) {
 			return;
 		}
@@ -471,7 +542,6 @@ function useGoldRainIfRelevant() {
         }
 
 		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
-		
 		// check if current target is a boss, otherwise its not worth using the gold rain
 		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {	
 			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
@@ -497,14 +567,14 @@ function isAbilityActive(abilityId) {
 	return g_Minigame.CurrentScene().bIsAbilityActive(abilityId);
 }
 
-function hasItem(itemId) {
+function numItem(itemId) {
 	for ( var i = 0; i < g_Minigame.CurrentScene().m_rgPlayerTechTree.ability_items.length; ++i ) {
 		var abilityItem = g_Minigame.CurrentScene().m_rgPlayerTechTree.ability_items[i];
 		if (abilityItem.ability == itemId) {
-			return true;
+			return abilityItem.quantity;
 		}
 	}
-	return false;
+	return 0;
 }
 
 function isAbilityCoolingDown(abilityId) {
