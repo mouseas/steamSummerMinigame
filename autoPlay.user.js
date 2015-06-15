@@ -48,8 +48,8 @@ var trt_oldCrit = function() {};
 var trt_oldPush = function() {};
 var trt_oldRender = function() {};
 
-var speedThreshold = 10000;
-var rainingRounds = 2000;
+var speedThreshold = 5000;
+var rainingRounds = 250;
 
 var topicID = "598198356173574660";
 var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/" + topicID;
