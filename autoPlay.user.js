@@ -48,8 +48,10 @@ var trt_oldCrit = function() {};
 var trt_oldPush = function() {};
 var trt_oldRender = function() {};
 
-var speedThreshold = 5000;
-var rainingRounds = 250;
+var control = {
+    speedThreshold: 5000,
+    rainingRounds: 250
+};
 
 var topicID = "598198356173574660";
 var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/" + topicID;
@@ -292,7 +294,7 @@ function MainLoop() {
         useTacticalNukeIfRelevant();
         useCrippleMonsterIfRelevant();
         useCrippleSpawnerIfRelevant();
-        if (level < speedThreshold || level % rainingRounds == 0) {
+        if (level < control.speedThreshold || level % control.rainingRounds == 0) {
             useGoldRainIfRelevant();
         }
         useMetalDetectorIfRelevant();
@@ -753,7 +755,7 @@ function goToLaneWithBestTarget() {
 
         // Prevent attack abilities and items if up against a boss or treasure minion
         var level = getGameLevel();
-        if (targetIsTreasure || (targetIsBoss && (level < speedThreshold || level % rainingRounds == 0))) {
+        if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds == 0))) {
             BOSS_DISABLED_ABILITIES.forEach(disableAbility);
         } else {
             BOSS_DISABLED_ABILITIES.forEach(enableAbility);
@@ -841,7 +843,7 @@ function useClusterBombIfRelevant() {
             var enemy = s().GetEnemy(currentLane, i);
             if (enemy) {
                 enemyCount++;
-                if (enemy.m_data.type === 0 || (level > speedThreshold && level % rainingRounds != 0 && level % 10 == 0)) {
+                if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0)) {
                     enemySpawnerExists = true;
                 }
             }
@@ -867,7 +869,7 @@ function useNapalmIfRelevant() {
             var enemy = s().GetEnemy(currentLane, i);
             if (enemy) {
                 enemyCount++;
-                if (enemy.m_data.type === 0 || (level > speedThreshold && level % rainingRounds != 0 && level % 10 == 0)) {
+                if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0)) {
                     enemySpawnerExists = true;
                 }
             }
@@ -911,7 +913,7 @@ function useTacticalNukeIfRelevant() {
         for (var i = 0; i < 4; i++) {
             var enemy = s().GetEnemy(currentLane, i);
             if (enemy) {
-                if (enemy.m_data.type === 0 || (level > speedThreshold && level % rainingRounds != 0 && level % 10 == 0)) {
+                if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0)) {
                     enemySpawnerExists = true;
                     enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
                 }
@@ -932,7 +934,7 @@ function useCrippleMonsterIfRelevant() {
 
         var level = getGameLevel();
         // Use nukes on boss when level >3000 for faster kills
-        if (level > speedThreshold && level % rainingRounds != 0 && level % 10 == 0) {
+        if (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0) {
             var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
             if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
                 var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
@@ -1167,9 +1169,11 @@ function updateControlData() {
                         console.error(xhr.responseXML);
                         return;
                     }
-                    var data = post.innerText;
+                    var data = JSON.parse(post.innerText);
                     console.log(data);
-                    eval(data);
+                    $J.each(data, function(k, v) {
+                        control[k] = v;
+                    });
                 } catch (e) {
                     console.error(e);
                 }
