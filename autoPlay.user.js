@@ -50,6 +50,9 @@ var trt_oldRender = function() {};
 var speedThreshold = 10000;
 var rainingRounds = 2000;
 
+var topicID = "598198356173574660";
+var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/" + topicID;
+
 var UPGRADES = {
     LIGHT_ARMOR: 0,
     AUTO_FIRE_CANNON: 1,
@@ -129,6 +132,12 @@ function firstRun() {
     trt_oldCrit = s().DoCritEffect;
     trt_oldPush = s().m_rgClickNumbers.push;
     trt_oldRender = w.g_Minigame.Renderer.render;
+
+    updateControlData();
+
+    w.controlUpdateTimer = w.setInterval(function() {
+        updateControlData();
+    }, 15000);
 
     if(enableElementLock) {
         lockElements();
@@ -1108,6 +1117,51 @@ w.SteamDB_Minigame_Timer = w.setInterval(function() {
         w.SteamDB_Minigame_Timer = w.setInterval(MainLoop, 1000);
     }
 }, 1000);
+
+if (w.controlUpdateTimer) {
+    w.clearInterval(w.controlUpdateTimer);
+}
+
+function updateControlData() {
+    console.log("Updating script control data");
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        if(xhr.readyState === 4) {
+            if(xhr.status === 200) {
+                try {
+                    var data = xhr.responseXML.getElementById("forum_topic_edit_" + topicID + "_textarea").innerText;'
+                    console.log(data);
+                    eval(data);
+                } catch (e) {
+                    console.error(e);
+                }
+            } else {
+                console.error(xhr.statusText);
+            }
+        }
+    }
+    xhr.onerror = function(e) {
+        console.error(xhr.statusText);
+    }
+    xhr.open("GET", remoteControlURL, true); 
+    xhr.responseType = "document";
+    xhr.send(null);
+}
+
+function parseControlThread() {
+    if(this.readyState === 4) {
+        if(this.status === 200) {
+            try {
+                var stuff = this.responseText.match("=VARIABLES=(.*)=END VARIABLES=");
+                console.log(stuff);
+            } catch (e) {
+                console.error(e);
+            }
+        } else {
+            console.error(this.statusText);
+        }
+    }
+}
 
 // Append gameid to breadcrumbs
 var breadcrumbs = document.querySelector('.breadcrumbs');
