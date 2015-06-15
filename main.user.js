@@ -375,7 +375,7 @@ function purchaseUpgrades() {
 	var highestElementLevel = 0;
 	
 	var critMultiplier = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_crit;
-	var critRate = Math.min(g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage - g_Minigame.CurrentScene().m_rgTuningData.player.crit_percentage, 1);
+	var critRate = Math.min(g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage, 1);
 	var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
 	var basedpc = g_Minigame.CurrentScene().m_rgTuningData.player.damage_per_click;
 	
