@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.3.5
+// @version 2.3.6
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match *://steamcommunity.com/minigame/towerattack*
@@ -58,7 +58,10 @@ var ITEMS = {
     "GOD_MODE": 21,
     "TREASURE": 22,
     "STEAL_HEALTH": 23,
-    "REFLECT_DAMAGE": 24
+    "REFLECT_DAMAGE": 24,
+	"FEELING_LUCKY": 25,
+	"WORMHOLE": 26,
+	"LIKE_NEW": 27
 };
 
 var ENEMY_TYPE = {
@@ -159,8 +162,12 @@ function purchaseBadgeItems() {
 		[ITEMS.REFLECT_DAMAGE, 2],
 		[ITEMS.PUMPED_UP, 1]
 		//[ITEMS.THROW_MONEY, 0]
-		// Only go up to the second-last item. Throw money
-		// should never be used, but it's here just in case.
+		//[ITEMS.FEELING_LUCKY, 0]
+		//[ITEMS.WORMHOLE, 0]
+		//[ITEMS.LIKE_NEW, 0]
+		// Only go up to the second-last item. Throw money should never be used,
+		// but it's here just in case. Similarly, feeling lucky, wormhole, and
+		// like new are ridiculously priced and honestly aren't worth it
 	];
 
 	// Being extra paranoid about spending, since abilities update slowly.
@@ -460,7 +467,7 @@ function purchaseUpgrades() {
 			return;
 		}
 
-		if(myGold > upgradeCost && bestUpgradeForArmor) {
+		if(myGold > upgradeCost && bestUpgradeForArmor !== undefined) {
 			buyUpgrade(bestUpgradeForArmor);
 			myGold = g_Minigame.CurrentScene().m_rgPlayerData.gold;
 
@@ -474,7 +481,7 @@ function purchaseUpgrades() {
 	// Try to buy some damage
 	upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestUpgradeForDamage);
 
-	if(myGold > upgradeCost && bestUpgradeForDamage) {
+	if(myGold > upgradeCost && bestUpgradeForDamage !== undefined) {
 		buyUpgrade(bestUpgradeForDamage);
 	}
 }
@@ -490,13 +497,13 @@ function useMedicsIfRelevant() {
 	
 	// check if Medics is purchased and cooled down
 	if(numItem(ITEMS.PUMPED_UP) > 0 && !isAbilityCoolingDown(ITEMS.PUMPED_UP)) {
-		// the item PUMPED UP will be the first used in order to regenerate our health
+		// The item PUMPED UP will be the first used in order to regenerate our health
+		// This is because PUMPED_UP is basically a better version of "MEDIC"
+		// and it gets dropped by monsters as loot
 		console.log('We can pump up our HP. Trigger it.');
 		triggerItem(ITEMS.PUMPED_UP);
 	} else if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
 		// Medics is purchased, cooled down, and needed. Trigger it.
-		// This is because PUMPED_UP is basically a better version of "MEDIC"
-		// and it gets dropped by monsters as loot
 		console.log('Medics is purchased, cooled down, and needed. Trigger it.');
 		triggerAbility(ABILITIES.MEDIC);
 	} else if (numItem(ITEMS.GOD_MODE) > 0 && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
