@@ -240,18 +240,21 @@ function firstRun() {
 	var activity = document.getElementById("activitylog");
 	activity.style.marginTop = "25px";
 
-	var info_box = document.querySelector(".leave_game_helper");
-	info_box.innerHTML = '<b>OPTIONS</b>' + ((typeof GM_info !== "undefined") ? ' (v' + GM_info.script.version + ')' : '') + '<br>Settings marked with a <span style="color:#FF5252;font-size:22px;line-height:4px;vertical-align:bottom;">*</span> requires a refresh to take effect.<hr>';
+	var options_box = document.querySelector(".leave_game_helper");
+	if(!options_box) {
+		options_box = document.querySelector(".options_box");
+	}
+	options_box.innerHTML = '<b>OPTIONS</b>' + ((typeof GM_info !== "undefined") ? ' (v' + GM_info.script.version + ')' : '') + '<br>Settings marked with a <span style="color:#FF5252;font-size:22px;line-height:4px;vertical-align:bottom;">*</span> requires a refresh to take effect.<hr>';
 
 	// reset the CSS for the info box for aesthetics
-	info_box.className = "options_box";
-	info_box.style.backgroundColor = "#000000";
-	info_box.style.width = "800px";
-	info_box.style.top = "73px";
-	info_box.style.padding = "12px";
-	info_box.style.position = "absolute";
-	info_box.style.boxShadow = "2px 2px 0 rgba( 0, 0, 0, 0.6 )";
-	info_box.style.color = "#ededed";
+	options_box.className = "options_box";
+	options_box.style.backgroundColor = "#000000";
+	options_box.style.width = "800px";
+	options_box.style.top = "73px";
+	options_box.style.padding = "12px";
+	options_box.style.position = "absolute";
+	options_box.style.boxShadow = "2px 2px 0 rgba( 0, 0, 0, 0.6 )";
+	options_box.style.color = "#ededed";
 
 	var options1 = document.createElement("div");
 	options1.style["-moz-column-count"] = 2;
@@ -269,7 +272,7 @@ function firstRun() {
 	options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
 	options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, false));
 	options1.appendChild(makeCheckBox("enableAutoUpdate", "Enable script auto update", enableAutoUpdate, toggleAutoUpdate, false));
-	info_box.appendChild(options1);
+	options_box.appendChild(options1);
 
 	var options2 = document.createElement("div");
 	options2.style["-moz-column-count"] = 2;
@@ -284,7 +287,7 @@ function firstRun() {
 	options2.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer", enableFingering, handleEvent, true));
 	options2.appendChild(makeNumber("setLogLevel", "Change the log level", "25px", logLevel, 0, 5, updateLogLevel));
 
-	info_box.appendChild(options2);
+	options_box.appendChild(options2);
 
 	//Elemental upgrades lock
 	var ab_box = document.getElementById("abilities");
@@ -618,7 +621,7 @@ function toggleRenderer(event) {
 	if (value) {
 		w.g_Minigame.Renderer.render = function() {}
 	} else {
-		w.g_Minigame.Renderer.renderer = trt_oldRender;
+		w.g_Minigame.Renderer.render = trt_oldRender;
 	}
 }
 
