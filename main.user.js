@@ -349,10 +349,9 @@ function purchaseUpgrades() {
 	var avgClicksPerSecond = 3;	//Set this yourself to serve your needs
 	
 	var upgrades = g_Minigame.CurrentScene().m_rgTuningData.upgrades.slice(0);
-	var playerUpgrades = g_Minigame.CurrentScene().m_rgPlayerUpgrades;
 
 	var buyUpgrade = function(id) {
-		console.log("Buying " + upgrades[id].name + " level " + (playerUpgrades[id].level + 1));
+		console.log("Buying " + upgrades[id].name + " level " + (g_Minigame.CurrentScene().GetUpgradeLevel(id) + 1));
 		if(id >= 3 && 6 >= id) { //If upgrade is element damage
 			g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + id).childElements()[3]);
 		} else {
@@ -368,11 +367,8 @@ function purchaseUpgrades() {
 	var highestUpgradeValueForArmor = 0;
 	var bestElement = -1;
 	var highestElementLevel = 0;
-	
-	var critMultiplier = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_crit;
-	var critRate = g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage - g_Minigame.CurrentScene().m_rgTuningData.player.crit_percentage;
-	var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
 
+	
 	for( var i=0; i< upgrades.length; i++ ) {
 		var upgrade = upgrades[i];
 		
@@ -387,8 +383,8 @@ function purchaseUpgrades() {
 			}
 		}
 	
-		var upgradeCurrentLevel = playerUpgrades[i].level;
-		var upgradeCost = playerUpgrades[i].cost_for_next_level;
+		var upgradeCurrentLevel = g_Minigame.CurrentScene().GetUpgradeLevel(i);
+		var upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(i);
 		
 		switch(upgrade.type) {
 			case UPGRADE_TYPES.ARMOR:
@@ -398,9 +394,9 @@ function purchaseUpgrades() {
 				}
 				break;
 			case UPGRADE_TYPES.CLICK_DAMAGE:
-				if((critRate * critMultiplier + 1) * avgClicksPerSecond * upgrade.multiplier / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+				if(avgClicksPerSecond * upgrade.multiplier / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
 					bestUpgradeForDamage = i;
-					highestUpgradeValueForDamage = (critRate * critMultiplier + 1) * avgClicksPerSecond * upgrade.multiplier / upgradeCost;
+					highestUpgradeValueForDamage = avgClicksPerSecond * upgrade.multiplier / upgradeCost;
 				}
 				break;
 			case UPGRADE_TYPES.DPS:
@@ -419,10 +415,13 @@ function purchaseUpgrades() {
 				}*/
 				break;
 			case UPGRADE_TYPES.LUCKY_SHOT:
-				if(upgrade.multiplier * dpc * critRate * avgClicksPerSecond / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+				//var critMultiplier = ?
+				/*var critChance = g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage;
+				var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
+				if(upgrade.multiplier /* critMultiplier * dpc * critChance * avgClicksPerSecond / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
 					bestUpgradeForDamage = i;
-					highestUpgradeValueForDamage = upgrade.multiplier * dpc * critRate * avgClicksPerSecond / upgradeCost;
-				}
+					highestUpgradeValueForDamage = upgrade.multiplier / upgradeCost;
+				}*/
 				break;
 			default:
 				break;
@@ -431,7 +430,7 @@ function purchaseUpgrades() {
 	/*
 	if(bestElement != -1) {
 		//Let user choose what element to level up by adding the point to desired element
-		upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestElement].cost_for_next_level;
+		upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestElement);
 		
 		var dps = g_Minigame.CurrentScene().m_rgPlayerTechTree.dps;
 		dps = dps + (g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click * avgClicksPerSecond);
@@ -448,7 +447,7 @@ function purchaseUpgrades() {
 		// Prioritize armor over damage
 		// - Should we by any armor we can afford or just wait for the best one possible?
 		//	 currently waiting
-		upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestUpgradeForArmor].cost_for_next_level;
+		upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestUpgradeForArmor);
 
 		// Prevent purchasing multiple shields while waiting to respawn.
 		if (purchasedShieldsWhileRespawning && currentHealth < 1) {
@@ -467,7 +466,7 @@ function purchaseUpgrades() {
 	}
 	
 	// Try to buy some damage
-	upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestUpgradeForDamage].cost_for_next_level;
+	upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestUpgradeForDamage);
 
 	if(myGold > upgradeCost && bestUpgradeForDamage) {
 		buyUpgrade(bestUpgradeForDamage);
