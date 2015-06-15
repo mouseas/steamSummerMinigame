@@ -46,10 +46,8 @@ This fork has:
 
 ### [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en) ###
 
-1. Open Tapermonkey's dashboard.
-2. Click on the `Utilites` tab on the right.
-3. Paste `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js` into the text area, and click `Import`.
-4. When the editor has loaded, click `Install` (*NOT* `Process with Chrome`).
+1. Navigate to `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js`.
+2. When the editor has loaded, click `Install` (*NOT* `Process with Chrome`).
 
 ### [Greasemonkey](https://addons.mozilla.org/en-us/firefox/addon/greasemonkey/) ###
 
