@@ -35,6 +35,10 @@ var lastAction = 500; //start with the max. Array length
 var clickTimer;
 var purchasedShieldsWhileRespawning = false;
 
+var avgClickRate = 5; // to keep track of the average clicks per second that the game actually records
+var totalClicksPastFiveSeconds = avgClickRate * 5; // keeps track of total clicks over the past 5 seconds for a moving average
+var previousTickTime = 0; // tracks the last time we received an update from the game
+
 var ABILITIES = {
 	"MORALE_BOOSTER": 5,
 	"GOOD_LUCK": 6,
@@ -783,6 +787,35 @@ function numItem(itemId) {
 		}
 	}
 	return 0;
+}
+
+// This calculates a 5 second moving average of clicks per second based
+// on the values that the game is recording.
+function updateAvgClickRate() {
+	// Make sure we have updated info from the game first
+	if (previousTickTime != g_Minigame.CurrentScene().m_nLastTick){
+		totalClicksPastFiveSeconds -= avgClickRate;
+		totalClicksPastFiveSeconds += g_Minigame.CurrentScene().m_nLastClicks / ((g_Minigame.CurrentScene().m_nLastTick - previousTickTime) / 1000);
+		avgClickRate = totalClicksPastFiveSeconds / 5;
+		previousTickTime = g_Minigame.CurrentScene().m_nLastTick;
+	}
+}
+// disable enemy flinching animation when they get hit
+function disableFlinchingAnimation() {
+	if (CEnemy !== undefined) {
+		CEnemy.prototype.TakeDamage = function() {};
+		CEnemySpawner.prototype.TakeDamage = function() {};
+		CEnemyBoss.prototype.TakeDamage = function() {};
+	}
+}
+// disable damage text from clicking
+function disableDamageText() {
+	g_Minigame.CurrentScene().DoClickEffect = function() {};
+	g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
+}
+
+function getCooldownTime(abilityId) {
+	return g_Minigame.CurrentScene().GetCooldownForAbility(abilityId);
 }
 
 function isAbilityCoolingDown(abilityId) {
