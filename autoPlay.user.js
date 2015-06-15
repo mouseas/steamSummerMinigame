@@ -24,8 +24,8 @@ var logLevel = 1; // 5 is the most verbose, 0 disables all log
 
 var enableAutoClicker = getPreferenceBoolean("enableAutoClicker", true);
 
-var removeInterface = getPreferenceBoolean("removeInterface", true); // get rid of a bunch of pointless DOM
-var removeParticles = getPreferenceBoolean("removeParticles", true);
+var removeInterface = getPreferenceBoolean("removeInterface", true); // get rid of a bunch of pointless DOM var removeParticles = getPreferenceBoolean("removeParticles", true);
+var removeParticles = getPreferenceBoolean("removeParticles", true); 
 var removeFlinching = getPreferenceBoolean("removeFlinching", true);
 var removeCritText = getPreferenceBoolean("removeCritText", false);
 var removeGoldText = getPreferenceBoolean("removeGoldText", false);
@@ -1151,7 +1151,8 @@ function updateControlData() {
         if(xhr.readyState === 4) {
             if(xhr.status === 200) {
                 try {
-                    var post = xhr.responseXML.getElementById("forum_topic_edit_" + topicID + "_textarea");
+//                    var post = xhr.responseXML.getElementById("forum_topic_edit_" + topicID + "_textarea");
+                    var post = xhr.responseXML.querySelectorAll("div.content")[1];
                     if(!post) {
                         console.error("Failed to load for some reason... debug DOM output:");
                         console.error(xhr.responseXML);
@@ -1174,21 +1175,6 @@ function updateControlData() {
     xhr.open("GET", remoteControlURL, true); 
     xhr.responseType = "document";
     xhr.send(null);
-}
-
-function parseControlThread() {
-    if(this.readyState === 4) {
-        if(this.status === 200) {
-            try {
-                var stuff = this.responseText.match("=VARIABLES=(.*)=END VARIABLES=");
-                console.log(stuff);
-            } catch (e) {
-                console.error(e);
-            }
-        } else {
-            console.error(this.statusText);
-        }
-    }
 }
 
 // Append gameid to breadcrumbs
