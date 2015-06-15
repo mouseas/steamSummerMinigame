@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.3.3
+// @version 2.3.4
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match *://steamcommunity.com/minigame/towerattack*
@@ -390,7 +390,16 @@ function useClusterBombIfRelevant() {
 		}
 		//Bombs away if spawner and 2+ other monsters
 		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.CLUSTER_BOMB);
+			// Wait 60 seconds if the cooldown ability
+			// is within 1 minute of coming back
+			if (getCooldownTime(ABILITIES.COOLDOWN) > 60 || !hasPurchasedAbility(ABILITIES.COOLDOWN) || (hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN))) {
+				if (hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN) && !currentLaneHasAbility(ABILITIES.COOLDOWN)) {
+					console.log("Cooling down prior to long-downtime ability use");
+					triggerAbility(ABILITIES.COOLDOWN);
+				} else {
+					triggerAbility(ABILITIES.CLUSTER_BOMB);
+				}
+			}
 		}
 	}
 }
@@ -418,8 +427,18 @@ function useNapalmIfRelevant() {
 		}
 		//Burn them all if spawner and 2+ other monsters
 		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.NAPALM);
+			// Wait 60 seconds if the cooldown ability
+			// is within 1 minute of coming back
+			if (getCooldownTime(ABILITIES.COOLDOWN) > 60 || !hasPurchasedAbility(ABILITIES.COOLDOWN) || (hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN))) {
+				if (hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN) && !currentLaneHasAbility(ABILITIES.COOLDOWN)) {
+					console.log("Cooling down prior to long-downtime ability use");
+					triggerAbility(ABILITIES.COOLDOWN);
+				} else {
+					triggerAbility(ABILITIES.NAPALM);
+				}
+			}
 		}
+	}
 	}
 }
 
@@ -476,7 +495,16 @@ function useTacticalNukeIfRelevant() {
 		// If there is a spawner and it's health is between 60% and 30%, nuke it!
 		if (enemySpawnerExists && enemySpawnerHealthPercent < 0.6 && enemySpawnerHealthPercent > 0.3) {
 			console.log("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.");
-			triggerAbility(ABILITIES.NUKE);
+			// Wait 60 seconds if the cooldown ability
+			// is within 1 minute of coming back
+			if (getCooldownTime(ABILITIES.COOLDOWN) > 60 || !hasPurchasedAbility(ABILITIES.COOLDOWN) || (hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN))) {
+				if (hasPurchasedAbility(ABILITIES.COOLDOWN) && !isAbilityCoolingDown(ABILITIES.COOLDOWN) && !currentLaneHasAbility(ABILITIES.COOLDOWN)) {
+					console.log("Cooling down prior to long-downtime ability use");
+					triggerAbility(ABILITIES.COOLDOWN);
+				} else {
+					triggerAbility(ABILITIES.NUKE);
+				}
+			}
 		}
 	}
 }
@@ -652,6 +680,13 @@ function isAbilityItemEnabled(abilityId) {
 	return false;
 }
 
+function currentLaneHasAbility(abilityID) {
+	var lane = g_Minigame.CurrentScene().m_rgPlayerData.current_lane;
+	if (typeof(g_Minigame.m_CurrentScene.m_rgLaneData[lane].abilities[abilityID]) == 'undefined')
+		return 0;
+	return g_Minigame.m_CurrentScene.m_rgLaneData[lane].abilities[abilityID];
+}
+
 function clickTheThing() {
 	// If we're going to be clicking, we should reset g_msTickRate
 	// There's a reddit thread about why and we might as well be safe
@@ -690,7 +725,7 @@ function startGoldRainClick() {
 				clearInterval(clickTimer);
 				timer = 0;
 				console.log('Let the GOLD rain!');
-				clickTimer = window.setInterval(clickTheThing, 1000/clickRate);
+				clickTimer = window.setInterval(clickTheThing, 1000 / clickRate);
 				timer = 150;
 			}
 		}
