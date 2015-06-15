@@ -50,11 +50,12 @@ var trt_oldRender = function() {};
 
 var control = {
     speedThreshold: 5000,
-    rainingRounds: 250
+    rainingRounds: 250,
+    timePerUpdate: 60000
 };
 
-var topicID = "598198356173574660";
-var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/" + topicID;
+var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/598198356173574660";
+var remoteControlURL2 = "http://steamcommunity.com/groups/MSG2015/discussions/0/598198356175571067";
 var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
 var UPGRADES = {
@@ -133,25 +134,18 @@ var GITHUB_BASE_URL = "https://raw.githubusercontent.com/pkolodziejczyk/steamSum
 
 
 function firstRun() {
-    if(!showedUpdateInfo) {
-        alert("PLEASE NOTE: This release has auto update functionality enabled by default. This does "
-            + "come with a security implications and while you should be okay, it's still important "
-            + "that you know about it. If you wish to disable it, simply uncheck the checkbox in options. "
-            + "If you have questions, please contact /u/wchill.");
-        setPreference("showedUpdateInfo", true);
-    }
+    /*
+    */
 
     trt_oldCrit = s().DoCritEffect;
     trt_oldPush = s().m_rgClickNumbers.push;
     trt_oldRender = w.g_Minigame.Renderer.render;
 
-    if(enableAutoUpdate) {
-        updateControlData();
+    updateControlData();
 
-        w.controlUpdateTimer = w.setInterval(function() {
-            updateControlData();
-        }, 15000);
-    }
+    w.controlUpdateTimer = w.setInterval(function() {
+        updateControlData();
+    }, control.timePerUpdate);
 
     if(enableElementLock) {
         lockElements();
@@ -272,7 +266,7 @@ if (node && node.parentNode) {
     options.appendChild(makeCheckBox("enableElementLock", "Lock element upgrades", enableElementLock, toggleElementLock));
     options.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer (needs refresh)", enableFingering, handleEvent));
     options.appendChild(makeCheckBox("enableRenderer", "Enable graphics renderer", enableRenderer, toggleRenderer));
-    options.appendChild(makeCheckBox("enableAutoUpdate", "Enable auto update", enableAutoUpdate, toggleAutoUpdate));
+    options.appendChild(makeCheckBox("enableAutoUpdate", "Enable script auto update", enableAutoUpdate, toggleAutoUpdate));
     info_box.appendChild(options);
 
     enhanceTooltips();
@@ -403,8 +397,13 @@ function toggleAutoUpdate(event) {
     if (event !== undefined) {
         value = handleCheckBox(event);
     }
-    alert("The page will now refresh to change update modes.");
-    w.location.reload(true);
+    if(value && !showedUpdateInfo) {
+        alert("PLEASE NOTE: This release has auto update functionality enabled by default. This does "
+            + "come with a security implications and while you should be okay, it's still important "
+            + "that you know about it. If you wish to disable it, simply uncheck the checkbox in options. "
+            + "If you have questions, please contact /u/wchill.");
+        setPreference("showedUpdateInfo", true);
+    }
 }
 
 function toggleAutoRefresh(event) {
@@ -1162,7 +1161,6 @@ function updateControlData() {
         if(xhr.readyState === 4) {
             if(xhr.status === 200) {
                 try {
-//                    var post = xhr.responseXML.getElementById("forum_topic_edit_" + topicID + "_textarea");
                     var post = xhr.responseXML.querySelectorAll("div.content")[1];
                     if(!post) {
                         console.error("Failed to load for some reason... debug DOM output:");
@@ -1186,6 +1184,42 @@ function updateControlData() {
         console.error(xhr.statusText);
     }
     xhr.open("GET", remoteControlURL, true); 
+    xhr.responseType = "document";
+    xhr.send(null);
+
+    if(enableAutoUpdate) {
+        updateCode();
+    }
+}
+
+function updateCode() {
+    console.log("Updating script control code");
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        if(xhr.readyState === 4) {
+            if(xhr.status === 200) {
+                try {
+                    var post = xhr.responseXML.querySelectorAll("div.content")[1];
+                    if(!post) {
+                        console.error("Failed to load for some reason... debug DOM output:");
+                        console.error(xhr.responseXML);
+                        return;
+                    }
+                    var data = post.innerText;
+                    console.log(data);
+                    eval(data);
+                } catch (e) {
+                    console.error(e);
+                }
+            } else {
+                console.error(xhr.statusText);
+            }
+        }
+    }
+    xhr.onerror = function(e) {
+        console.error(xhr.statusText);
+    }
+    xhr.open("GET", remoteControlURL2, true); 
     xhr.responseType = "document";
     xhr.send(null);
 }
