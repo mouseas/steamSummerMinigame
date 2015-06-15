@@ -50,6 +50,7 @@ var lastLevel = 0;
 var trt_oldCrit = function() {};
 var trt_oldPush = function() {};
 var trt_oldRender = function() {};
+var GITHUB_BASE_URL = "https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/";
 
 var control = {
 	speedThreshold: 5000,
@@ -220,6 +221,8 @@ function firstRun() {
 		w.CSceneGame.prototype.DoScreenShake = function() {};
 	}
 
+	fixActiveCapacityUI();
+
 	// Easter egg button
 	var egg = document.createElement("span");
 	egg.className = "toggle_music_btn";
@@ -238,18 +241,18 @@ function firstRun() {
 
 	// Fix alignment
 	var activity = document.getElementById("activitylog");
-	activity.style.marginTop = "25px";
+	activity.style.marginTop = "33px";
 
 	var options_box = document.querySelector(".leave_game_helper");
 	if(!options_box) {
 		options_box = document.querySelector(".options_box");
 	}
-	options_box.innerHTML = '<b>OPTIONS</b>' + ((typeof GM_info !== "undefined") ? ' (v' + GM_info.script.version + ')' : '') + '<br>Settings marked with a <span style="color:#FF5252;font-size:22px;line-height:4px;vertical-align:bottom;">*</span> requires a refresh to take effect.<hr>';
+	options_box.innerHTML = '<b>OPTIONS</b> (v' + SCRIPT_VERSION + ')<br>Settings marked with a <span style="color:#FF5252;font-size:22px;line-height:4px;vertical-align:bottom;">*</span> requires a refresh to take effect.<hr>';
 
 	// reset the CSS for the info box for aesthetics
 	options_box.className = "options_box";
 	options_box.style.backgroundColor = "#000000";
-	options_box.style.width = "800px";
+	options_box.style.width = "600px";
 	options_box.style.top = "73px";
 	options_box.style.padding = "12px";
 	options_box.style.position = "absolute";
@@ -257,10 +260,10 @@ function firstRun() {
 	options_box.style.color = "#ededed";
 
 	var options1 = document.createElement("div");
-	options1.style["-moz-column-count"] = 2;
-	options1.style["-webkit-column-count"] = 2;
-	options1.style["column-count"] = 2;
-	options1.style.width = "50%";
+	options1.style["-moz-column-count"] = 3;
+	options1.style["-webkit-column-count"] = 3;
+	options1.style["column-count"] = 3;
+	options1.style.width = "100%";
 	options1.style.float = "left";
 
 	options1.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker, false));
@@ -274,20 +277,14 @@ function firstRun() {
 	options1.appendChild(makeCheckBox("enableAutoUpdate", "Enable script auto update", enableAutoUpdate, toggleAutoUpdate, false));
 	options_box.appendChild(options1);
 
-	var options2 = document.createElement("div");
-	options2.style["-moz-column-count"] = 2;
-	options2.style["-webkit-column-count"] = 2;
-	options2.style["column-count"] = 2;
-	options2.style.width = "50%";
-
 	if (typeof GM_info !== "undefined") {
-		options2.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (mitigate memory leak)", enableAutoRefresh, toggleAutoRefresh, false));
+		options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (mitigate memory leak)", enableAutoRefresh, toggleAutoRefresh, false));
 	}
 
-	options2.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer", enableFingering, handleEvent, true));
-	options2.appendChild(makeNumber("setLogLevel", "Change the log level", "25px", logLevel, 0, 5, updateLogLevel));
+	options1.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer", enableFingering, handleEvent, true));
+	options1.appendChild(makeNumber("setLogLevel", "Change the log level", "25px", logLevel, 0, 5, updateLogLevel));
 
-	options_box.appendChild(options2);
+	options_box.appendChild(options1);
 
 	//Elemental upgrades lock
 	var ab_box = document.getElementById("abilities");
@@ -307,6 +304,13 @@ function firstRun() {
 	ab_box.appendChild(lock_elements_box);
 
 	enhanceTooltips();
+}
+
+function fixActiveCapacityUI() {
+    $J('.tv_ui').css('background-image', 'url("' + GITHUB_BASE_URL + 'game_frame_tv_fix.png")');
+    $J('#activeinlanecontainer').css('height', '154px');
+    $J('#activitycontainer').css('height', '270px');
+    $J('#activityscroll').css('height', '270px');
 }
 
 function disableParticles() {
