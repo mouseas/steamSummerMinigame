@@ -122,6 +122,7 @@ function doTheThing() {
 		}
 
 		useGoodLuckCharmIfRelevant();
+		useCritIfRelevant();
 		useMedicsIfRelevant();
 		useMoraleBoosterIfRelevant();
 		useClusterBombIfRelevant();
@@ -717,8 +718,8 @@ function useGoldRainIfRelevant() {
 		}
 
 		if(Math.random() > g_Minigame.CurrentScene().m_rgGameData.level / 10000) {
-        	return;
-        }
+	        	return;
+	        }
 
 		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
 		// check if current target is a boss, otherwise its not worth using the gold rain
@@ -731,6 +732,14 @@ function useGoldRainIfRelevant() {
 				triggerItem(ITEMS.GOLD_RAIN);
 			}
 		}
+	}
+}
+
+// Upgrades the crit by 1% if we have the CRIT item available for use.
+function useCritIfRelevant() {
+	if(numItem(ITEMS.CRIT) > 0 && !isAbilityCoolingDown(ITEMS.CRIT))
+	{
+		triggerItem(ITEMS.CRIT);
 	}
 }
 
