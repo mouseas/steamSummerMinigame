@@ -257,7 +257,7 @@ function purchaseUpgrades() {
 	
 	var myGold = g_Minigame.CurrentScene().m_rgPlayerData.gold;
 	
-	//Initial values for   armor, dps, click damage 
+	//Initial values for armor & damage
 	var bestUpgradeForDamage,bestUpgradeForArmor;
 	var highestUpgradeValueForDamage = 0;
 	var highestUpgradeValueForArmor = 0;
