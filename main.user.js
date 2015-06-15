@@ -466,12 +466,17 @@ function useGoldRainIfRelevant() {
 			return;
 		}
 
+		if(Math.random() > g_Minigame.CurrentScene().m_rgGameData.level / 10000) {
+        	return;
+        }
+
 		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+		
 		// check if current target is a boss, otherwise its not worth using the gold rain
 		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {	
 			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 
-		  if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
+			if (enemyBossHealthPercent >= 0.3) { // We want sufficient time for the gold rain to be applicable
 				// Gold Rain is purchased, cooled down, and needed. Trigger it.
 				console.log('Gold rain is purchased and cooled down, Triggering it on boss');
 				triggerItem(ITEMS.GOLD_RAIN);
