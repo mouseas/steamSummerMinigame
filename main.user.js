@@ -777,6 +777,10 @@ function numItem(itemId) {
 	return 0;
 }
 
+function getCooldownTime(abilityId) {
+	return g_Minigame.CurrentScene().GetCooldownForAbility(abilityId);
+}
+
 function isAbilityCoolingDown(abilityId) {
 	return g_Minigame.CurrentScene().GetCooldownForAbility(abilityId) > 0;
 }
