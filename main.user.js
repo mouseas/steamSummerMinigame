@@ -485,14 +485,22 @@ function useMedicsIfRelevant() {
 	
 	// check if Medics is purchased and cooled down
 	if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
-
 		// Medics is purchased, cooled down, and needed. Trigger it.
 		console.log('Medics is purchased, cooled down, and needed. Trigger it.');
 		triggerAbility(ABILITIES.MEDIC);
 	} else if (numItem(ITEMS.GOD_MODE) > 0 && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
-		
 		console.log('We have god mode, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.GOD_MODE);
+	} else if(numItem(ITEMS.PUMPED_UP) > 0 && !isAbilityCoolingDown(ITEMS.PUMPED_UP)) {
+		// If we have no medic-pots or godmode we will use 
+		// the item PUMPED UP in order to regenerate our health
+		console.log('We can pump up our HP. Trigger it.');
+		triggerItem(ITEMS.PUMPED_UP);
+	} else if(numItem(ITEMS.STEAL_HEALTH) > 0 && !isAbilityCoolingDown(ITEMS.STEAL_HEALTH)) {
+		// Use Steal Health as a last resort as that 
+		// allows us to gain HP depending on our click-damage
+		console.log("Last resort for survival: STEALING HEALTH");
+		triggerItem(ITEMS.STEAL_HEALTH);
 	}
 };
 
