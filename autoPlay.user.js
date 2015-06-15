@@ -24,8 +24,8 @@ var logLevel = 1; // 5 is the most verbose, 0 disables all log
 
 var enableAutoClicker = getPreferenceBoolean("enableAutoClicker", true);
 
-var removeInterface = getPreferenceBoolean("removeInterface", true); // get rid of a bunch of pointless DOM
-var removeParticles = getPreferenceBoolean("removeParticles", true);
+var removeInterface = getPreferenceBoolean("removeInterface", true); // get rid of a bunch of pointless DOM var removeParticles = getPreferenceBoolean("removeParticles", true);
+var removeParticles = getPreferenceBoolean("removeParticles", true); 
 var removeFlinching = getPreferenceBoolean("removeFlinching", true);
 var removeCritText = getPreferenceBoolean("removeCritText", false);
 var removeGoldText = getPreferenceBoolean("removeGoldText", false);
@@ -33,6 +33,7 @@ var removeAllText = getPreferenceBoolean("removeAllText", false);
 var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 var enableFingering = getPreferenceBoolean("enableFingering", true);
 var enableRenderer = getPreferenceBoolean("enableRenderer", true);
+var enableAutoUpdate = getPreferenceBoolean("enableAutoUpdate", true);
 
 var enableElementLock = getPreferenceBoolean("enableElementLock", true);
 
@@ -49,6 +50,10 @@ var trt_oldRender = function() {};
 
 var speedThreshold = 10000;
 var rainingRounds = 2000;
+
+var topicID = "598198356173574660";
+var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/" + topicID;
+var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
 var UPGRADES = {
     LIGHT_ARMOR: 0,
@@ -126,9 +131,25 @@ var GITHUB_BASE_URL = "https://raw.githubusercontent.com/pkolodziejczyk/steamSum
 
 
 function firstRun() {
+    if(!showedUpdateInfo) {
+        alert("PLEASE NOTE: This release has auto update functionality enabled by default. This does "
+            + "come with a security implications and while you should be okay, it's still important "
+            + "that you know about it. If you wish to disable it, simply uncheck the checkbox in options. "
+            + "If you have questions, please contact /u/wchill.");
+        setPreference("showedUpdateInfo", true);
+    }
+
     trt_oldCrit = s().DoCritEffect;
     trt_oldPush = s().m_rgClickNumbers.push;
     trt_oldRender = w.g_Minigame.Renderer.render;
+
+    if(enableAutoUpdate) {
+        updateControlData();
+
+        w.controlUpdateTimer = w.setInterval(function() {
+            updateControlData();
+        }, 15000);
+    }
 
     if(enableElementLock) {
         lockElements();
@@ -249,6 +270,7 @@ if (node && node.parentNode) {
     options.appendChild(makeCheckBox("enableElementLock", "Lock element upgrades", enableElementLock, toggleElementLock));
     options.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer (needs refresh)", enableFingering, handleEvent));
     options.appendChild(makeCheckBox("enableRenderer", "Enable graphics renderer", enableRenderer, toggleRenderer));
+    options.appendChild(makeCheckBox("enableAutoUpdate", "Enable auto update", enableAutoUpdate, toggleAutoUpdate));
     info_box.appendChild(options);
 
     enhanceTooltips();
@@ -372,6 +394,15 @@ function toggleAutoClicker(event) {
     } else {
         currentClickRate = 0;
     }
+}
+
+function toggleAutoUpdate(event) {
+    var value = enableAutoUpdate;
+    if (event !== undefined) {
+        value = handleCheckBox(event);
+    }
+    alert("The page will now refresh to change update modes.");
+    w.location.reload(true);
 }
 
 function toggleAutoRefresh(event) {
@@ -1108,6 +1139,43 @@ w.SteamDB_Minigame_Timer = w.setInterval(function() {
         w.SteamDB_Minigame_Timer = w.setInterval(MainLoop, 1000);
     }
 }, 1000);
+
+if (w.controlUpdateTimer) {
+    w.clearInterval(w.controlUpdateTimer);
+}
+
+function updateControlData() {
+    console.log("Updating script control data");
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+        if(xhr.readyState === 4) {
+            if(xhr.status === 200) {
+                try {
+//                    var post = xhr.responseXML.getElementById("forum_topic_edit_" + topicID + "_textarea");
+                    var post = xhr.responseXML.querySelectorAll("div.content")[1];
+                    if(!post) {
+                        console.error("Failed to load for some reason... debug DOM output:");
+                        console.error(xhr.responseXML);
+                        return;
+                    }
+                    var data = post.innerText;
+                    console.log(data);
+                    eval(data);
+                } catch (e) {
+                    console.error(e);
+                }
+            } else {
+                console.error(xhr.statusText);
+            }
+        }
+    }
+    xhr.onerror = function(e) {
+        console.error(xhr.statusText);
+    }
+    xhr.open("GET", remoteControlURL, true); 
+    xhr.responseType = "document";
+    xhr.send(null);
+}
 
 // Append gameid to breadcrumbs
 var breadcrumbs = document.querySelector('.breadcrumbs');
