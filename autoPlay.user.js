@@ -274,7 +274,7 @@ if (node && node.parentNode) {
 
     options_box.appendChild(options);
 
-    info_box.innerHTML = "<b>LANE INFO</b><br/>";
+    info_box.innerHTML = "<b>GAME INFO</b><br/>";
     info_box.className = "info_box";
     info_box.style["right"] = "0px";
     lane_info = document.createElement("div");
