@@ -50,7 +50,6 @@ var lastLevel = 0;
 var trt_oldCrit = function() {};
 var trt_oldPush = function() {};
 var trt_oldRender = function() {};
-var GITHUB_BASE_URL = "https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/";
 
 var control = {
 	speedThreshold: 5000,
@@ -307,7 +306,7 @@ function firstRun() {
 }
 
 function fixActiveCapacityUI() {
-    $J('.tv_ui').css('background-image', 'url("' + GITHUB_BASE_URL + 'game_frame_tv_fix.png")');
+    $J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ieDoLnx.png)');
     $J('#activeinlanecontainer').css('height', '154px');
     $J('#activitycontainer').css('height', '270px');
     $J('#activityscroll').css('height', '270px');
