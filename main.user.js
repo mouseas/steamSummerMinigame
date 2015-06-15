@@ -27,6 +27,7 @@
 
 var isAlreadyRunning = false;
 var autoClickGoldRain = true;
+var purcahseUpgradeToggle = true;
 
 var clickRate = 10; // change to number of desired clicks per second
 var timer = 0;
@@ -115,7 +116,11 @@ function doTheThing() {
 		isAlreadyRunning = true;
 
 		goToLaneWithBestTarget();
-		purchaseUpgrades();
+
+		if (purchaseUpgradesToggle){
+			purchaseUpgrades();
+		}
+
 		useGoodLuckCharmIfRelevant();
 		useMedicsIfRelevant();
 		useMoraleBoosterIfRelevant();
