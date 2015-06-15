@@ -122,6 +122,7 @@ function doTheThing() {
 		}
 
 		useGoodLuckCharmIfRelevant();
+		useCritIfRelevant();
 		useMedicsIfRelevant();
 		useMoraleBoosterIfRelevant();
 		useClusterBombIfRelevant();
@@ -351,13 +352,12 @@ function goToLaneWithBestTarget() {
 
 function purchaseUpgrades() {
 	var oddsOfElement = 1 - (0.75*0.75*0.75); //This values elemental too much because best element lanes are not focused(0.578)
-	var avgClicksPerSecond = 3;	//Set this yourself to serve your needs
+	var avgClicksPerSecond = 1;	//Set this yourself to serve your needs
 	
 	var upgrades = g_Minigame.CurrentScene().m_rgTuningData.upgrades.slice(0);
-	var playerUpgrades = g_Minigame.CurrentScene().m_rgPlayerUpgrades;
 
 	var buyUpgrade = function(id) {
-		console.log("Buying " + upgrades[id].name + " level " + (playerUpgrades[id].level + 1));
+		console.log("Buying " + upgrades[id].name + " level " + (g_Minigame.CurrentScene().GetUpgradeLevel(id) + 1));
 		if(id >= 3 && 6 >= id) { //If upgrade is element damage
 			g_Minigame.CurrentScene().TryUpgrade(document.getElementById('upgr_' + id).childElements()[3]);
 		} else {
@@ -389,8 +389,8 @@ function purchaseUpgrades() {
 			}
 		}
 	
-		var upgradeCurrentLevel = playerUpgrades[i].level;
-		var upgradeCost = playerUpgrades[i].cost_for_next_level;
+		var upgradeCurrentLevel = g_Minigame.CurrentScene().GetUpgradeLevel(i);
+		var upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(i);
 		
 		switch(upgrade.type) {
 			case UPGRADE_TYPES.ARMOR:
@@ -415,35 +415,35 @@ function purchaseUpgrades() {
 			case UPGRADE_TYPES.ELEMENTAL_WATER:
 			case UPGRADE_TYPES.ELEMENTAL_AIR:
 			case UPGRADE_TYPES.ELEMENTAL_EARTH:
-				if(upgradeCurrentLevel > highestElementLevel){
+				/*if(upgradeCurrentLevel > highestElementLevel){
 					highestElementLevel = upgradeCurrentLevel;
 					bestElement = i;
-				}
+				}*/
 				break;
 			case UPGRADE_TYPES.LUCKY_SHOT:
 				//var critMultiplier = ?
-				var critChance = g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage;
+				/*var critChance = g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage;
 				var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
-				if(upgrade.multiplier /* critMultiplier*/ * dpc * critChance * avgClicksPerSecond / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
-					/*bestUpgradeForDamage = i;
-					highestUpgradeValueForDamage = upgrade.multiplier / upgradeCost;*/
-				}
+				if(upgrade.multiplier /* critMultiplier * dpc * critChance * avgClicksPerSecond / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+					bestUpgradeForDamage = i;
+					highestUpgradeValueForDamage = upgrade.multiplier / upgradeCost;
+				}*/
 				break;
 			default:
 				break;
 		}
 	}
-	
+	/*
 	if(bestElement != -1) {
 		//Let user choose what element to level up by adding the point to desired element
-		upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestElement].cost_for_next_level;
+		upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestElement);
 		
 		var dps = g_Minigame.CurrentScene().m_rgPlayerTechTree.dps;
 		dps = dps + (g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click * avgClicksPerSecond);
 		if(0.25 * oddsOfElement * dps * upgrades[bestElement].multiplier / upgradeCost > highestUpgradeValueForDamage) { //dmg increase / moneys
 			//bestUpgradeForDamage = bestElement; // Not doing this because this values element damage too much
 		}
-	}
+	}*/
 
 	var currentHealth = g_Minigame.CurrentScene().m_rgPlayerData.hp;
 	var myMaxHealth = g_Minigame.CurrentScene().m_rgPlayerTechTree.max_hp;
@@ -453,7 +453,7 @@ function purchaseUpgrades() {
 		// Prioritize armor over damage
 		// - Should we by any armor we can afford or just wait for the best one possible?
 		//	 currently waiting
-		upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestUpgradeForArmor].cost_for_next_level;
+		upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestUpgradeForArmor);
 
 		// Prevent purchasing multiple shields while waiting to respawn.
 		if (purchasedShieldsWhileRespawning && currentHealth < 1) {
@@ -472,7 +472,7 @@ function purchaseUpgrades() {
 	}
 	
 	// Try to buy some damage
-	upgradeCost = g_Minigame.CurrentScene().m_rgPlayerUpgrades[bestUpgradeForDamage].cost_for_next_level;
+	upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestUpgradeForDamage);
 
 	if(myGold > upgradeCost && bestUpgradeForDamage) {
 		buyUpgrade(bestUpgradeForDamage);
@@ -489,15 +489,28 @@ function useMedicsIfRelevant() {
 	}
 	
 	// check if Medics is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
-
+	if(numItem(ITEMS.PUMPED_UP) > 0 && !isAbilityCoolingDown(ITEMS.PUMPED_UP)) {
+		// the item PUMPED UP will be the first used in order to regenerate our health
+		console.log('We can pump up our HP. Trigger it.');
+		triggerItem(ITEMS.PUMPED_UP);
+	} else if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
 		// Medics is purchased, cooled down, and needed. Trigger it.
+		// This is because PUMPED_UP is basically a better version of "MEDIC"
+		// and it gets dropped by monsters as loot
 		console.log('Medics is purchased, cooled down, and needed. Trigger it.');
 		triggerAbility(ABILITIES.MEDIC);
 	} else if (numItem(ITEMS.GOD_MODE) > 0 && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
-		
+		// Don't have Medic or Pumped Up? 
+		// We'll use godmode so we can delay our death in case the cooldowns come back.
+		// Instead of just firing it, we could maybe only use godmode
+		// if the medic / pumped up ability is going to be back before godmode expires
 		console.log('We have god mode, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.GOD_MODE);
+	} else if(numItem(ITEMS.STEAL_HEALTH) > 0 && !isAbilityCoolingDown(ITEMS.STEAL_HEALTH)) {
+		// Use Steal Health as a last resort as that 
+		// allows us to gain HP depending on our click-damage
+		console.log("Last resort for survival: STEALING HEALTH");
+		triggerItem(ITEMS.STEAL_HEALTH);
 	}
 }
 
@@ -717,8 +730,8 @@ function useGoldRainIfRelevant() {
 		}
 
 		if(Math.random() > g_Minigame.CurrentScene().m_rgGameData.level / 10000) {
-        	return;
-        }
+	        	return;
+	        }
 
 		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
 		// check if current target is a boss, otherwise its not worth using the gold rain
@@ -731,6 +744,14 @@ function useGoldRainIfRelevant() {
 				triggerItem(ITEMS.GOLD_RAIN);
 			}
 		}
+	}
+}
+
+// Upgrades the crit by 1% if we have the CRIT item available for use.
+function useCritIfRelevant() {
+	if(numItem(ITEMS.CRIT) > 0 && !isAbilityCoolingDown(ITEMS.CRIT))
+	{
+		triggerItem(ITEMS.CRIT);
 	}
 }
 
