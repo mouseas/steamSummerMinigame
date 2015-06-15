@@ -117,7 +117,7 @@ function doTheThing() {
 
 		goToLaneWithBestTarget();
 
-		if (purchaaseUpgradeToggle){
+		if (purchaseUpgradeToggle){
 			purchaseUpgrades();
 		}
 
