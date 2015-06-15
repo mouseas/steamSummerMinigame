@@ -33,6 +33,7 @@ var removeAllText = getPreferenceBoolean("removeAllText", false);
 var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 var enableFingering = getPreferenceBoolean("enableFingering", true);
 var enableRenderer = getPreferenceBoolean("enableRenderer", true);
+var enableAutoUpdate = getPreferenceBoolean("enableAutoUpdate", true);
 
 var enableElementLock = getPreferenceBoolean("enableElementLock", true);
 
@@ -52,6 +53,7 @@ var rainingRounds = 2000;
 
 var topicID = "598198356173574660";
 var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/" + topicID;
+var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
 var UPGRADES = {
     LIGHT_ARMOR: 0,
@@ -129,15 +131,25 @@ var GITHUB_BASE_URL = "https://raw.githubusercontent.com/pkolodziejczyk/steamSum
 
 
 function firstRun() {
+    if(!showedUpdateInfo) {
+        alert("PLEASE NOTE: This release has auto update functionality enabled by default. This does "
+            + "come with a security implications and while you should be okay, it's still important "
+            + "that you know about it. If you wish to disable it, simply uncheck the checkbox in options. "
+            + "If you have questions, please contact /u/wchill.");
+        setPreference("showedUpdateInfo", true);
+    }
+
     trt_oldCrit = s().DoCritEffect;
     trt_oldPush = s().m_rgClickNumbers.push;
     trt_oldRender = w.g_Minigame.Renderer.render;
 
-    updateControlData();
-
-    w.controlUpdateTimer = w.setInterval(function() {
+    if(enableAutoUpdate) {
         updateControlData();
-    }, 15000);
+
+        w.controlUpdateTimer = w.setInterval(function() {
+            updateControlData();
+        }, 15000);
+    }
 
     if(enableElementLock) {
         lockElements();
@@ -258,6 +270,7 @@ if (node && node.parentNode) {
     options.appendChild(makeCheckBox("enableElementLock", "Lock element upgrades", enableElementLock, toggleElementLock));
     options.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer (needs refresh)", enableFingering, handleEvent));
     options.appendChild(makeCheckBox("enableRenderer", "Enable graphics renderer", enableRenderer, toggleRenderer));
+    options.appendChild(makeCheckBox("enableAutoUpdate", "Enable auto update", enableAutoUpdate, toggleAutoUpdate));
     info_box.appendChild(options);
 
     enhanceTooltips();
@@ -381,6 +394,15 @@ function toggleAutoClicker(event) {
     } else {
         currentClickRate = 0;
     }
+}
+
+function toggleAutoUpdate(event) {
+    var value = enableAutoUpdate;
+    if (event !== undefined) {
+        value = handleCheckBox(event);
+    }
+    alert("The page will now refresh to change update modes.");
+    w.location.reload(true);
 }
 
 function toggleAutoRefresh(event) {
