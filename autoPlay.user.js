@@ -64,6 +64,8 @@ var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/5
 var remoteControlURL2 = "http://steamcommunity.com/groups/MSG2015/discussions/0/598198356175571067";
 var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
+var lane_info = {};
+
 var UPGRADES = {
 	LIGHT_ARMOR: 0,
 	AUTO_FIRE_CANNON: 1,
@@ -274,7 +276,8 @@ function firstRun() {
 	options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
 	options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, false));
 	options1.appendChild(makeCheckBox("enableAutoUpdate", "Enable script auto update", enableAutoUpdate, toggleAutoUpdate, false));
-	options_box.appendChild(options1);
+
+	var info_box = options_box.cloneNode(true);
 
 	if (typeof GM_info !== "undefined") {
 		options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (mitigate memory leak)", enableAutoRefresh, toggleAutoRefresh, false));
@@ -284,6 +287,21 @@ function firstRun() {
 	options1.appendChild(makeNumber("setLogLevel", "Change the log level", "25px", logLevel, 0, 5, updateLogLevel));
 
 	options_box.appendChild(options1);
+
+	info_box.innerHTML = "<b>LANE INFO</b><br/>";
+	info_box.className = "info_box";
+	info_box.style["right"] = "0px";
+	lane_info = document.createElement("div");
+	lane_info.style["-moz-column-count"] = 3;
+	lane_info.style["-webkit-column-count"] = 3;
+	lane_info.style["column-count"] = 3;
+
+	lane_info.appendChild(document.createElement("div"));
+	lane_info.appendChild(document.createElement("div"));
+	lane_info.appendChild(document.createElement("div"));
+
+	info_box.appendChild(lane_info);
+	options_box.parentElement.appendChild(info_box);
 
 	//Elemental upgrades lock
 	var ab_box = document.getElementById("abilities");
@@ -303,6 +321,27 @@ function firstRun() {
 	ab_box.appendChild(lock_elements_box);
 
 	enhanceTooltips();
+}
+
+function updateLaneData() {
+    var element_names = {1:"Fire", 2:"Water", 3:"Air", 4:"Earth"};
+    for(var i = 0; i < 3; i++) {
+        var element = s().m_rgGameData.lanes[i].element;
+        var abilities = s().m_rgLaneData[i].abilities;
+        if(!abilities) {
+            abilities = {};
+        }
+        var enemies = [];
+        for (var j = 0; j < 4; j++) {
+            var enemy = s().GetEnemy(i, j);
+            if (enemy) {
+                enemies.push(enemy);
+            }
+        }
+        var players = s().m_rgLaneData[i].players;
+        var output = "Lane " + (i+1) + " - " + element_names[element] + "\n" + players + " players\n\n";
+        lane_info.children[i].innerText = output;
+    }
 }
 
 function fixActiveCapacityUI() {
@@ -345,6 +384,8 @@ function MainLoop() {
 		if (level < 10 && control.useSlowMode) {
 			return;
 		}
+
+		updateLaneData();
 
 		attemptRespawn();
 		goToLaneWithBestTarget();
