@@ -484,18 +484,23 @@ function useMedicsIfRelevant() {
 	}
 	
 	// check if Medics is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
+	if(numItem(ITEMS.PUMPED_UP) > 0 && !isAbilityCoolingDown(ITEMS.PUMPED_UP)) {
+		// the item PUMPED UP will be the first used in order to regenerate our health
+		console.log('We can pump up our HP. Trigger it.');
+		triggerItem(ITEMS.PUMPED_UP);
+	} else if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
 		// Medics is purchased, cooled down, and needed. Trigger it.
+		// This is because PUMPED_UP is basically a better version of "MEDIC"
+		// and it gets dropped by monsters as loot
 		console.log('Medics is purchased, cooled down, and needed. Trigger it.');
 		triggerAbility(ABILITIES.MEDIC);
 	} else if (numItem(ITEMS.GOD_MODE) > 0 && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
+		// Don't have Medic or Pumped Up? 
+		// We'll use godmode so we can delay our death in case the cooldowns come back.
+		// Instead of just firing it, we could maybe only use godmode
+		// if the medic / pumped up ability is going to be back before godmode expires
 		console.log('We have god mode, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.GOD_MODE);
-	} else if(numItem(ITEMS.PUMPED_UP) > 0 && !isAbilityCoolingDown(ITEMS.PUMPED_UP)) {
-		// If we have no medic-pots or godmode we will use 
-		// the item PUMPED UP in order to regenerate our health
-		console.log('We can pump up our HP. Trigger it.');
-		triggerItem(ITEMS.PUMPED_UP);
 	} else if(numItem(ITEMS.STEAL_HEALTH) > 0 && !isAbilityCoolingDown(ITEMS.STEAL_HEALTH)) {
 		// Use Steal Health as a last resort as that 
 		// allows us to gain HP depending on our click-damage
