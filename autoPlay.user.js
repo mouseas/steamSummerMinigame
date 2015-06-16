@@ -1022,7 +1022,7 @@ function useGoodLuckCharmIfRelevant() {
 
 function useClusterBombIfRelevant() {
 	//Check if Cluster Bomb is purchased and cooled down
-	if (!canUseAbility(ABILITIES.CLUSTER_BOMB)) {
+	if (canUseAbility(ABILITIES.CLUSTER_BOMB)) {
 
 		//Check lane has monsters to explode
 		var currentLane = s().m_nExpectedLane;
