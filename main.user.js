@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.3.5
+// @version 2.3.8
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match *://steamcommunity.com/minigame/towerattack*
@@ -123,6 +123,7 @@ function doTheThing() {
 
 		useGoodLuckCharmIfRelevant();
 		useCritIfRelevant();
+		useReviveIfRelevant();
 		useMedicsIfRelevant();
 		useMoraleBoosterIfRelevant();
 		useClusterBombIfRelevant();
@@ -479,6 +480,30 @@ function purchaseUpgrades() {
 	}
 }
 
+function useReviveIfRelevant() {
+	// Use resurrection if doable
+	
+	var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+	// Check if anyone needs reviving
+	var numDead = g_Minigame.CurrentScene().m_rgGameData.lanes[ currentLane ].player_hp_buckets[0];
+	var numPlayers = g_Minigame.CurrentScene().m_rgLaneData[ currentLane ].players;
+	var numRevives = numAbilityInLane(ABILITIES.REVIVE);
+
+	if (numPlayers === 0)
+		return; // no one alive, apparently
+	
+	var deadPercent = numDead / numPlayers;
+
+	// If it was recently used in current lane, don't bother ('instants' take a few seconds to
+	// register and last for 5 seconds). Also skip if number of dead players < 1/3 of lane team or
+	// lane consists of < 20% of total team players.
+	if (hasItem(ITEMS.REVIVE) && !isAbilityCoolingDown(ITEMS.REVIVE) && numRevives === 0 &&
+		deadPercent > 0.33 && getLanePercent() > 0.2) {
+		console.log('We have revive, cooled down, and needed. Trigger it.');
+		triggerItem(ITEMS.REVIVE);
+	}
+}
+
 function useMedicsIfRelevant() {
 	var myMaxHealth = g_Minigame.CurrentScene().m_rgPlayerTechTree.max_hp;
 	
@@ -490,13 +515,13 @@ function useMedicsIfRelevant() {
 	
 	// check if Medics is purchased and cooled down
 	if(numItem(ITEMS.PUMPED_UP) > 0 && !isAbilityCoolingDown(ITEMS.PUMPED_UP)) {
-		// the item PUMPED UP will be the first used in order to regenerate our health
+		// The item PUMPED UP will be the first used in order to regenerate our health
+		// This is because PUMPED_UP is basically a better version of "MEDIC"
+		// and it gets dropped by monsters as loot
 		console.log('We can pump up our HP. Trigger it.');
 		triggerItem(ITEMS.PUMPED_UP);
 	} else if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
 		// Medics is purchased, cooled down, and needed. Trigger it.
-		// This is because PUMPED_UP is basically a better version of "MEDIC"
-		// and it gets dropped by monsters as loot
 		console.log('Medics is purchased, cooled down, and needed. Trigger it.');
 		triggerAbility(ABILITIES.MEDIC);
 	} else if (numItem(ITEMS.GOD_MODE) > 0 && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
@@ -857,6 +882,22 @@ function currentLaneHasAbility(abilityID) {
 	if (typeof(g_Minigame.m_CurrentScene.m_rgLaneData[lane].abilities[abilityID]) == 'undefined')
 		return 0;
 	return g_Minigame.m_CurrentScene.m_rgLaneData[lane].abilities[abilityID];
+}
+
+function getLanePercent(lane) {
+	// Gets the percentage of total players in current lane. Useful in deciding if an ability is worthwhile to use
+
+	lane = lane || g_Minigame.CurrentScene().m_nExpectedLane
+	var currentPlayers = g_Minigame.CurrentScene().m_rgLaneData[ lane ].players
+	var numPlayers = 0;
+	for (var i=0; i < g_Minigame.CurrentScene().m_rgGameData.lanes.length; i++) {
+		numPlayers += g_Minigame.CurrentScene().m_rgLaneData[ i ].players;
+	}
+	
+	if (numPlayers === 0)
+		return 0;
+
+	return currentPlayers / numPlayers;
 }
 
 function clickTheThing() {
