@@ -161,11 +161,11 @@ function purchaseBadgeItems() {
 	// http://www.reddit.com/r/Steam/comments/39i0qc/psa_how_the_monster_game_works_an_indepth/
 	var abilityItemPriority = [
 		[ITEMS.GOLD_RAIN, 50],
-		[ITEMS.CRIPPLE_MONSTER, 10],
-		[ITEMS.CRIPPLE_SPAWNER, 8],
-		[ITEMS.MAXIMIZE_ELEMENT, 7],
-		[ITEMS.CRIT, 5],
-		[ITEMS.TREASURE, 5],
+		[ITEMS.CRIT, 20],
+		[ITEMS.TREASURE, 6],
+		[ITEMS.MAXIMIZE_ELEMENT, 5],
+		[ITEMS.CRIPPLE_MONSTER, 5],
+		[ITEMS.CRIPPLE_SPAWNER, 5],
 		[ITEMS.REVIVE, 5],
 		[ITEMS.STEAL_HEALTH, 4],
 		[ITEMS.GOD_MODE, 3],
