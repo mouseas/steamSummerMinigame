@@ -397,7 +397,7 @@
 			useTacticalNukeIfRelevant();
 			useCrippleMonsterIfRelevant();
 			useCrippleSpawnerIfRelevant();
-			if (level < control.speedThreshold || level % control.rainingRounds === 0 && level > control.useGoldThreshold) {
+			if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
 				useGoldRainIfRelevant();
 			}
 			useCrippleMonsterIfRelevant(level);
