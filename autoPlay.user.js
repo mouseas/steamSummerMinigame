@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.3.0
+// @version 4.3.1
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.3.0';
+	var SCRIPT_VERSION = '4.3.1';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -51,7 +51,7 @@
 	var trt_oldRender = function() {};
 
 	var control = {
-		speedThreshold: 5000,
+		speedThreshold: 2000,
 		rainingRounds: 500,
 		timePerUpdate: 60000,
 		useSlowMode: false,
