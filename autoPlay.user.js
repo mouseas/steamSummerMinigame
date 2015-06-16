@@ -57,7 +57,9 @@ var control = {
 	timePerUpdate: 60000,
 	useSlowMode: false,
 	minsLeft: 30,
-	allowWormholeLevel: 25000
+	allowWormholeLevel: 25000,
+	githubVersion: SCRIPT_VERSION,
+	useAbilityChance: 0.10
 };
 
 var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/598198356173574660";
@@ -245,9 +247,9 @@ function firstRun() {
 	var newDiv = document.createElement("div");
 	document.getElementsByClassName('pagecontent')[0].insertBefore(newDiv, document.getElementsByClassName('footer_spacer')[0]);
 	newDiv.className = "options_box";
-	
+
 	var options_box = document.querySelector(".options_box");
-	
+
 	if(!options_box) {
 		options_box = document.querySelector(".options_box");
 	}
@@ -305,7 +307,7 @@ function firstRun() {
 
 	info_box.appendChild(lane_info);
 	options_box.parentElement.appendChild(info_box);
-	
+
 	var leave_game_box = document.querySelector(".leave_game_helper");
 	leave_game_box.parentElement.removeChild(leave_game_box);
 
@@ -1018,7 +1020,7 @@ function goToLaneWithBestTarget() {
 }
 
 function useCooldownIfRelevant() {
-	if (getActiveAbilityLaneCount(ABILITIES.DECREASE_COOLDOWNS) > 0) {
+	if (getActiveAbilityLaneCount(ABILITIES.DECREASE_COOLDOWNS) > 0 || Math.random() > control.useAbilityChance) {
 		disableAbility(ABILITIES.DECREASE_COOLDOWNS);
 		return;
 	}
@@ -1068,33 +1070,34 @@ function useGoodLuckCharmIfRelevant() {
 
 function useClusterBombIfRelevant() {
 	//Check if Cluster Bomb is purchased and cooled down
-	if (canUseAbility(ABILITIES.CLUSTER_BOMB)) {
+	if (!canUseAbility(ABILITIES.CLUSTER_BOMB) || Math.random() > control.useAbilityChance) {
+		return;
+	}
 
-		//Check lane has monsters to explode
-		var currentLane = s().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
-		var level = getGameLevel();
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
-					enemySpawnerExists = true;
-				}
+	//Check lane has monsters to explode
+	var currentLane = s().m_nExpectedLane;
+	var enemyCount = 0;
+	var enemySpawnerExists = false;
+	var level = getGameLevel();
+	//Count each slot in lane
+	for (var i = 0; i < 4; i++) {
+		var enemy = s().GetEnemy(currentLane, i);
+		if (enemy) {
+			enemyCount++;
+			if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
+				enemySpawnerExists = true;
 			}
 		}
-		//Bombs away if spawner and 2+ other monsters
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.CLUSTER_BOMB);
-		}
+	}
+	//Bombs away if spawner and 2+ other monsters
+	if (enemySpawnerExists && enemyCount >= 3) {
+		triggerAbility(ABILITIES.CLUSTER_BOMB);
 	}
 }
 
 function useNapalmIfRelevant() {
 	//Check if Napalm is purchased and cooled down
-	if (!canUseAbility(ABILITIES.NAPALM)) {
+	if (!canUseAbility(ABILITIES.NAPALM) || Math.random() > control.useAbilityChance) {
 		return;
 	}
 
@@ -1122,7 +1125,7 @@ function useNapalmIfRelevant() {
 // Use Moral Booster if doable
 function useMoraleBoosterIfRelevant() {
 	// check if Good Luck Charms is purchased and cooled down
-	if (!canUseAbility(ABILITIES.MORALE_BOOSTER)) {
+	if (!canUseAbility(ABILITIES.MORALE_BOOSTER) || Math.random() > control.useAbilityChance) {
 		return;
 	}
 	var numberOfWorthwhileEnemies = 0;
@@ -1141,7 +1144,7 @@ function useMoraleBoosterIfRelevant() {
 
 function useTacticalNukeIfRelevant() {
 	// Check if Tactical Nuke is purchased
-	if (!canUseAbility(ABILITIES.TACTICAL_NUKE)) {
+	if (!canUseAbility(ABILITIES.TACTICAL_NUKE) || Math.random() > control.useAbilityChance) {
 		return;
 	}
 
@@ -1170,18 +1173,19 @@ function useTacticalNukeIfRelevant() {
 
 function useCrippleMonsterIfRelevant() {
 	// Check if Cripple Monster is available
-	if (canUseItem(ABILITIES.CRIPPLE_MONSTER)) {
+	if (!canUseItem(ABILITIES.CRIPPLE_MONSTER) || Math.random() > control.useAbilityChance) {
+		return;
+	}
 
-		var level = getGameLevel();
-		// Use nukes on boss when level >3000 for faster kills
-		if (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0) {
-			var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-			if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-				var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-				if (enemyBossHealthPercent > 0.5) {
-					advLog("Cripple Monster available and used on boss", 2);
-					triggerItem(ABILITIES.CRIPPLE_MONSTER);
-				}
+	var level = getGameLevel();
+	// Use nukes on boss when level >3000 for faster kills
+	if (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0) {
+		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
+		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+			if (enemyBossHealthPercent > 0.5) {
+				advLog("Cripple Monster available and used on boss", 2);
+				triggerItem(ABILITIES.CRIPPLE_MONSTER);
 			}
 		}
 	}
@@ -1189,7 +1193,7 @@ function useCrippleMonsterIfRelevant() {
 
 function useCrippleSpawnerIfRelevant() {
 	// Check if Cripple Spawner is available
-	if (!canUseItem(ABILITIES.CRIPPLE_SPAWNER)) {
+	if (!canUseItem(ABILITIES.CRIPPLE_SPAWNER) || Math.random() > control.useAbilityChance) {
 		return;
 	}
 
@@ -1267,7 +1271,7 @@ function useMetalDetectorIfRelevant() {
 
 function useMaxElementalDmgIfRelevant() {
 	// Check if Max Elemental Damage is purchased
-	if (isAbilityActive(ABILITIES.MAX_ELEMENTAL_DAMAGE)) {
+	if (isAbilityActive(ABILITIES.MAX_ELEMENTAL_DAMAGE) || Math.random() > control.useAbilityChance) {
 		return;
 	}
 	if (tryUsingItem(ABILITIES.MAX_ELEMENTAL_DAMAGE, true)) {
@@ -1290,7 +1294,7 @@ function useWormholeIfRelevant() {
 }
 
 function useReviveIfRelevant(level) {
-	if (level % 10 === 9 && tryUsingItem(ABILITIES.RESURRECTION)) {
+	if (level % 10 === 9 && tryUsingItem(ABILITIES.RESURRECTION) && Math.random() <= control.useAbilityChance) {
 		// Resurrect is purchased and we are using it.
 		advLog('Triggered Resurrect.');
 	}
