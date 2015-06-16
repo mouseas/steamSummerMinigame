@@ -7,8 +7,6 @@ This javascript automatically plays the 2015 Steam Summer minigame for you in a 
 It goes beyond the autoclicker scripts already out there. It will keep you in the lane where you'll make the most money, activate abilities as they are available and best apply, and possibly purchase upgrades and
 powerups for you.
 
-**DISCLAIMER:** This script will never include an automatic clicker. It leans into the realm of "cheating", and this script is not designed to cheat, rather to optimize gold retrieval. However, this script does automatically click when the gold rain / raining gold ability is present.
-
 ## Features ##
 
 - Moves you to the lane most likely to give you gold, prioritized like so:
