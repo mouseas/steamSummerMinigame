@@ -25,11 +25,13 @@
 //                                                       //
 ///////////////////////////////////////////////////////////
 
-var isAlreadyRunning = false;
-var autoClickGoldRain = true;
-var purchaseUpgradeToggle = true;
 
-var clickRate = 10; // change to number of desired clicks per second
+// Options. Can also be set in the options menu below game.
+var purchaseUpgradeToggle = true;
+var clickRate = 0; // change to number of desired clicks per second
+
+// Do not touch these
+var isAlreadyRunning = false;
 var timer = 0;
 var lastAction = 500; //start with the max. Array length
 var clickTimer;
@@ -99,6 +101,7 @@ function firstRun() {
 	if (g_Minigame.CurrentScene().m_UI.m_spendBadgePointsDialog.is(":visible")) {
 		purchaseBadgeItems();
 	}
+	createOptionsMenu();
 
 	// disable particle effects - this drastically reduces the game's memory leak
 	if (g_Minigame !== undefined) {
@@ -140,7 +143,7 @@ function doTheThing() {
 		useGoldRainIfRelevant();
 		attemptRespawn();
 
-		if(autoClickGoldRain) {
+		if(clickRate > 0) {
 			startGoldRainClick();
 		}
 
@@ -944,6 +947,134 @@ function startGoldRainClick() {
 		}
 		clickTimer = window.setInterval(clickTheThing, 1000 / clickRate);
 		timer = clickRate * 2; // click for 2 seconds; this will be topped off as long as Gold Rain is still active.
+	}
+}
+
+function createOptionsMenu() {
+
+	// Remove the junk at the bottom to make room for options
+	node = document.getElementById("footer");
+	if (node && node.parentNode) {
+		node.parentNode.removeChild( node );
+	}
+	
+	// Make space for option menu
+	var options_menu = document.querySelector(".game_options");
+	var sfx_btn = document.querySelector(".toggle_sfx_btn");
+	sfx_btn.style.marginLeft = "2px";
+	sfx_btn.style.marginRight = "7px";
+	sfx_btn.style.cssFloat = "right";
+	sfx_btn.style.styleFloat = "right";
+	var music_btn = document.querySelector(".toggle_music_btn");
+	music_btn.style.marginRight = "2px";
+	music_btn.style.cssFloat = "right";
+	music_btn.style.styleFloat = "right";
+	var leave_btn = document.querySelector(".leave_game_btn");
+	leave_btn.style.marginRight = "2px";
+	leave_btn.style.cssFloat = "right";
+	leave_btn.style.styleFloat = "right";
+
+	var info_box = document.querySelector(".leave_game_helper");
+	var pagecontent = document.querySelector(".pagecontent");
+	pagecontent.style.padding = "0";
+	options_menu.insertBefore(info_box, sfx_btn);
+
+	info_box.innerHTML = '<br><b>OPTIONS</b><hr>' + ((typeof GM_info !==  "undefined") ? ' (v' + GM_info.script.version + ')' : '');
+
+	// reset the CSS for the info box for aesthetics
+	info_box.className = "options_box";
+	info_box.style.backgroundColor = "#000000";
+	info_box.style.width = "300px";
+	info_box.style.padding = "12px";
+	info_box.style.boxShadow = "2px 2px 0 rgba( 0, 0, 0, 0.6 )";
+	info_box.style.color = "#ededed";
+	info_box.style.margin = "2px auto";
+	info_box.style.overflow = "auto";
+	info_box.style.cssFloat = "left";
+	info_box.style.styleFloat = "left";
+
+	var options = document.createElement("div");
+	options.style["-moz-column-count"] = 1;
+	options.style["-webkit-column-count"] = 1;
+	options.style["column-count"] = 1;
+	options.style.width = "100%";
+	options.style.float = "left";
+
+	options.appendChild(makeNumber("setAutoClickRate", "CPS during gold rain", "45px", clickRate, 0, 30, updateAutoClickRate));
+	options.appendChild(makeCheckBox("purchaseUpgradeToggle", "Auto upgrade items", purchaseUpgradeToggle, toggleAutoUpgrade));
+
+	info_box.appendChild(options);
+}
+
+function makeCheckBox(name, desc, state, listener) {
+	var label= document.createElement("label");
+	var description = document.createTextNode(desc);
+	var checkbox = document.createElement("input");
+
+	checkbox.type = "checkbox";
+	checkbox.name = name;
+	checkbox.checked = state;
+	checkbox.onclick = listener;
+	window[checkbox.name] = checkbox.checked;
+
+	label.appendChild(checkbox);
+	label.appendChild(description);
+	
+	label.appendChild(document.createElement("br"));
+	return label;
+}
+
+function makeNumber(name, desc, width, value, min, max, listener) {
+	var label= document.createElement("label");
+	var description = document.createTextNode(desc);
+	var number = document.createElement("input");
+
+	number.type = "number";
+	number.name = name;
+	number.style.width = width;
+	number.style.marginRight = "5px";
+	number.value = value;
+	number.min = min;
+	number.max = max;
+	number.onchange = listener;
+	number.addEventListener("keypress", function (evt) {
+		if (evt.which === 13)
+			number.onchange();
+		else if (evt.which < 48 || evt.which > 57)
+			evt.preventDefault();
+	});
+	window[number.name] = number;
+
+	label.appendChild(number);
+	label.appendChild(description);
+	label.appendChild(document.createElement("br"));
+	return label;
+}
+
+function handleCheckBox(event) {
+	var checkbox = event.target;
+
+	window[checkbox.name] = checkbox.checked;
+	return checkbox.checked;
+}
+
+function updateAutoClickRate(event) {
+	if(event !== undefined && event.target.value != "") {
+
+		var val = event.target.value;
+		if (val > event.target.max)
+			clickRate = event.target.max;
+		else if (val < event.target.min)
+			clickRate = event.target.min;
+		else
+			clickRate = val;
+		console.log('Click rate is now ' + clickRate);
+	}
+}
+
+function toggleAutoUpgrade(event) {
+	if(event !== undefined) {
+		purchaseUpgradeToggle = handleCheckBox(event);
 	}
 }
 
