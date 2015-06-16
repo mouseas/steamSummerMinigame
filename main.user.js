@@ -23,6 +23,9 @@
 //   Greasemonkey / Tampermonkey users will NOT update   //
 //                    automatically!!                    //
 //                                                       //
+//    Do not update version number in pull requests;     //
+//         It usually causes a merge conflict.           //
+//                                                       //
 ///////////////////////////////////////////////////////////
 
 var isAlreadyRunning = false;
