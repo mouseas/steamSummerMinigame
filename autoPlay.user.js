@@ -238,7 +238,6 @@ function firstRun() {
 	var titleActivity = document.querySelector('.title_activity');
 	var playersInGame = document.createElement('span');
 	playersInGame.innerHTML = '<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br>';
-
 	titleActivity.insertBefore(playersInGame, titleActivity.firstChild);
 
 	// Fix alignment
@@ -419,7 +418,7 @@ function MainLoop() {
 
 		if (level !== lastLevel) {
 			lastLevel = level;
-
+			updateLevelInfoTitle(level);
 			refreshPlayerData();
 		}
 
@@ -1430,7 +1429,12 @@ function sortLanesByElementals() {
 	return lanePointers;
 }
 
+function getCurrentTime() {
+	return s().m_rgGameData.timestamp;
+}
+
 function getActiveAbilityLaneCount(ability) {
+	var now = getCurrentTime();
 	var abilities = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_abilities;
 	var count = 0;
 	for (var i = 0; i < abilities.length; i++) {
@@ -1550,6 +1554,39 @@ w.setTimeout(function() {
 // Append gameid to breadcrumbs
 var breadcrumbs = document.querySelector('.breadcrumbs');
 
+function countdown(time) {
+	var hours = 0;
+	var minutes = 0;
+	for (var i = 0; i < 24; i++) {
+		if (time >= 3600) {
+			time = time - 3600;
+			hours = hours + 1;
+		}
+	}
+	for (var j = 0; j < 60; j++) {
+		if (time >= 60) {
+			time = time - 60;
+			minutes = minutes + 1;
+		}
+	}
+	return {hours : hours, minutes : minutes};
+}
+
+function expectedLevel(level) {
+	var time = Math.floor(s().m_nTime) % 86400;
+	time = time - 16*3600;
+	if (time < 0) {
+		time = time + 86400;
+	}
+
+	var remaining_time = 86400 - time;
+	var passed_time = getCurrentTime() - s().m_rgGameData.timestamp_game_start;
+	var expected_level = Math.floor(((level/passed_time)*remaining_time)+level);
+	var likely_level = Math.floor((expected_level - level)/Math.log(3))+ level;
+	
+	return {expected_level : expected_level, likely_level : likely_level, remaining_time : remaining_time};
+}
+
 if (breadcrumbs) {
 	var element = document.createElement('span');
 	element.textContent = ' > ';
@@ -1560,6 +1597,37 @@ if (breadcrumbs) {
 	element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
 	element.textContent = 'Room ' + w.g_GameID;
 	breadcrumbs.appendChild(element);
+
+	element = document.createElement('span');
+	element.textContent = ' > ';
+	breadcrumbs.appendChild(element);
+
+	element = document.createElement('span');
+	element.style.color = '#FFA07A';
+	element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
+	element.textContent = 'Level: 0, Expected Level: 0, Likely Level: 0';
+	breadcrumbs.appendChild(element);
+	document.ExpectedLevel = element;
+
+	element = document.createElement('span');
+	element.textContent = ' > ';
+	breadcrumbs.appendChild(element);
+
+	element = document.createElement('span');
+	element.style.color = '#9AC0FF';
+	element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
+	element.textContent = 'Remaining Time: 0 hours, 0 minutes.';
+	breadcrumbs.appendChild(element);
+	document.RemainingTime = element;
+}
+
+function updateLevelInfoTitle(level)
+{
+	var exp_lvl = expectedLevel(level);
+	var rem_time = countdown(exp_lvl.remaining_time);
+
+	document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
+	document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
 }
 
 // Helpers to access player stats.
