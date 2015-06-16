@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.3.5
+// @version 2.3.7
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match *://steamcommunity.com/minigame/towerattack*
@@ -35,6 +35,10 @@ var lastAction = 500; //start with the max. Array length
 var clickTimer;
 var purchasedShieldsWhileRespawning = false;
 
+var avgClickRate = 5; // to keep track of the average clicks per second that the game actually records
+var totalClicksPastFiveSeconds = avgClickRate * 5; // keeps track of total clicks over the past 5 seconds for a moving average
+var previousTickTime = 0; // tracks the last time we received an update from the game
+
 var ABILITIES = {
 	"MORALE_BOOSTER": 5,
 	"GOOD_LUCK": 6,
@@ -58,7 +62,10 @@ var ITEMS = {
     "GOD_MODE": 21,
     "TREASURE": 22,
     "STEAL_HEALTH": 23,
-    "REFLECT_DAMAGE": 24
+    "REFLECT_DAMAGE": 24,
+	"FEELING_LUCKY": 25,
+	"WORMHOLE": 26,
+	"LIKE_NEW": 27
 };
 
 var ENEMY_TYPE = {
@@ -159,8 +166,12 @@ function purchaseBadgeItems() {
 		[ITEMS.REFLECT_DAMAGE, 2],
 		[ITEMS.PUMPED_UP, 1]
 		//[ITEMS.THROW_MONEY, 0]
-		// Only go up to the second-last item. Throw money
-		// should never be used, but it's here just in case.
+		//[ITEMS.FEELING_LUCKY, 0]
+		//[ITEMS.WORMHOLE, 0]
+		//[ITEMS.LIKE_NEW, 0]
+		// Only go up to the second-last item. Throw money should never be used,
+		// but it's here just in case. Similarly, feeling lucky, wormhole, and
+		// like new are ridiculously priced and honestly aren't worth it
 	];
 
 	// Being extra paranoid about spending, since abilities update slowly.
@@ -367,13 +378,17 @@ function purchaseUpgrades() {
 	
 	var myGold = g_Minigame.CurrentScene().m_rgPlayerData.gold;
 	
-	//Initial values for   armor, dps, click damage 
+	//Initial values for armor & damage
 	var bestUpgradeForDamage,bestUpgradeForArmor;
 	var highestUpgradeValueForDamage = 0;
 	var highestUpgradeValueForArmor = 0;
 	var bestElement = -1;
 	var highestElementLevel = 0;
-
+	
+	var critMultiplier = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_crit;
+	var critRate = Math.min(g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage, 1);
+	var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
+	var basedpc = g_Minigame.CurrentScene().m_rgTuningData.player.damage_per_click;
 	
 	for( var i=0; i< upgrades.length; i++ ) {
 		var upgrade = upgrades[i];
@@ -400,13 +415,13 @@ function purchaseUpgrades() {
 				}
 				break;
 			case UPGRADE_TYPES.CLICK_DAMAGE:
-				if(avgClicksPerSecond * upgrade.multiplier / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+				if((critRate * critMultiplier + (1 - critRate)) * avgClicksPerSecond * upgrade.multiplier * basedpc / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
 					bestUpgradeForDamage = i;
-					highestUpgradeValueForDamage = avgClicksPerSecond * upgrade.multiplier / upgradeCost;
+					highestUpgradeValueForDamage = (critRate * critMultiplier + (1 - critRate)) * avgClicksPerSecond * upgrade.multiplier * basedpc / upgradeCost;
 				}
 				break;
 			case UPGRADE_TYPES.DPS:
-				if(upgrade.multiplier / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+				if(upgrade.multiplier * basedpc / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
 					bestUpgradeForDamage = i;
 					highestUpgradeValueForDamage = upgrade.multiplier / upgradeCost;
 				}
@@ -421,13 +436,10 @@ function purchaseUpgrades() {
 				}*/
 				break;
 			case UPGRADE_TYPES.LUCKY_SHOT:
-				//var critMultiplier = ?
-				/*var critChance = g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage;
-				var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
-				if(upgrade.multiplier /* critMultiplier * dpc * critChance * avgClicksPerSecond / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+				if(upgrade.multiplier * dpc * critRate * avgClicksPerSecond / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
 					bestUpgradeForDamage = i;
 					highestUpgradeValueForDamage = upgrade.multiplier / upgradeCost;
-				}*/
+				}
 				break;
 			default:
 				break;
@@ -460,7 +472,7 @@ function purchaseUpgrades() {
 			return;
 		}
 
-		if(myGold > upgradeCost && bestUpgradeForArmor) {
+		if(myGold > upgradeCost && bestUpgradeForArmor !== undefined) {
 			buyUpgrade(bestUpgradeForArmor);
 			myGold = g_Minigame.CurrentScene().m_rgPlayerData.gold;
 
@@ -474,7 +486,7 @@ function purchaseUpgrades() {
 	// Try to buy some damage
 	upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestUpgradeForDamage);
 
-	if(myGold > upgradeCost && bestUpgradeForDamage) {
+	if(myGold > upgradeCost && bestUpgradeForDamage !== undefined) {
 		buyUpgrade(bestUpgradeForDamage);
 	}
 }
@@ -490,13 +502,13 @@ function useMedicsIfRelevant() {
 	
 	// check if Medics is purchased and cooled down
 	if(numItem(ITEMS.PUMPED_UP) > 0 && !isAbilityCoolingDown(ITEMS.PUMPED_UP)) {
-		// the item PUMPED UP will be the first used in order to regenerate our health
+		// The item PUMPED UP will be the first used in order to regenerate our health
+		// This is because PUMPED_UP is basically a better version of "MEDIC"
+		// and it gets dropped by monsters as loot
 		console.log('We can pump up our HP. Trigger it.');
 		triggerItem(ITEMS.PUMPED_UP);
 	} else if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
 		// Medics is purchased, cooled down, and needed. Trigger it.
-		// This is because PUMPED_UP is basically a better version of "MEDIC"
-		// and it gets dropped by monsters as loot
 		console.log('Medics is purchased, cooled down, and needed. Trigger it.');
 		triggerAbility(ABILITIES.MEDIC);
 	} else if (numItem(ITEMS.GOD_MODE) > 0 && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
@@ -775,6 +787,35 @@ function numItem(itemId) {
 		}
 	}
 	return 0;
+}
+
+// This calculates a 5 second moving average of clicks per second based
+// on the values that the game is recording.
+function updateAvgClickRate() {
+	// Make sure we have updated info from the game first
+	if (previousTickTime != g_Minigame.CurrentScene().m_nLastTick){
+		totalClicksPastFiveSeconds -= avgClickRate;
+		totalClicksPastFiveSeconds += g_Minigame.CurrentScene().m_nLastClicks / ((g_Minigame.CurrentScene().m_nLastTick - previousTickTime) / 1000);
+		avgClickRate = totalClicksPastFiveSeconds / 5;
+		previousTickTime = g_Minigame.CurrentScene().m_nLastTick;
+	}
+}
+// disable enemy flinching animation when they get hit
+function disableFlinchingAnimation() {
+	if (CEnemy !== undefined) {
+		CEnemy.prototype.TakeDamage = function() {};
+		CEnemySpawner.prototype.TakeDamage = function() {};
+		CEnemyBoss.prototype.TakeDamage = function() {};
+	}
+}
+// disable damage text from clicking
+function disableDamageText() {
+	g_Minigame.CurrentScene().DoClickEffect = function() {};
+	g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
+}
+
+function getCooldownTime(abilityId) {
+	return g_Minigame.CurrentScene().GetCooldownForAbility(abilityId);
 }
 
 function isAbilityCoolingDown(abilityId) {
