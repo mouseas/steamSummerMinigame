@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements.
-// @version 2.4.0
+// @version 2.4.1
 // @namespace https://github.com/mouseas/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match *://steamcommunity.com/minigame/towerattack*
@@ -116,6 +116,10 @@ function firstRun() {
 		CEnemySpawner.prototype.TakeDamage = function() {};
 		CEnemyBoss.prototype.TakeDamage = function() {};
 	}
+
+	// add some extra buttons
+	jQuery('span#GRACSpan').remove(); // make sure only one exists; multiple runs of the script would otherwise keep adding another button.
+	jQuery(".toggle_music_btn").after("<span onclick=\"toggleGoldenRainAutoClick()\" class=\"toggle_music_btn\" id=\"GRACSpan\">Gold Rain Clicker:<span id=\"GRACStaus\">On</span></span>");
 }
 
 function doTheThing() {
@@ -905,10 +909,12 @@ function clickTheThing() {
 	// There's a reddit thread about why and we might as well be safe
 	g_msTickRate = 1100;
 
-	g_Minigame.m_CurrentScene.DoClick(
-		{
+	// Check if we should still click...we might get turned off/on
+	// during a Golden Rain
+	if (autoClickGoldRain) {
+		g_Minigame.m_CurrentScene.DoClick({
 			data: {
-				getLocalPosition: function() {
+				getLocalPosition: function () {
 					var enemy = g_Minigame.m_CurrentScene.GetEnemy(
 						g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane,
 						g_Minigame.m_CurrentScene.m_rgPlayerData.target);
@@ -920,8 +926,8 @@ function clickTheThing() {
 					}
 				}
 			}
-		}
-	);
+		});
+	}
 	
 	timer--;
 	
@@ -954,3 +960,16 @@ var thingTimer = window.setInterval(function(){
 		thingTimer = window.setInterval(doTheThing, 1000);
 	}
 }, 1000);
+
+// Toggles the Golden Rain Auto Clicker On and Off
+// and updates the button on the UI
+function toggleGoldenRainAutoClick() {
+	var status = "Off";
+	autoClickGoldRain = !autoClickGoldRain;
+
+	if (autoClickGoldRain) {
+		status = "On";
+	}
+
+	jQuery("#GRACStaus").text(status);
+}
