@@ -975,7 +975,7 @@
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
 			}
 			if (level < control.allowWormholeLevel && !isNearEndGame()) {
-				disableAbility(ABILITIES.WORMHOLE);
+				//disableAbility(ABILITIES.WORMHOLE);
 			} else {
 				enableAbility(ABILITIES.WORMHOLE);
 			}
