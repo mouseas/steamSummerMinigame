@@ -33,7 +33,6 @@ var removeAllText = getPreferenceBoolean("removeAllText", false);
 var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 var enableFingering = getPreferenceBoolean("enableFingering", true);
 var disableRenderer = getPreferenceBoolean("disableRenderer", false);
-var enableAutoUpdate = getPreferenceBoolean("enableAutoUpdate", true);
 
 var enableElementLock = getPreferenceBoolean("enableElementLock", true);
 
@@ -63,8 +62,6 @@ var control = {
 	useGoldThreshold: 200
 };
 
-var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/598198356173574660";
-var remoteControlURL2 = "http://steamcommunity.com/groups/MSG2015/discussions/0/598198356175571067";
 var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
 var lane_info = {};
@@ -149,12 +146,6 @@ function firstRun() {
 	trt_oldCrit = s().DoCritEffect;
 	trt_oldPush = s().m_rgClickNumbers.push;
 	trt_oldRender = w.g_Minigame.Render;
-
-	updateControlData();
-
-	w.controlUpdateTimer = w.setInterval(function() {
-		updateControlData();
-	}, control.timePerUpdate);
 
 	if (enableElementLock) {
 		lockElements();
@@ -283,7 +274,6 @@ function firstRun() {
 	options1.appendChild(makeCheckBox("removeGoldText", "Remove gold text", removeGoldText, handleEvent, false));
 	options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
 	options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, true));
-	options1.appendChild(makeCheckBox("enableAutoUpdate", "Enable script auto update", enableAutoUpdate, toggleAutoUpdate, false));
 
 	if (typeof GM_info !== "undefined") {
 		options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh", enableAutoRefresh, toggleAutoRefresh, false));
@@ -612,17 +602,6 @@ function toggleAutoClicker(event) {
 		currentClickRate = clickRate;
 	} else {
 		currentClickRate = 0;
-	}
-}
-
-function toggleAutoUpdate(event) {
-	var value = enableAutoUpdate;
-	if (event !== undefined) {
-		value = handleCheckBox(event);
-	}
-	if (value && !showedUpdateInfo) {
-		alert("PLEASE NOTE: This release has auto update functionality enabled by default. This does " + "come with a security implications and while you should be okay, it's still important " + "that you know about it. If you wish to disable it, simply uncheck the checkbox in options. " + "If you have questions, please contact /u/wchill.");
-		setPreference("showedUpdateInfo", true);
 	}
 }
 
@@ -1467,77 +1446,6 @@ w.SteamDB_Minigame_Timer = w.setInterval(function() {
         w.SteamDB_Minigame_Timer = w.setInterval(MainLoop, 1000);
     }
 }, 1000);
-
-function updateControlData() {
-	console.log("Updating script control data");
-	var xhr = new XMLHttpRequest();
-	xhr.onload = function() {
-		if (xhr.readyState === 4) {
-			if (xhr.status === 200) {
-				try {
-					var post = xhr.responseXML.querySelectorAll("div.content")[1];
-					if (!post) {
-						console.error("Failed to load for some reason... debug DOM output:");
-						console.error(xhr.responseXML);
-						return;
-					}
-					var data = JSON.parse(post.textContent);
-					console.log(data);
-					w.$J.each(data, function(k, v) {
-						control[k] = v;
-					});
-				} catch (e) {
-					console.error(e);
-				}
-			} else {
-				console.error(xhr.statusText);
-			}
-		}
-	};
-	xhr.onerror = function(e) {
-		console.error(xhr.statusText);
-	};
-	xhr.open("GET", remoteControlURL, true);
-	xhr.responseType = "document";
-	xhr.send(null);
-
-	if (enableAutoUpdate) {
-		updateCode();
-	}
-}
-
-function updateCode() {
-	console.log("Updating script control code");
-	var xhr = new XMLHttpRequest();
-	xhr.onload = function() {
-		if (xhr.readyState === 4) {
-			if (xhr.status === 200) {
-				try {
-					var post = xhr.responseXML.querySelectorAll("div.content")[1];
-					if (!post) {
-						console.error("Failed to load for some reason... debug DOM output:");
-						console.error(xhr.responseXML);
-						return;
-					}
-					var data = post.textContent;
-					console.log(data);
-					/*jslint evil: true */
-					eval(data);
-				} catch (e) {
-					console.error(e);
-				}
-			} else {
-				console.error(xhr.statusText);
-			}
-		}
-	};
-	xhr.onerror = function(e) {
-		console.error(xhr.statusText);
-	};
-	xhr.open("GET", remoteControlURL2, true);
-	xhr.responseType = "document";
-	xhr.send(null);
-}
 
 // reload page if game isn't fully loaded, regardless of autoRefresh setting
 w.setTimeout(function() {
