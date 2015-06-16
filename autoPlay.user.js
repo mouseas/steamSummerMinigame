@@ -1220,6 +1220,9 @@ function useMetalDetectorIfRelevant() {
 
 function useMaxElementalDmgIfRelevant() {
 	// Check if Max Elemental Damage is purchased
+	if (isAbilityActive(ABILITIES.MAX_ELEMENTAL_DAMAGE)) {
+		return;
+	}
 	if (tryUsingItem(ABILITIES.MAX_ELEMENTAL_DAMAGE, true)) {
 		// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
 		advLog('Max Elemental Damage is purchased and cooled down, triggering it.', 2);
