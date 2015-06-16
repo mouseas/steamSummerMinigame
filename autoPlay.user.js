@@ -1122,8 +1122,8 @@ function useTacticalNukeIfRelevant() {
 }
 
 function useCrippleMonsterIfRelevant() {
-	// Check if Cripple Spawner is available
-	if (canUseAbility(ABILITIES.CRIPPLE_MONSTER)) {
+	// Check if Cripple Monster is available
+	if (canUseItem(ABILITIES.CRIPPLE_MONSTER)) {
 
 		var level = getGameLevel();
 		// Use nukes on boss when level >3000 for faster kills
@@ -1133,7 +1133,7 @@ function useCrippleMonsterIfRelevant() {
 				var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
 				if (enemyBossHealthPercent > 0.5) {
 					advLog("Cripple Monster available and used on boss", 2);
-					triggerAbility(ABILITIES.CRIPPLE_MONSTER);
+					triggerItem(ABILITIES.CRIPPLE_MONSTER);
 				}
 			}
 		}
