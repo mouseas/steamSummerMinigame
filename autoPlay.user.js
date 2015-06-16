@@ -1192,7 +1192,7 @@ function useMetalDetectorIfRelevant() {
 		triggerAbility(ABILITIES.TREASURE);
 	}
 	// Check if metal detector or treasure is purchased
-	if (canUseAbility(ABILITIES.METAL_DETECTOR) || canUseAbility(ABILITIES.METAL_DETECTOR)) {
+	if (canUseAbility(ABILITIES.METAL_DETECTOR) || canUseAbility(ABILITIES.TREASURE)) {
 		if (isAbilityActive(ABILITIES.METAL_DETECTOR)) {
 			return;
 		}
@@ -1202,7 +1202,7 @@ function useMetalDetectorIfRelevant() {
 		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
 			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 
-			if (enemyBossHealthPercent >= 0.9) { // We want sufficient time for the metal detector to be applicable
+			if (enemyBossHealthPercent <= 0.25) { // We want sufficient time for the metal detector to be applicable
 				// Metal Detector is purchased, cooled down, and needed. Trigger it.
 				if (canUseAbility(ABILITIES.METAL_DETECTOR)) {
 					advLog('Metal Detector is purchased and cooled down, Triggering it on boss', 2);
