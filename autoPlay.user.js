@@ -59,7 +59,8 @@ var control = {
 	minsLeft: 30,
 	allowWormholeLevel: 25000,
 	githubVersion: SCRIPT_VERSION,
-	useAbilityChance: 0.10
+	useAbilityChance: 0.10,
+	useGoldThreshold: 200
 };
 
 var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/598198356173574660";
@@ -407,7 +408,7 @@ function MainLoop() {
 		useTacticalNukeIfRelevant();
 		useCrippleMonsterIfRelevant();
 		useCrippleSpawnerIfRelevant();
-		if (level < control.speedThreshold || level % control.rainingRounds === 0) {
+		if (level < control.speedThreshold || level % control.rainingRounds === 0 && level > control.useGoldThreshold) {
 			useGoldRainIfRelevant();
 		}
 		useCrippleMonsterIfRelevant(level);
