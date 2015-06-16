@@ -1,6 +1,6 @@
 #Steam Summer 2015 Monster Minigame AutoScript#
 
-[![forthebadge](http://forthebadge.com/images/badges/fuck-it-ship-it.svg)](http://forthebadge.com) [![Build Status](https://travis-ci.org/SteamDatabase/steamSummerMinigame.svg?branch=master)](https://travis-ci.org/SteamDatabase/steamSummerMinigame)
+[![forthebadge](http://forthebadge.com/images/badges/fuck-it-ship-it.svg)](http://forthebadge.com) [![Build Status](https://travis-ci.org/wchill/steamSummerMinigame.svg)](https://travis-ci.org/wchill/steamSummerMinigame)
 
 ## Purpose ##
 
