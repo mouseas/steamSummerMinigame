@@ -25,11 +25,13 @@
 //                                                       //
 ///////////////////////////////////////////////////////////
 
-var isAlreadyRunning = false;
-var autoClickGoldRain = true;
-var purchaseUpgradeToggle = true;
 
+// Options. Can also be set in the options menu below game.
+var purchaseUpgradeToggle = true;
 var clickRate = 0; // change to number of desired clicks per second
+
+// Do not touch these
+var isAlreadyRunning = false;
 var timer = 0;
 var lastAction = 500; //start with the max. Array length
 var clickTimer;
@@ -134,7 +136,7 @@ function doTheThing() {
 		useGoldRainIfRelevant();
 		attemptRespawn();
 
-		if(autoClickGoldRain) {
+		if(clickRate > 0) {
 			startGoldRainClick();
 		}
 
@@ -912,6 +914,13 @@ function startGoldRainClick() {
 }
 
 function createOptionsMenu() {
+
+	// Remove the junk at the bottom to make room for options
+	node = document.getElementById("footer");
+	if (node && node.parentNode) {
+		node.parentNode.removeChild( node );
+	}
+	
 	// Make space for option menu
 	var options_menu = document.querySelector(".game_options");
 	var sfx_btn = document.querySelector(".toggle_sfx_btn");
@@ -954,19 +963,13 @@ function createOptionsMenu() {
 	options.style.width = "100%";
 	options.style.float = "left";
 
-	options.appendChild(makeNumber("setAutoClickRate", "Auto clicks per second", "45px", clickRate, 0, 30, updateAutoClickRate));
+	options.appendChild(makeNumber("setAutoClickRate", "CPS during gold rain", "45px", clickRate, 0, 30, updateAutoClickRate));
+	options.appendChild(makeCheckBox("purchaseUpgradeToggle", "Auto upgrade items", purchaseUpgradeToggle, toggleAutoUpgrade));
 
 	info_box.appendChild(options);
 }
 
-function makeCheckBox(name, desc, state, listener, reqRefresh) {
-	var asterisk = document.createElement('span');
-	asterisk.appendChild(document.createTextNode("*"));
-	asterisk.style.color = "#FF5252";
-	asterisk.style.fontSize = "22px";
-	asterisk.style.lineHeight = "14px";
-	asterisk.style.verticalAlign = "bottom";
-
+function makeCheckBox(name, desc, state, listener) {
 	var label= document.createElement("label");
 	var description = document.createTextNode(desc);
 	var checkbox = document.createElement("input");
@@ -979,9 +982,7 @@ function makeCheckBox(name, desc, state, listener, reqRefresh) {
 
 	label.appendChild(checkbox);
 	label.appendChild(description);
-	if(reqRefresh) {
-		label.appendChild(asterisk);
-	}
+	
 	label.appendChild(document.createElement("br"));
 	return label;
 }
@@ -1013,6 +1014,13 @@ function makeNumber(name, desc, width, value, min, max, listener) {
 	return label;
 }
 
+function handleCheckBox(event) {
+	var checkbox = event.target;
+
+	window[checkbox.name] = checkbox.checked;
+	return checkbox.checked;
+}
+
 function updateAutoClickRate(event) {
 	if(event !== undefined && event.target.value != "") {
 
@@ -1024,6 +1032,12 @@ function updateAutoClickRate(event) {
 		else
 			clickRate = val;
 		console.log(val + ' cool cool ' + clickRate);
+	}
+}
+
+function toggleAutoUpgrade(event) {
+	if(event !== undefined) {
+		purchaseUpgradeToggle = handleCheckBox(event);
 	}
 }
 
