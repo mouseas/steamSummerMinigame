@@ -52,7 +52,7 @@
 
 	var control = {
 		speedThreshold: 5000,
-		rainingRounds: 250,
+		rainingRounds: 500,
 		timePerUpdate: 60000,
 		useSlowMode: false,
 		minsLeft: 60,
@@ -975,7 +975,7 @@
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
 			}
 			if (level < control.allowWormholeLevel && !isNearEndGame()) {
-				disableAbility(ABILITIES.WORMHOLE);
+				//disableAbility(ABILITIES.WORMHOLE);
 			} else {
 				enableAbility(ABILITIES.WORMHOLE);
 			}
@@ -1245,13 +1245,14 @@
 
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
-		if (!isNearEndGame()) {
+		var level = getGameLevel();
+		if (level < control.speedThreshold || level % control.rainingRounds !== 0) {
 			return;
 		}
 		// Check if Wormhole is purchased
 		if (tryUsingItem(ABILITIES.WORMHOLE)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
-		} else if (tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
+		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
 		}
 	}
