@@ -161,12 +161,10 @@ function firstRun() {
 	}
 
 	// disable enemy flinching animation when they get hit
-	if (removeFlinching) {
-		if (CEnemy !== undefined) {
-			CEnemy.prototype.TakeDamage = function() {};
-			CEnemySpawner.prototype.TakeDamage = function() {};
-			CEnemyBoss.prototype.TakeDamage = function() {};
-		}
+	if (removeFlinching && w.CEnemy) {
+		w.CEnemy.prototype.TakeDamage = function() {};
+		w.CEnemySpawner.prototype.TakeDamage = function() {};
+		w.CEnemyBoss.prototype.TakeDamage = function() {};
 	}
 
 	if (removeCritText) {
@@ -184,7 +182,7 @@ function firstRun() {
 	}
 
 	if (removeInterface) {
-		var node = document.getElementById("global_header");
+		node = document.getElementById("global_header");
 		if (node && node.parentNode) {
 			node.parentNode.removeChild(node);
 		}
@@ -227,7 +225,7 @@ function firstRun() {
 	egg.className = "toggle_music_btn";
 	egg.innerText = "Easter Egg";
 	egg.onclick = function() {
-		SmackTV();
+		w.SmackTV();
 	};
 	document.querySelector(".game_options").insertBefore(egg, document.querySelector(".leave_game_btn"));
 
@@ -306,10 +304,10 @@ function firstRun() {
 }
 
 function fixActiveCapacityUI() {
-    $J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ieDoLnx.png)');
-    $J('#activeinlanecontainer').css('height', '154px');
-    $J('#activitycontainer').css('height', '270px');
-    $J('#activityscroll').css('height', '270px');
+	w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ieDoLnx.png)');
+	w.$J('#activeinlanecontainer').css('height', '154px');
+	w.$J('#activitycontainer').css('height', '270px');
+	w.$J('#activityscroll').css('height', '270px');
 }
 
 function disableParticles() {
@@ -358,7 +356,7 @@ function MainLoop() {
 		useTacticalNukeIfRelevant();
 		useCrippleMonsterIfRelevant();
 		useCrippleSpawnerIfRelevant();
-		if (level < control.speedThreshold || level % control.rainingRounds == 0) {
+		if (level < control.speedThreshold || level % control.rainingRounds === 0) {
 			useGoldRainIfRelevant();
 		}
 		useCrippleMonsterIfRelevant(level);
@@ -375,7 +373,7 @@ function MainLoop() {
 
 		s().m_nClicks = currentClickRate;
 		s().m_nLastTick = false;
-		g_msTickRate = 1000;
+		w.g_msTickRate = 1000;
 
 		var damagePerClick = s().CalculateDamage(
 			s().m_rgPlayerTechTree.damage_per_click,
@@ -405,7 +403,7 @@ function MainLoop() {
 				displayText(
 					enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
 					enemy.m_Sprite.position.y - 52,
-					"-" + FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
+					"-" + w.FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
 					"#aaf"
 				);
 
@@ -431,7 +429,7 @@ function MainLoop() {
 						displayText(
 							enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
 							enemy.m_Sprite.position.y - 17,
-							"+" + FormatNumberForDisplay(goldPerSecond, 5),
+							"+" + w.FormatNumberForDisplay(goldPerSecond, 5),
 							"#e1b21e"
 						);
 					}
@@ -622,7 +620,7 @@ function toggleRenderer(event) {
 	}
 
 	if (value) {
-		w.g_Minigame.Renderer.render = function() {}
+		w.g_Minigame.Renderer.render = function() {};
 	} else {
 		w.g_Minigame.Renderer.render = trt_oldRender;
 	}
@@ -958,7 +956,7 @@ function goToLaneWithBestTarget() {
 
 		// Prevent attack abilities and items if up against a boss or treasure minion
 		var level = getGameLevel();
-		if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds == 0))) {
+		if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds === 0))) {
 			BOSS_DISABLED_ABILITIES.forEach(disableAbility);
 		} else {
 			BOSS_DISABLED_ABILITIES.forEach(enableAbility);
@@ -1034,7 +1032,7 @@ function useClusterBombIfRelevant() {
 			var enemy = s().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0)) {
+				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
 					enemySpawnerExists = true;
 				}
 			}
@@ -1062,7 +1060,7 @@ function useNapalmIfRelevant() {
 		var enemy = s().GetEnemy(currentLane, i);
 		if (enemy) {
 			enemyCount++;
-			if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0)) {
+			if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
 				enemySpawnerExists = true;
 			}
 		}
@@ -1107,7 +1105,7 @@ function useTacticalNukeIfRelevant() {
 	for (var i = 0; i < 4; i++) {
 		var enemy = s().GetEnemy(currentLane, i);
 		if (enemy) {
-			if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0)) {
+			if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
 				enemySpawnerExists = true;
 				enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 			}
@@ -1127,10 +1125,10 @@ function useCrippleMonsterIfRelevant() {
 
 		var level = getGameLevel();
 		// Use nukes on boss when level >3000 for faster kills
-		if (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0) {
+		if (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0) {
 			var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
 			if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-				var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
+				var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 				if (enemyBossHealthPercent > 0.5) {
 					advLog("Cripple Monster available and used on boss", 2);
 					triggerAbility(ABILITIES.CRIPPLE_MONSTER);
@@ -1425,7 +1423,7 @@ if (w.SteamDB_Minigame_Timer) {
 }
 
 w.SteamDB_Minigame_Timer = w.setInterval(function() {
-    if (g_Minigame && s().m_bRunning && s().m_rgPlayerTechTree && s().m_rgGameData) {
+    if (w.g_Minigame && s().m_bRunning && s().m_rgPlayerTechTree && s().m_rgGameData) {
         w.clearInterval(w.SteamDB_Minigame_Timer);
         firstRun();
         w.SteamDB_Minigame_Timer = w.setInterval(MainLoop, 1000);
@@ -1447,7 +1445,7 @@ function updateControlData() {
 					}
 					var data = JSON.parse(post.innerText);
 					console.log(data);
-					$J.each(data, function(k, v) {
+					w.$J.each(data, function(k, v) {
 						control[k] = v;
 					});
 				} catch (e) {
@@ -1457,10 +1455,10 @@ function updateControlData() {
 				console.error(xhr.statusText);
 			}
 		}
-	}
+	};
 	xhr.onerror = function(e) {
 		console.error(xhr.statusText);
-	}
+	};
 	xhr.open("GET", remoteControlURL, true);
 	xhr.responseType = "document";
 	xhr.send(null);
@@ -1485,6 +1483,7 @@ function updateCode() {
 					}
 					var data = post.innerText;
 					console.log(data);
+					/*jslint evil: true */
 					eval(data);
 				} catch (e) {
 					console.error(e);
@@ -1493,10 +1492,10 @@ function updateCode() {
 				console.error(xhr.statusText);
 			}
 		}
-	}
+	};
 	xhr.onerror = function(e) {
 		console.error(xhr.statusText);
-	}
+	};
 	xhr.open("GET", remoteControlURL2, true);
 	xhr.responseType = "document";
 	xhr.send(null);
@@ -1521,7 +1520,7 @@ if (breadcrumbs) {
 	element = document.createElement('span');
 	element.style.color = '#D4E157';
 	element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-	element.textContent = 'Room ' + g_GameID;
+	element.textContent = 'Room ' + w.g_GameID;
 	breadcrumbs.appendChild(element);
 }
 
@@ -1579,7 +1578,7 @@ function startFingering() {
 function enhanceTooltips() {
 	var trt_oldTooltip = w.fnTooltipUpgradeDesc;
 	w.fnTooltipUpgradeDesc = function(context) {
-		var $context = $J(context);
+		var $context = w.$J(context);
 		var desc = $context.data('desc');
 		var strOut = desc;
 		var multiplier = parseFloat($context.data('multiplier'));
@@ -1587,8 +1586,8 @@ function enhanceTooltips() {
 			case 2: // Type for click damage. All tiers.
 				strOut = trt_oldTooltip(context);
 				var currentCrit = getClickDamage() * getCritMultiplier();
-				var newCrit = g_Minigame.CurrentScene().m_rgTuningData.player.damage_per_click * (getClickDamageMultiplier() + multiplier) * getCritMultiplier();
-				strOut += '<br><br>Crit Click: ' + FormatNumberForDisplay(currentCrit) + ' => ' + FormatNumberForDisplay(newCrit);
+				var newCrit = w.g_Minigame.CurrentScene().m_rgTuningData.player.damage_per_click * (getClickDamageMultiplier() + multiplier) * getCritMultiplier();
+				strOut += '<br><br>Crit Click: ' + w.FormatNumberForDisplay(currentCrit) + ' => ' + w.FormatNumberForDisplay(newCrit);
 				break;
 			case 7: // Lucky Shot's type.
 				var currentMultiplier = getCritMultiplier();
@@ -1600,20 +1599,20 @@ function enhanceTooltips() {
 
 				strOut += '<br><br>Crit Percentage: ' + getCritChance().toFixed(1) + '%';
 
-				strOut += '<br><br>Critical Damage Multiplier:'
+				strOut += '<br><br>Critical Damage Multiplier:';
 				strOut += '<br>Current: ' + (currentMultiplier) + 'x';
 				strOut += '<br>Next Level: ' + (newMultiplier) + 'x';
 
 				strOut += '<br><br>Damage with one crit:';
-				strOut += '<br>DPS: ' + FormatNumberForDisplay(currentMultiplier * dps) + ' => ' + FormatNumberForDisplay(newMultiplier * dps);
-				strOut += '<br>Click: ' + FormatNumberForDisplay(currentMultiplier * clickDamage) + ' => ' + FormatNumberForDisplay(newMultiplier * clickDamage);
-				strOut += '<br><br>Base Increased By: ' + FormatNumberForDisplay(multiplier) + 'x';
+				strOut += '<br>DPS: ' + w.FormatNumberForDisplay(currentMultiplier * dps) + ' => ' + w.FormatNumberForDisplay(newMultiplier * dps);
+				strOut += '<br>Click: ' + w.FormatNumberForDisplay(currentMultiplier * clickDamage) + ' => ' + w.FormatNumberForDisplay(newMultiplier * clickDamage);
+				strOut += '<br><br>Base Increased By: ' + w.FormatNumberForDisplay(multiplier) + 'x';
 				break;
 			case 9: // Boss Loot Drop's type
-				strOut += '<br><br>Boss Loot Drop Rate:'
+				strOut += '<br><br>Boss Loot Drop Rate:';
 				strOut += '<br>Current: ' + getBossLootChance().toFixed(0) + '%';
 				strOut += '<br>Next Level: ' + (getBossLootChance() + multiplier * 100).toFixed(0) + '%';
-				strOut += '<br><br>Base Increased By: ' + FormatNumberForDisplay(multiplier * 100) + '%';
+				strOut += '<br><br>Base Increased By: ' + w.FormatNumberForDisplay(multiplier * 100) + '%';
 				break;
 			default:
 				return trt_oldTooltip(context);
@@ -1626,8 +1625,8 @@ function enhanceTooltips() {
 	w.fnTooltipUpgradeElementDesc = function(context) {
 		var strOut = trt_oldElemTooltip(context);
 
-		var $context = $J(context);
-		var upgrades = g_Minigame.CurrentScene().m_rgTuningData.upgrades.slice(0);
+		var $context = w.$J(context);
+		var upgrades = w.g_Minigame.CurrentScene().m_rgTuningData.upgrades.slice(0);
 		// Element Upgrade index 3 to 6
 		var idx = $context.data('type');
 		// Is the current tooltip for the recommended element?
