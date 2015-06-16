@@ -118,6 +118,9 @@ function firstRun() {
 		CEnemySpawner.prototype.TakeDamage = function() {};
 		CEnemyBoss.prototype.TakeDamage = function() {};
 	}
+	
+	// flat disable Throw Money At Screen item - it causes more harm than benefit in every conceivable case
+	disableAbilityItem(ITEMS.THROW_MONEY);
 }
 
 function doTheThing() {
