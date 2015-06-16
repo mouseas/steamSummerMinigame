@@ -1031,7 +1031,7 @@ function updateAutoClickRate(event) {
 			clickRate = event.target.min;
 		else
 			clickRate = val;
-		console.log(val + ' cool cool ' + clickRate);
+		console.log('Click rate is now ' + clickRate);
 	}
 }
 
