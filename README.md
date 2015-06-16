@@ -42,12 +42,12 @@ This fork has:
 
 ### [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en) ###
 
-1. Navigate to `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js`.
+1. Navigate to `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js` or click [here](https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js).
 2. When the editor has loaded, click `Install` (*NOT* `Process with Chrome`).
 
 ### [Greasemonkey](https://addons.mozilla.org/en-us/firefox/addon/greasemonkey/) ###
 
-1. Navigate to `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js`.
+1. Navigate to `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js` or click [here](https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js).
 2. Right click on the page, and click `Save Page As`.
 3. While Firefox is still open, open a File Manager of any sort, and navigate to the directory you saved the script.
 4. Drag & drop the script file onto the Firefox window.
