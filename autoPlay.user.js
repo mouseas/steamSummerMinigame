@@ -288,11 +288,7 @@ function firstRun() {
 
 	options_box.appendChild(options1);
 
-<<<<<<< HEAD
-	info_box.innerHTML = "<b>LANE INFO</b><br/>";
-=======
 	info_box.innerHTML = "<b>GAME INFO</b><br/>";
->>>>>>> c06d3685f2a538700a4a8bb43f95fd6be7fd87ff
 	info_box.className = "info_box";
 	info_box.style["right"] = "0px";
 	lane_info = document.createElement("div");
@@ -359,7 +355,6 @@ function disableParticles() {
 	if (w.CSceneGame) {
 		w.CSceneGame.prototype.DoScreenShake = function() {};
 
-<<<<<<< HEAD
 		if (removeParticles) {
 			w.CSceneGame.prototype.SpawnEmitter = function(emitter) {
 				emitter.emit = false;
@@ -368,76 +363,6 @@ function disableParticles() {
 		}
 	}
 }
-=======
-    if (w.CSceneGame !== undefined) {
-        w.CSceneGame.prototype.DoScreenShake = function() {};
-    }
-    
-    // Easter egg button
-    var egg = document.createElement("span");
-    egg.className = "toggle_music_btn";
-    egg.innerText = "Easter Egg";
-    egg.onclick = function () {
-        SmackTV();
-    };
-    document.querySelector(".game_options").insertBefore(egg, document.querySelector(".leave_game_btn"));
-
-    // Add "players in game" label
-    var oldHTML = document.getElementsByClassName("title_activity")[0].innerHTML;
-    document.getElementsByClassName("title_activity")[0].innerHTML = "<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br />" + oldHTML;
-
-    var options_box = document.querySelector(".leave_game_helper");
-    options_box.innerHTML = '<b>OPTIONS</b><br/>Some of these may need a refresh to take effect.<br/>Version: ' + SCRIPT_VERSION +'<br/>';
-
-    // reset the CSS for the info box for aesthetics
-    options_box.className = "options_box";
-    options_box.style.backgroundColor = "#000000";
-    options_box.style.width = "600px";
-    options_box.style.top = "73px";
-    options_box.style.padding = "12px";
-    options_box.style.position = "absolute";
-    options_box.style.boxShadow = "2px 2px 0 rgba( 0, 0, 0, 0.6 )";
-    options_box.style.color = "#ededed";
-
-    var options = document.createElement("div");
-    options.style["-moz-column-count"] = 2;
-    options.style["-webkit-column-count"] = 2;
-    options.style["column-count"] = 2;
-
-    options.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker));
-    if (typeof GM_info !== "undefined") {
-        options.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (fix memory leak)", enableAutoRefresh, toggleAutoRefresh));
-    }
-    options.appendChild(makeCheckBox("removeInterface", "Remove interface (needs refresh)", removeInterface, handleEvent));
-    options.appendChild(makeCheckBox("removeParticles", "Remove particle effects (needs refresh)", removeParticles, handleEvent));
-    options.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects (needs refresh)", removeFlinching, handleEvent));
-    options.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText));
-    options.appendChild(makeCheckBox("removeGoldText", "Remove gold text", removeGoldText, handleEvent));
-    options.appendChild(makeCheckBox("removeAllText", "Remove all text (overrides above)", removeAllText, toggleAllText));
-    options.appendChild(makeCheckBox("enableElementLock", "Lock element upgrades", enableElementLock, toggleElementLock));
-    options.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer (needs refresh)", enableFingering, handleEvent));
-    options.appendChild(makeCheckBox("enableRenderer", "Enable graphics renderer", enableRenderer, toggleRenderer));
-    options.appendChild(makeCheckBox("enableAutoUpdate", "Enable script auto update", enableAutoUpdate, toggleAutoUpdate));
-
-    var info_box = options_box.cloneNode(true);
-
-    options_box.appendChild(options);
-
-    info_box.innerHTML = "<b>GAME INFO</b><br/>";
-    info_box.className = "info_box";
-    info_box.style["right"] = "0px";
-    lane_info = document.createElement("div");
-    lane_info.style["-moz-column-count"] = 3;
-    lane_info.style["-webkit-column-count"] = 3;
-    lane_info.style["column-count"] = 3;
-
-    lane_info.appendChild(document.createElement("div"));
-    lane_info.appendChild(document.createElement("div"));
-    lane_info.appendChild(document.createElement("div"));
-
-    info_box.appendChild(lane_info);
-    options_box.parentElement.appendChild(info_box);
->>>>>>> c67485d7952120ca4da7e1868f0a9d26a83324a4
 
 function updateLaneData() {
     var element_names = {1:"Fire", 2:"Water", 3:"Air", 4:"Earth"};
@@ -494,7 +419,6 @@ function updateLaneData() {
 }
 
 function MainLoop() {
-<<<<<<< HEAD
 	if (!isAlreadyRunning) {
 		isAlreadyRunning = true;
 
@@ -675,35 +599,6 @@ function makeCheckBox(name, desc, state, listener, reqRefresh) {
 	}
 	label.appendChild(document.createElement("br"));
 	return label;
-=======
-    if (!isAlreadyRunning) {
-        isAlreadyRunning = true;
-
-        var level = getGameLevel();
-        readTickData();
-
-        updateLaneData();
-
-        goToLaneWithBestTarget();
-        useGoodLuckCharmIfRelevant();
-        useMedicsIfRelevant();
-        useMoraleBoosterIfRelevant();
-        useClusterBombIfRelevant();
-        useNapalmIfRelevant();
-        useTacticalNukeIfRelevant();
-        useCrippleMonsterIfRelevant();
-        useCrippleSpawnerIfRelevant();
-        if (level < control.speedThreshold || level % control.rainingRounds == 0) {
-            useGoldRainIfRelevant();
-        }
-        useMetalDetectorIfRelevant();
-        attemptRespawn();
-        disableCooldownIfRelevant();
-        updatePlayersInGame();
-
-        s().m_nClicks = currentClickRate;
-        g_msTickRate = 1000;
->>>>>>> c67485d7952120ca4da7e1868f0a9d26a83324a4
 
 }
 
