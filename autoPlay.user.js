@@ -55,8 +55,8 @@
 		rainingRounds: 250,
 		timePerUpdate: 60000,
 		useSlowMode: false,
-		minsLeft: 30,
-		allowWormholeLevel: 25000,
+		minsLeft: 60,
+		allowWormholeLevel: 180000,
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.10,
 		useGoldThreshold: 200
