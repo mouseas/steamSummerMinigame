@@ -30,7 +30,7 @@
 
 var isAlreadyRunning = false;
 var autoClickGoldRain = true;
-var purchaseUpgradeToggle = true;
+var purchaseUpgradeToggle = false;
 
 var clickRate = 10; // change to number of desired clicks per second
 var timer = 0;
@@ -121,8 +121,7 @@ function firstRun() {
 	}
 
 	// add some extra buttons
-	jQuery('span#GRACSpan').remove(); // make sure only one exists; multiple runs of the script would otherwise keep adding another button.
-	jQuery(".toggle_music_btn").after("<span onclick=\"toggleGoldenRainAutoClick()\" class=\"toggle_music_btn\" id=\"GRACSpan\">Gold Rain Clicker:<span id=\"GRACStaus\">On</span></span>");
+	addUIElements();
 }
 
 function doTheThing() {
@@ -964,6 +963,16 @@ var thingTimer = window.setInterval(function(){
 	}
 }, 1000);
 
+function addUIElements() {
+	// Toggle-able Gold Rain Auto-click switch
+	jQuery('span#GRACSpan').remove(); // make sure only one exists; multiple runs of the script would otherwise keep adding another button.
+	jQuery(".leave_game_btn").before("<span onclick=\"toggleGoldenRainAutoClick()\" class=\"toggle_music_btn\" id=\"GRACSpan\">Gold Rain Clicker:<span id=\"GRACStatus\">On</span></span>");
+	
+	// Toggle-able Auto-purchase switch
+	jQuery('span#APSpan').remove(); // make sure only one exists; multiple runs of the script would otherwise keep adding another button.
+	jQuery(".leave_game_btn").before("<span onclick=\"toggleAutoPurchase()\" class=\"toggle_music_btn\" id=\"APSpan\">Auto-Purchase:<span id=\"APStatus\">Off</span></span>");
+}
+
 // Toggles the Golden Rain Auto Clicker On and Off
 // and updates the button on the UI
 function toggleGoldenRainAutoClick() {
@@ -974,5 +983,18 @@ function toggleGoldenRainAutoClick() {
 		status = "On";
 	}
 
-	jQuery("#GRACStaus").text(status);
+	jQuery("#GRACStatus").text(status);
+}
+
+// Toggles the Upgrade Auto Purchaser On and Off
+// and updates the button on the UI
+function toggleAutoPurchase() {
+	var status = "Off";
+	purchaseUpgradeToggle = !purchaseUpgradeToggle;
+
+	if (purchaseUpgradeToggle) {
+		status = "On";
+	}
+
+	jQuery("#APStatus").text(status);
 }
