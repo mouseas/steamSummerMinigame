@@ -277,8 +277,6 @@ function firstRun() {
 	options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, false));
 	options1.appendChild(makeCheckBox("enableAutoUpdate", "Enable script auto update", enableAutoUpdate, toggleAutoUpdate, false));
 
-	var info_box = options_box.cloneNode(true);
-
 	if (typeof GM_info !== "undefined") {
 		options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (mitigate memory leak)", enableAutoRefresh, toggleAutoRefresh, false));
 	}
@@ -290,7 +288,7 @@ function firstRun() {
 
 	info_box.innerHTML = "<b>GAME INFO</b><br/>";
 	info_box.className = "info_box";
-	info_box.style["right"] = "0px";
+	info_box.style.right = "0px";
 	lane_info = document.createElement("div");
 	lane_info.style["-moz-column-count"] = 3;
 	lane_info.style["-webkit-column-count"] = 3;
@@ -324,7 +322,7 @@ function firstRun() {
 }
 
 function updateLaneData() {
-    var element_names = {1:"Fire", 2:"Water", 3:"Air", 4:"Earth"};
+    var element_names = {1:":shelterwildfire:", 2:":waterrune:", 3:":Wisp:", 4:":FateTree:"};
     for(var i = 0; i < 3; i++) {
         var element = s().m_rgGameData.lanes[i].element;
         var abilities = s().m_rgLaneData[i].abilities;
@@ -339,8 +337,8 @@ function updateLaneData() {
             }
         }
         var players = s().m_rgLaneData[i].players;
-        var output = "Lane " + (i+1) + " - " + element_names[element] + "\n" + players + " players\n\n";
-        lane_info.children[i].innerText = output;
+        var output = "Lane " + (i+1) + " - <img src=\"http://cdn.steamcommunity.com/economy/emoticon/" + element_names[element] + "\"><br>" + players + " players";
+        lane_info.children[i].innerHTML = output;
     }
 }
 
@@ -364,27 +362,6 @@ function disableParticles() {
 	}
 }
 
-function updateLaneData() {
-    var element_names = {1:"Fire", 2:"Water", 3:"Air", 4:"Earth"};
-    for(var i = 0; i < 3; i++) {
-        var element = s().m_rgGameData.lanes[i].element;
-        var abilities = s().m_rgLaneData[i].abilities;
-        if(!abilities) {
-            abilities = {};
-        }
-        var enemies = [];
-        for (var j = 0; j < 4; j++) {
-            var enemy = s().GetEnemy(i, j);
-            if (enemy) {
-                enemies.push(enemy);
-            }
-        }
-        var players = s().m_rgLaneData[i].players;
-        var output = "Lane " + (i+1) + " - " + element_names[element] + "\n" + players + " players\n\n";
-        lane_info.children[i].innerText = output;
-    }
-}
-
 function isNearEndGame() {
 	var cTime = new Date();
 	var cHours = cTime.getUTCHours();
@@ -395,27 +372,6 @@ function isNearEndGame() {
 	} else {
 		return false;
 	}
-}
-
-function updateLaneData() {
-    var element_names = {1:"Fire", 2:"Water", 3:"Air", 4:"Earth"};
-    for(var i = 0; i < 3; i++) {
-        var element = s().m_rgGameData.lanes[i].element;
-        var abilities = s().m_rgLaneData[i].abilities;
-        if(!abilities) {
-            abilities = {};
-        }
-        var enemies = [];
-        for (var j = 0; j < 4; j++) {
-            var enemy = s().GetEnemy(i, j);
-            if (enemy) {
-                enemies.push(enemy);
-            }
-        }
-        var players = s().m_rgLaneData[i].players;
-        var output = "Lane " + (i+1) + " - " + element_names[element] + "\n" + players + " players\n\n";
-        lane_info.children[i].innerText = output; 
-    }
 }
 
 function MainLoop() {
@@ -599,7 +555,6 @@ function makeCheckBox(name, desc, state, listener, reqRefresh) {
 	}
 	label.appendChild(document.createElement("br"));
 	return label;
-
 }
 
 function handleEvent(event) {
