@@ -271,7 +271,6 @@ function firstRun() {
 	options1.style["-webkit-column-count"] = 3;
 	options1.style["column-count"] = 3;
 	options1.style.width = "100%";
-	options1.style.float = "left";
 
 	options1.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker, false));
 	options1.appendChild(makeCheckBox("removeInterface", "Remove interface", removeInterface, handleEvent, true));
@@ -306,6 +305,9 @@ function firstRun() {
 
 	info_box.appendChild(lane_info);
 	options_box.parentElement.appendChild(info_box);
+	
+	var leave_game_box = document.querySelector(".leave_game_helper");
+	leave_game_box.parentElement.removeChild(leave_game_box);
 
 	//Elemental upgrades lock
 	var ab_box = document.getElementById("abilities");
