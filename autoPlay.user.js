@@ -433,14 +433,13 @@ function MainLoop() {
 
 		advLog("Ticked. Current clicks per second: " + currentClickRate + ". Current damage per second: " + (damagePerClick * currentClickRate), 4);
 
-		/*
 		if(disableRenderer) {
 		  s().Tick();
 
 		  requestAnimationFrame(function() {
 		    w.g_Minigame.Renderer.render(s().m_Container);
 		  });
-		}*/
+		}
 
 		isAlreadyRunning = false;
 
@@ -638,7 +637,6 @@ function toggleAutoRefresh(event) {
 	}
 }
 
-/*
 function toggleRenderer(event) {
 	var value = disableRenderer;
 
@@ -659,20 +657,6 @@ function toggleRenderer(event) {
 		ticker.stop();
 
 		w.g_Minigame.Render = function() {};
-	}
-}
-*/
-
-function toggleRenderer(event) {
-	var value = disableRenderer;
-	if (event !== undefined) {
-		value = handleCheckBox(event);
-	}
-
-	if (value) {
-		w.g_Minigame.Renderer.render = function() {};
-	} else {
-		w.g_Minigame.Renderer.render = trt_oldRender;
 	}
 }
 
