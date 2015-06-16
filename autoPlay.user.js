@@ -793,11 +793,11 @@ function displayText(x, y, strText, color) {
 	s().m_containerUI.addChild(text);
 	text.container = s().m_containerUI;
 
-	var e = new CEasingSinOut(text.y, -200, 1000);
+	var e = new w.CEasingSinOut(text.y, -200, 1000);
 	e.parent = text;
 	text.m_easeY = e;
 
-	e = new CEasingSinOut(2, -2, 1000);
+	e = new w.CEasingSinOut(2, -2, 1000);
 	e.parent = text;
 	text.m_easeAlpha = e;
 
@@ -1101,6 +1101,7 @@ function useTacticalNukeIfRelevant() {
 	var currentLane = s().m_nExpectedLane;
 	var enemySpawnerExists = false;
 	var enemySpawnerHealthPercent = 0.0;
+	var level = getGameLevel();
 	//Count each slot in lane
 	for (var i = 0; i < 4; i++) {
 		var enemy = s().GetEnemy(currentLane, i);
@@ -1250,7 +1251,7 @@ function useReviveIfRelevant(level) {
 function attemptRespawn() {
 	if ((s().m_bIsDead) &&
 		((s().m_rgPlayerData.time_died) + 5) < (s().m_nTime)) {
-		RespawnPlayer();
+		w.RespawnPlayer();
 	}
 }
 
