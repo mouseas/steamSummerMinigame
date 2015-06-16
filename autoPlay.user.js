@@ -242,7 +242,12 @@ function firstRun() {
 	var activity = document.getElementById("activitylog");
 	activity.style.marginTop = "33px";
 
-	var options_box = document.querySelector(".leave_game_helper");
+	var newDiv = document.createElement("div");
+	document.getElementsByClassName('pagecontent')[0].insertBefore(newDiv, document.getElementsByClassName('footer_spacer')[0]);
+	newDiv.className = "options_box";
+	
+	var options_box = document.querySelector(".options_box");
+	
 	if(!options_box) {
 		options_box = document.querySelector(".options_box");
 	}
@@ -252,11 +257,12 @@ function firstRun() {
 	options_box.className = "options_box";
 	options_box.style.backgroundColor = "#000000";
 	options_box.style.width = "600px";
-	options_box.style.top = "73px";
+	options_box.style.marginTop = "12px";
 	options_box.style.padding = "12px";
-	options_box.style.position = "absolute";
 	options_box.style.boxShadow = "2px 2px 0 rgba( 0, 0, 0, 0.6 )";
 	options_box.style.color = "#ededed";
+	options_box.style.marginLeft = "auto";
+	options_box.style.marginRight = "auto";
 
 	var info_box = options_box.cloneNode(true);
 
