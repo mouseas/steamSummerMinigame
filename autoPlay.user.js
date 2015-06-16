@@ -1240,11 +1240,11 @@ function useGoldRainIfRelevant() {
 
 function useMetalDetectorIfRelevant() {
 	// Early game treasures
-	if (getGameLevel() <= 30 && canUseAbility(ABILITIES.TREASURE)) {
-		triggerAbility(ABILITIES.TREASURE);
+	if (getGameLevel() <= 30 && canUseItem(ABILITIES.TREASURE)) {
+		triggerItem(ABILITIES.TREASURE);
 	}
 	// Check if metal detector or treasure is purchased
-	if (canUseAbility(ABILITIES.METAL_DETECTOR) || canUseAbility(ABILITIES.TREASURE)) {
+	if (canUseAbility(ABILITIES.METAL_DETECTOR) || canUseItem(ABILITIES.TREASURE)) {
 		if (isAbilityActive(ABILITIES.METAL_DETECTOR)) {
 			return;
 		}
@@ -1259,9 +1259,9 @@ function useMetalDetectorIfRelevant() {
 				if (canUseAbility(ABILITIES.METAL_DETECTOR)) {
 					advLog('Metal Detector is purchased and cooled down, Triggering it on boss', 2);
 					triggerAbility(ABILITIES.METAL_DETECTOR);
-				} else if (canUseAbility(ABILITIES.TREASURE)) {
+				} else if (canUseItem(ABILITIES.TREASURE)) {
 					advLog('Treasure is available and cooled down, Triggering it on boss', 2);
-					triggerAbility(ABILITIES.TREASURE);
+					triggerItem(ABILITIES.TREASURE);
 				}
 			}
 		}
