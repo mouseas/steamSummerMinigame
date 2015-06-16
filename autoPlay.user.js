@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.2.2
+// @version 4.2.3
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -748,7 +748,7 @@
 			return t;
 		};
 
-		var elem = Math.abs(hashCode(w.g_steamID) % 4);
+		var elem = (parseInt(w.g_steamID.slice(-2)) + (parseInt(w.g_Minigame.gameid) % 100)) % 4;
 
 		// If more than two elements are leveled to 3 or higher, do not enable lock
 		var leveled = 0;
