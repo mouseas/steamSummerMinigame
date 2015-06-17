@@ -714,6 +714,7 @@
 	}
 
 	function getWantedClicksPerSecond() {
+		var level = getGameLevel();
 		if (level % control.rainingRounds === 0) {
 			if (hasItem(ABILITIES.WORMHOLE)) {
 				currentClickRate = 0;
@@ -1127,11 +1128,12 @@
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
 		var level = getGameLevel();
-		
+
 		// Prevent this outright if its within control.rainingSafeRounds of the next rainingRound
-		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds)
+		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
 			return;
-		
+		}
+
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = s().GetEnemy(currentLane, i);
@@ -1142,6 +1144,7 @@
 				}
 			}
 		}
+
 		//Burn them all if spawner and 2+ other monsters
 		if (enemySpawnerExists && enemyCount >= 3) {
 			triggerAbility(ABILITIES.NAPALM);
