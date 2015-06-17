@@ -436,17 +436,7 @@
 				refreshPlayerData();
 			}
 
-			// Made a woopsy, now clicks are actually disabled with wormholes.
-			if (level % control.rainingRounds === 0) {
-				if (hasItem(ABILITIES.WORMHOLE)) {
-					currentClickRate = 0;
-				} else {
-					currentClickRate = Math.floor(clickRate/2);
-				}
-			} else {
-				currentClickRate = clickRate;
-			}
-
+			currentClickRate = getWantedClicksPerSecond();
 			s().m_nClicks = currentClickRate;
 			s().m_nLastTick = false;
 			w.g_msTickRate = 1000;
@@ -720,6 +710,21 @@
 			};
 		} else {
 			s().m_rgClickNumbers.push = trt_oldPush;
+		}
+	}
+
+	function getWantedClicksPerSecond() {
+		var level = getGameLevel();
+		if (level % control.rainingRounds === 0) {
+			if (hasItem(ABILITIES.WORMHOLE)) {
+				return 0;
+			} else {
+				return Math.floor(clickRate/2);
+			}
+		} else if (enableAutoClicker) {
+			return clickRate;
+		} else {
+			return 0;
 		}
 	}
 
@@ -1123,11 +1128,12 @@
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
 		var level = getGameLevel();
-		
+
 		// Prevent this outright if its within control.rainingSafeRounds of the next rainingRound
-		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds)
+		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
 			return;
-		
+		}
+
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = s().GetEnemy(currentLane, i);
@@ -1138,6 +1144,7 @@
 				}
 			}
 		}
+
 		//Burn them all if spawner and 2+ other monsters
 		if (enemySpawnerExists && enemyCount >= 3) {
 			triggerAbility(ABILITIES.NAPALM);
