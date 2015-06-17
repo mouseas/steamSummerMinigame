@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.3.3
+// @version 4.3.4
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.3.3';
+	var SCRIPT_VERSION = '4.3.4';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -1215,7 +1215,7 @@
 
 	function useMetalDetectorIfRelevant() {
 		// Early game treasures
-		if (getGameLevel() <= 30 && canUseItem(ABILITIES.TREASURE)) {
+		if ((getGameLevel() <= 30 || getGameLevel() >= 100000) && canUseItem(ABILITIES.TREASURE)) {
 			triggerItem(ABILITIES.TREASURE);
 		}
 		// Check if metal detector or treasure is purchased
