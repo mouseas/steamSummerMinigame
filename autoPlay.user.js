@@ -318,7 +318,7 @@
 		leave_game_box.parentElement.removeChild(leave_game_box);
 
 		enhanceTooltips();
-		addBadgeItemPurchaseMultiplierButtons();
+		waitForWelcomePanelLoad();
 	}
 
 	function updateLaneData() {
@@ -478,7 +478,7 @@
 					}
 				}
 			}
-			
+
 			// Make sure to only include ticks that are relevant
 			var level_jump = getGameLevel() - oldLevel;
 			if (level_jump > 0) {
@@ -487,8 +487,8 @@
 					levelsSkipped[i+1] = levelsSkipped[i];
 				}
 				levelsSkipped[0] = level_jump;
-				
-				oldLevel = getGameLevel();	
+
+				oldLevel = getGameLevel();
 			}
 		}
 	}
@@ -1647,45 +1647,66 @@
 		return s().m_rgGameData.level + 1;
 	}
 
-	/** Add 3 button on the "Welcome Panel" to multiply starting item purchase */
-	function addBadgeItemPurchaseMultiplierButtons() {
-		// create multiplier buttons
-		var buttonX1 = w.$J('<button onclick="setBadgeItemByMultiplier(1)" type="button">x1</button>');
-		var buttonX10 = w.$J('<button onclick="setBadgeItemByMultiplier(10)" type="button">x10</button>');
-		var buttonX100 = w.$J('<button onclick="setBadgeItemByMultiplier(100)" type="button">x100</button>');
+	/** Check periodicaly if the welcome panel is visible
+	 * then trigger an event 'event:welcomePanelVisible' */
+	function waitForWelcomePanelLoad() {
+		var checkTicks = 20; // not very elegant but effective
+		var waitForWelcomePanelInterval = setInterval(function() {
+			var $welcomePanel = w.$J('.spend_badge_ponts_ctn');
+			var panelReady = !!($welcomePanel && $welcomePanel.length && $welcomePanel.is(':visible'));
 
-		// Add them to the badge point item purache panel
-		w.$J('#badge_items').append('<span>Batch purchase : </span>')
-			.append(buttonX1).append(buttonX10).append(buttonX100);
-
-		// hook to handle multiplier button clicks
-		var badgeItemByMultiplier = 1;
-
-		w.setBadgeItemByMultiplier = function(newMult) {
-			if(typeof newMult === 'number' && newMult >= 1) {
-				badgeItemByMultiplier = Math.floor(newMult);
+			if(panelReady) { // Got it! Tuning time!
+				window.document.dispatchEvent(new Event('event:welcomePanelVisible'));
+				clearInterval(waitForWelcomePanelInterval);
 			}
-		};
-
-		// Bind new click function on each item div/button
-		w.$J('#badge_items > .purchase_ability_item').each(function() {
-			var item = w.$J(this);
-			item.attr('onclick', '');
-			item.click(function(e) {
-				// Call the old function
-				w.g_Minigame.CurrentScene().TrySpendBadgePoints(this);
-				// Multiply the las added element
-				var queue = w.g_Minigame.CurrentScene().m_rgPurchaseItemsQueue;
-				if(badgeItemByMultiplier > 1 && queue.length > 0) {
-					var lastAddedItem = queue[queue.length - 1]; // top item
-					// do magic ... well... a for loop .. Ohmagad!
-					for(var i=1; i<badgeItemByMultiplier; i++) {
-						queue.push(lastAddedItem);
-					}
-				}
-				return false;
-			});
-		});
+			else if(w.g_Minigame && w.g_Minigame.CurrentScene() && w.g_Minigame.CurrentScene().m_rgPlayerTechTree
+					&& !w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points) { // techtree but no points
+				clearInterval(waitForWelcomePanelInterval);
+			}
+			else if(--checkTicks <= 0) { // give up
+				clearInterval(waitForWelcomePanelInterval);
+			}
+		}, 500);
 	}
+
+	// Wait for welcome panel then add more buttons for batch purchase
+	w.document.addEventListener('event:welcomePanelVisible', function() {
+		// Select existings x10 buttons
+		w.$J('#badge_items > .purchase_ability_item > .sub_item').each(function() {
+			var x10Button = w.$J(this);
+
+			// New button
+			var x100Button = w.$J('<div class="sub_item x100">x100</div>');
+			x100Button.click(function(event) { // same from steam script but x100 (incredible!)
+					w.g_Minigame.CurrentScene().TrySpendBadgePoints(this, 100);
+					event.stopPropagation();
+				});
+			x100Button.data(x10Button.data());
+
+			x10Button.css('margin-right', '50px'); // Shift the x10 button a little
+			x10Button.after(x100Button);
+		});
+
+		// Wrap panel update to unable/disable x100 buttons
+		var oldUpdate = w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog;
+		w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog = function() {
+			oldUpdate.apply(w.g_Minigame.CurrentScene().m_UI, arguments); // super call
+
+			// remaining badgepoints
+			var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
+
+			// each x100 button
+			w.$J('#badge_items > .purchase_ability_item > .sub_item.x100').each(function() {
+				var button = w.$J(this);
+				// disable if not enougth points
+				if(badgePoints < button.data().cost * 100) {
+					button.addClass('disabled');
+				}
+				else {
+					button.removeClass('disabled');
+				}
+			});
+		};
+	}, false);
 
 }(window));
