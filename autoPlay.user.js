@@ -491,7 +491,7 @@
 					}
 					if (showLevelJumps) {
 						displayText(
-							s().m_rgPlayerData.current_lane * 300,
+							100 + s().m_rgPlayerData.current_lane * 200,
 							300,
 							">>" + calculateLevelsJumped(),
 							"#66ff66"
