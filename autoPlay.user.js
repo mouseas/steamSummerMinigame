@@ -52,6 +52,8 @@
 
 	var control = {
 		speedThreshold: 2000,
+		// Stop using offensive abilities shortly before rain/wormhole rounds.
+		rainingSafeRounds: 5,
 		rainingRounds: 100,
 		timePerUpdate: 60000,
 		useSlowMode: false,
@@ -1043,7 +1045,7 @@
 
 	function useClusterBombIfRelevant() {
 		//Check if Cluster Bomb is purchased and cooled down
-		if (!canUseAbility(ABILITIES.CLUSTER_BOMB) || Math.random() > control.useAbilityChance) {
+		if (!canUseAbility(ABILITIES.CLUSTER_BOMB) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
 			return;
 		}
 
@@ -1070,7 +1072,7 @@
 
 	function useNapalmIfRelevant() {
 		//Check if Napalm is purchased and cooled down
-		if (!canUseAbility(ABILITIES.NAPALM) || Math.random() > control.useAbilityChance) {
+		if (!canUseAbility(ABILITIES.NAPALM) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
 			return;
 		}
 
@@ -1117,7 +1119,7 @@
 
 	function useTacticalNukeIfRelevant() {
 		// Check if Tactical Nuke is purchased
-		if (!canUseAbility(ABILITIES.TACTICAL_NUKE) || Math.random() > control.useAbilityChance) {
+		if (!canUseAbility(ABILITIES.TACTICAL_NUKE) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
 			return;
 		}
 
@@ -1146,7 +1148,7 @@
 
 	function useCrippleMonsterIfRelevant() {
 		// Check if Cripple Monster is available
-		if (!canUseItem(ABILITIES.CRIPPLE_MONSTER) || Math.random() > control.useAbilityChance) {
+		if (!canUseItem(ABILITIES.CRIPPLE_MONSTER) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
 			return;
 		}
 
@@ -1352,6 +1354,14 @@
 
 	function canUseAbility(abilityId) {
 		return hasPurchasedAbility(abilityId) && !isAbilityCoolingDown(abilityId) && isAbilityEnabled(abilityId);
+	}
+
+	function canUseOffensiveAbility() {
+		var level = getGameLevel();
+		var levelmod = level % control.rainingRounds;
+		// Early in the game, or we're a safe distance away from raining rounds.
+		return level < control.speedThreshold - control.rainingSafeRounds ||
+			(levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds);
 	}
 
 	function tryUsingAbility(abilityId) {
