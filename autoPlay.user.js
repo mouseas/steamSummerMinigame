@@ -1288,6 +1288,7 @@
 		if (canUseLikeNew) {
 			var rand = Math.floor(Math.random() * 4000 + 1000);
 			setTimeout(useLikeNew, rand);
+			advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
 			canUseLikeNew = false;
 		}
 	}
