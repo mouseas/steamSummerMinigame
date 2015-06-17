@@ -491,8 +491,9 @@ function purchaseUpgrades() {
 	
 	// Try to buy some damage
 	upgradeCost = g_Minigame.CurrentScene().GetUpgradeCost(bestUpgradeForDamage);
+	var upgradeCostBestArmor = g_Minigame.CurrentScene().GetUpgradeCost(bestUpgradeForArmor);
 
-	if(myGold > upgradeCost && bestUpgradeForDamage !== undefined) {
+	if(myGold - upgradeCostBestArmor > upgradeCost && bestUpgradeForDamage !== undefined) {
 		buyUpgrade(bestUpgradeForDamage);
 	}
 }
