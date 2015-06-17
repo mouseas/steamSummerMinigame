@@ -59,7 +59,7 @@
 		allowWormholeLevel: 180000,
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
-		useGoldThreshold: 200,
+		useGoldThreshold: 200
 	};
 	
 	var canUseLikeNew = true;
