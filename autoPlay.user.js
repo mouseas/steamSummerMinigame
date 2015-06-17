@@ -49,7 +49,7 @@
 	var trt_oldCrit = function() {};
 	var trt_oldPush = function() {};
 	var trt_oldRender = function() {};
-
+	
 	var control = {
 		speedThreshold: 2000,
 		rainingRounds: 500,
@@ -59,8 +59,10 @@
 		allowWormholeLevel: 180000,
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
-		useGoldThreshold: 200
+		useGoldThreshold: 200,
 	};
+	
+	var canUseLikeNew = true;
 
 	var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
@@ -403,6 +405,7 @@
 			useCrippleMonsterIfRelevant(level);
 			useReviveIfRelevant(level);
 			useMaxElementalDmgIfRelevant();
+			useLikeNewIfRelevant();
 			useWormholeIfRelevant();
 			updatePlayersInGame();
 
@@ -1258,6 +1261,24 @@
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
 		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
+		}
+	}
+	
+	function useLikeNewIfRelevant() {
+		// Allow Like New use for next farm boss round
+		var level = getGameLevel();
+		if (level % control.rainingRounds !== 0 && !canUseLikeNew) {
+			canUseLikeNew = true;
+			return;
+		}
+		// Check if wormhole is on cooldown and roll the dice 
+		if (canUseItem(ABILITIES.WORMHOLE) || Math.random() > control.useAbilityChance || level % control.rainingRounds !== 0) {
+			return;
+		}
+		// Reset away, and disable Like New for this boss round
+		if (tryUsingItem(ABILITIES.LIKE_NEW, true) && canUseLikeNew) {
+			advLog('Wormhole on cooldown, resetting cooldowns');
+			canUseLikeNew = false;
 		}
 	}
 
