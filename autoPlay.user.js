@@ -1757,41 +1757,41 @@
 	function getGameLevel() {
 		return s().m_rgGameData.level + 1;
 	}
-	
+
 	/** Add 3 button on the "Welcome Panel" to multiply starting item purchase */
 	function addBadgeItemPurchaseMultiplierButtons() {
 		// create multiplier buttons
-		var buttonX1 = $J('<button onclick="setBadgeItemByMultiplier(1)" type="button">x1</button>');
-		var buttonX10 = $J('<button onclick="setBadgeItemByMultiplier(10)" type="button">x10</button>');
-		var buttonX100 = $J('<button onclick="setBadgeItemByMultiplier(100)" type="button">x100</button>');
+		var buttonX1 = w.$J('<button onclick="setBadgeItemByMultiplier(1)" type="button">x1</button>');
+		var buttonX10 = w.$J('<button onclick="setBadgeItemByMultiplier(10)" type="button">x10</button>');
+		var buttonX100 = w.$J('<button onclick="setBadgeItemByMultiplier(100)" type="button">x100</button>');
 
 		// Add them to the badge point item purache panel
-		$J('#badge_items').append('<span>Batch purchase : </span>')
+		w.$J('#badge_items').append('<span>Batch purchase : </span>')
 			.append(buttonX1).append(buttonX10).append(buttonX100);
 
 		// hook to handle multiplier button clicks
 		var badgeItemByMultiplier = 1;
 
 		w.setBadgeItemByMultiplier = function(newMult) {
-			if(typeof(newMult) === 'number' && newMult >= 1) {
+			if(typeof newMult === 'number' && newMult >= 1) {
 				badgeItemByMultiplier = Math.floor(newMult);
 			}
 		};
 
 		// Bind new click function on each item div/button
-		$J('#badge_items > .purchase_ability_item').each(function() {
-			var item = $J(this);
+		w.$J('#badge_items > .purchase_ability_item').each(function() {
+			var item = w.$J(this);
 			item.attr('onclick', '');
 			item.click(function(e) {
 				// Call the old function
-				g_Minigame.CurrentScene().TrySpendBadgePoints(this);
+				w.g_Minigame.CurrentScene().TrySpendBadgePoints(this);
 				// Multiply the las added element
-				var queue = g_Minigame.CurrentScene().m_rgPurchaseItemsQueue;
+				var queue = w.g_Minigame.CurrentScene().m_rgPurchaseItemsQueue;
 				if(badgeItemByMultiplier > 1 && queue.length > 0) {
 					var lastAddedItem = queue[queue.length - 1]; // top item
 					// do magic ... well... a for loop .. Ohmagad!
 					for(var i=1; i<badgeItemByMultiplier; i++) {
-						queue.push(lastAddedItem)
+						queue.push(lastAddedItem);
 					}
 				}
 				return false;
