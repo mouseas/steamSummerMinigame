@@ -1004,6 +1004,9 @@
 			var level = getGameLevel();
 			if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds === 0))) {
 				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
+				if (hasItem(ABILITIES.WORMHOLE)) {
+					s().m_nClicks = 0;
+				}
 			} else {
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
 			}
