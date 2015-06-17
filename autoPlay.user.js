@@ -32,6 +32,7 @@
 	var removeAllText = getPreferenceBoolean("removeAllText", false);
 	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
+	var showLevelJumps = getPreferenceBoolean("showLevelJumps", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
 
 	var enableElementLock = getPreferenceBoolean("enableElementLock", true);
@@ -68,6 +69,7 @@
 	};
 
 	var canUseLikeNew = true;
+	var oldLevel = 0;
 
 	var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
@@ -279,6 +281,7 @@
 		options1.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText, false));
 		options1.appendChild(makeCheckBox("removeGoldText", "Remove gold text", removeGoldText, handleEvent, false));
 		options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
+		options1.appendChild(makeCheckBox("showLevelJumps", "Show level jumps", showLevelJumps, toggleShowLevelJumps, false));
 		options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, true));
 
 		if (typeof GM_info !== "undefined") {
@@ -486,8 +489,17 @@
 							);
 						}
 					}
+					if (showLevelJumps) {
+						displayText(
+							enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
+							enemy.m_Sprite.position.y + 52,
+							">" + calculateLevelsJumped() + ">",
+							"#66ff66"
+						);
+					}
 				}
 			}
+			oldLevel = getGameLevel();
 		}
 	}
 
@@ -689,6 +701,22 @@
 		} else {
 			s().m_rgClickNumbers.push = trt_oldPush;
 		}
+	}
+
+	function toggleShowLevelJumps(event) {
+		var value = !showLevelJumps;
+		if (event !== undefined) {
+			value = handleCheckBox(event);
+		}
+		if (value) {
+			showLevelJumps = true;
+		} else {
+			showLevelJumps = false;
+		}
+	}
+
+	function calculateLevelsJumped() {
+		return toString(getGameLevel() - oldLevel);
 	}
 
 	function updateLogLevel(event) {
