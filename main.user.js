@@ -732,7 +732,7 @@ function useCrippleSpawnerIfRelevant() {
 		}
 
 		// If there is a spawner and it's health is above 95%, cripple it!
-		if (enemySpawnerExists && enemySpawnerHealthPercent > 0.95 && Math.random() < 1/50) {
+		if (enemySpawnerExists && enemySpawnerHealthPercent > 0.9 && Math.random() < 1/10) {
 			console.log("Cripple Spawner available, and needed. Cripple 'em.");
 			triggerItem(ITEMS.CRIPPLE_SPAWNER);
 		}
