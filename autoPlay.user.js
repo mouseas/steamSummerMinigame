@@ -1004,6 +1004,9 @@
 			var level = getGameLevel();
 			if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds === 0))) {
 				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
+				if (canUseItem(ABILITIES.WORMHOLE)) {
+					s().m_nClicks = 0;
+				}
 			} else {
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
 			}
@@ -1509,6 +1512,11 @@
 		return false;
 	}
 
+	function fightSafeBossFight() {
+
+
+	}
+
 	function advLog(msg, lvl) {
 		if (lvl <= logLevel) {
 			console.log(msg);
@@ -1665,6 +1673,7 @@
 	function getBossLootChance() {
 		return s().m_rgPlayerTechTree.boss_loot_drop_percentage * 100;
 	}
+
 
 	function startFingering() {
 		w.CSceneGame.prototype.ClearNewPlayer = function() {};
