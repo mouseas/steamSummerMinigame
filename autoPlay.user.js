@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.6.5
+// @version 4.6.6
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.6.5';
+	var SCRIPT_VERSION = '4.6.6';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -58,9 +58,10 @@
 		allowWormholeLevel: 180000,
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
-		useLikeNewMinChance: 0.05,
-		useLikeNewMaxChance: 1.0,
-		useLikeNewTimeSpread: 100,
+		useLikeNewMinChance: 0.02,
+		useLikeNewMaxChance: 0.25,
+		useLikeNewMinTime: 0,
+		useLikeNewMaxTime: 500,
 		useGoldThreshold: 200
 	};
 
@@ -1259,7 +1260,7 @@
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
 		var level = getGameLevel();
-		if (level < control.speedThreshold || level % control.rainingRounds !== 0) {
+		if (level % control.rainingRounds !== 0) {
 			return;
 		}
 		// Check if Wormhole is purchased
@@ -1272,25 +1273,28 @@
 
 	function useLikeNewIfRelevant() {
 		// Allow Like New use for next farm boss round.
-		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0 && !canUseLikeNew) {
-			canUseLikeNew = true;
+		if (!hasItem(ABILITIES.LIKE_NEW)) {
 			return;
 		}
+
+		var level = getGameLevel();
+		//if (level % control.rainingRounds !== 0 && !canUseLikeNew) {
+		//	canUseLikeNew = true;
+		//	return;
+		//}
 		// Check if wormhole is on cooldown and roll the dice.
+
 		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
 		var likeNewChance = (control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance;
 
-		if (canUseItem(ABILITIES.WORMHOLE) || Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
+		if (Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
 			return;
 		}
 		// Start a timer between 1 and 5 seconds to try to use LikeNew.
-		if (canUseLikeNew) {
-			var rand = Math.floor(Math.random() * control.useLikeNewTimeSpread * 2 + (control.speedThreshold - control.useLikeNewTimeSpread));
-			setTimeout(useLikeNew, rand);
-			advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
-			canUseLikeNew = false;
-		}
+		var rand = Math.floor(Math.random() * control.useLikeNewMaxTime - control.useLikeNewMinTime + control.useLikeNewMinTime);
+		setTimeout(useLikeNew, rand);
+		advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
+		//canUseLikeNew = false;
 	}
 
 	function useLikeNew() {
@@ -1299,7 +1303,7 @@
 		if (level % control.rainingRounds === 0) {
 			if (tryUsingItem(ABILITIES.LIKE_NEW)) {
 				advLog('We can actually use Like New semi-reliably! Cooldowns-b-gone.', 2);
-				canUseLikeNew = true;
+				//canUseLikeNew = true;
 			}
 		}
 	}
