@@ -491,9 +491,9 @@
 					}
 					if (showLevelJumps) {
 						displayText(
-							enemy.m_nLane * 440,
-							100,
-							">" + calculateLevelsJumped() + ">",
+							s().m_rgPlayerData.current_lane * 300,
+							300,
+							">>" + calculateLevelsJumped(),
 							"#66ff66"
 						);
 					}
