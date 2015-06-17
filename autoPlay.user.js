@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.6.9
+// @version 4.7.0
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.6.9';
+	var SCRIPT_VERSION = '4.7.0';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -533,7 +533,7 @@
 								this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 								w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
-							} else if(getGameLevel() % 100 !== 0 && rgEntry.ability === 26) {
+							} else if(getGameLevel() % 100 !== 0 && getGameLevel() > 3 && rgEntry.ability === 26) {
 								w.$J(ele).data('abilityid', rgEntry.ability );
 								w.$J('.name', ele).text( rgEntry.actor_name );
 								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name );
