@@ -461,6 +461,8 @@
 						"-" + w.FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
 						"#aaf"
 					);
+					advLog(enemy.m_Sprite.position.x, 1);
+					advLog(enemy.m_Sprite.position.y, 1);
 
 					if (s().m_rgStoredCrits.length > 0) {
 						var rgDamage = s().m_rgStoredCrits.reduce(function(a, b) {
@@ -491,8 +493,8 @@
 					}
 					if (showLevelJumps) {
 						displayText(
-							100 + s().m_rgPlayerData.current_lane * 200,
-							300,
+							enemy.m_Sprite.position.x - (enemy.m_nLane * 440) - 200,
+							enemy.m_Sprite.position.y - 17,
 							">>" + calculateLevelsJumped(),
 							"#66ff66"
 						);
