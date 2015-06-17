@@ -538,7 +538,7 @@
 								w.$J('.name', ele).text( rgEntry.actor_name );
 								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name );
 								w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
-								w.$J('.name', ele).attr( "style", "color: yellow; font-weight: bold;" );
+								w.$J('.name', ele).attr( "style", "color: yellow" );
 
 								w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
 
