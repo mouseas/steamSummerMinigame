@@ -52,13 +52,9 @@
 
 	var control = {
 		speedThreshold: 2000,
-<<<<<<< HEAD
 		// Stop using offensive abilities shortly before rain/wormhole rounds.
 		rainingSafeRounds: 5,
-		rainingRounds: 500,
-=======
 		rainingRounds: 100,
->>>>>>> 4a7ff8b59f8b1a1b261d02665d0ecf260c9a8cad
 		timePerUpdate: 60000,
 		useSlowMode: false,
 		minsLeft: 60,
