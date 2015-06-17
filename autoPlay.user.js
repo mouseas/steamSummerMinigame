@@ -393,6 +393,7 @@
 			updateLaneData();
 
 			attemptRespawn();
+			useWormholeIfRelevant();
 			goToLaneWithBestTarget();
 			useCooldownIfRelevant();
 			useGoodLuckCharmIfRelevant();
@@ -411,7 +412,6 @@
 			useReviveIfRelevant(level);
 			useMaxElementalDmgIfRelevant();
 			useLikeNewIfRelevant();
-			useWormholeIfRelevant();
 			updatePlayersInGame();
 
 			if (level !== lastLevel) {
