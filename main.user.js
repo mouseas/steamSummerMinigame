@@ -241,7 +241,7 @@ function useWormholeIfRelevant()
 			if(getCurrentGameLevel() > 0 && (getCurrentGameLevel() % 500 == 0))
 			{
 				console.log("Game is divisible by 500. Time to use Wormhole to gain 10 levels!");
-				triggerAbility(ITEMS.WORMHOLE);
+				triggerItem(ITEMS.WORMHOLE);
 			}
 		}
 	}
