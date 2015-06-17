@@ -460,8 +460,6 @@
 						"-" + w.FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
 						"#aaf"
 					);
-					advLog(enemy.m_Sprite.position.x, 1);
-					advLog(enemy.m_Sprite.position.y, 1);
 
 					if (s().m_rgStoredCrits.length > 0) {
 						var rgDamage = s().m_rgStoredCrits.reduce(function(a, b) {
