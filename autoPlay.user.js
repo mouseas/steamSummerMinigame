@@ -1321,7 +1321,7 @@
 		var levelmod = level % control.rainingRounds;
 		// Early in the game, or we're a safe distance away from raining rounds.
 		return level < control.speedThreshold - control.rainingSafeRounds ||
-			(levelmod > 0 && levelmod < control.speedThreshold - control.rainingSafeRounds);
+			(levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds);
 	}
 
 	function tryUsingAbility(abilityId) {
