@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.3.5
+// @version 4.5.0
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.3.4';
+	var SCRIPT_VERSION = '4.5.0';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -133,7 +133,20 @@
 		WORMHOLE: 26,
 		LIKE_NEW: 27
 	};
-	var BOSS_DISABLED_ABILITIES = ['MORALE_BOOSTER', 'GOOD_LUCK_CHARMS', 'TACTICAL_NUKE', 'CLUSTER_BOMB', 'NAPALM', 'CRIT', 'CRIPPLE_SPAWNER', 'CRIPPLE_MONSTER', 'MAX_ELEMENTAL_DAMAGE', 'REFLECT_DAMAGE', 'THROW_MONEY_AT_SCREEN'];
+
+	var BOSS_DISABLED_ABILITIES = [
+		ABILITIES.MORALE_BOOSTER,
+		ABILITIES.GOOD_LUCK_CHARMS,
+		ABILITIES.TACTICAL_NUKE,
+		ABILITIES.CLUSTER_BOMB,
+		ABILITIES.NAPALM,
+		ABILITIES.CRIT,
+		ABILITIES.CRIPPLE_SPAWNER,
+		ABILITIES.CRIPPLE_MONSTER,
+		ABILITIES.MAX_ELEMENTAL_DAMAGE,
+		ABILITIES.REFLECT_DAMAGE,
+		ABILITIES.THROW_MONEY_AT_SCREEN
+	];
 
 	var ENEMY_TYPE = {
 		"SPAWNER": 0,
@@ -328,6 +341,7 @@
 		ab_box.appendChild(lock_elements_box);
 
 		enhanceTooltips();
+		addBadgeItemPurchaseMultiplierButtons();
 	}
 
 	function updateLaneData() {
@@ -1332,7 +1346,7 @@
 	}
 
 	function useReviveIfRelevant(level) {
-		if (level % 10 === 9 && tryUsingItem(ABILITIES.RESURRECTION) && Math.random() <= control.useAbilityChance) {
+		if (level % 10 === 9 && Math.random() <= control.useAbilityChance && tryUsingItem(ABILITIES.RESURRECTION)) {
 			// Resurrect is purchased and we are using it.
 			advLog('Triggered Resurrect.');
 		}
@@ -1759,6 +1773,47 @@
 
 	function getGameLevel() {
 		return s().m_rgGameData.level + 1;
+	}
+
+	/** Add 3 button on the "Welcome Panel" to multiply starting item purchase */
+	function addBadgeItemPurchaseMultiplierButtons() {
+		// create multiplier buttons
+		var buttonX1 = w.$J('<button onclick="setBadgeItemByMultiplier(1)" type="button">x1</button>');
+		var buttonX10 = w.$J('<button onclick="setBadgeItemByMultiplier(10)" type="button">x10</button>');
+		var buttonX100 = w.$J('<button onclick="setBadgeItemByMultiplier(100)" type="button">x100</button>');
+
+		// Add them to the badge point item purache panel
+		w.$J('#badge_items').append('<span>Batch purchase : </span>')
+			.append(buttonX1).append(buttonX10).append(buttonX100);
+
+		// hook to handle multiplier button clicks
+		var badgeItemByMultiplier = 1;
+
+		w.setBadgeItemByMultiplier = function(newMult) {
+			if(typeof newMult === 'number' && newMult >= 1) {
+				badgeItemByMultiplier = Math.floor(newMult);
+			}
+		};
+
+		// Bind new click function on each item div/button
+		w.$J('#badge_items > .purchase_ability_item').each(function() {
+			var item = w.$J(this);
+			item.attr('onclick', '');
+			item.click(function(e) {
+				// Call the old function
+				w.g_Minigame.CurrentScene().TrySpendBadgePoints(this);
+				// Multiply the las added element
+				var queue = w.g_Minigame.CurrentScene().m_rgPurchaseItemsQueue;
+				if(badgeItemByMultiplier > 1 && queue.length > 0) {
+					var lastAddedItem = queue[queue.length - 1]; // top item
+					// do magic ... well... a for loop .. Ohmagad!
+					for(var i=1; i<badgeItemByMultiplier; i++) {
+						queue.push(lastAddedItem);
+					}
+				}
+				return false;
+			});
+		});
 	}
 
 }(window));
