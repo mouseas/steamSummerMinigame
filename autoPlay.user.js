@@ -717,14 +717,14 @@
 		var level = getGameLevel();
 		if (level % control.rainingRounds === 0) {
 			if (hasItem(ABILITIES.WORMHOLE)) {
-				currentClickRate = 0;
+				return 0;
 			} else {
-				currentClickRate = Math.floor(clickRate/2);
+				return Math.floor(clickRate/2);
 			}
 		} else if (enableAutoClicker) {
-			currentClickRate = clickRate;
+			return clickRate;
 		} else {
-			currentClickRate = 0;
+			return 0;
 		}
 	}
 
