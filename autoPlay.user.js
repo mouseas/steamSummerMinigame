@@ -631,11 +631,8 @@
 		if (event !== undefined) {
 			value = handleCheckBox(event);
 		}
-		if (value) {
-			currentClickRate = clickRate;
-		} else {
-			currentClickRate = 0;
-		}
+		enableAutoClicker = value;
+		advLog('Autoclicker is ' + enableAutoClicker, 1);
 	}
 
 	function toggleAutoRefresh(event) {
@@ -715,17 +712,17 @@
 
 	function getWantedClicksPerSecond() {
 		var level = getGameLevel();
+		if (!enableAutoClicker) {
+			return 0;
+		}
 		if (level % control.rainingRounds === 0) {
 			if (hasItem(ABILITIES.WORMHOLE)) {
 				return 0;
 			} else {
 				return Math.floor(clickRate/2);
 			}
-		} else if (enableAutoClicker) {
-			return clickRate;
-		} else {
-			return 0;
 		}
+		return clickRate;
 	}
 
 	function getLevelsSkipped() {
