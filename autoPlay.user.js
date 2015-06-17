@@ -32,7 +32,6 @@
 	var removeAllText = getPreferenceBoolean("removeAllText", false);
 	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
-	var showLevelJumps = getPreferenceBoolean("showLevelJumps", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
 
 	var enableElementLock = getPreferenceBoolean("enableElementLock", true);
@@ -69,7 +68,7 @@
 	};
 
 	var canUseLikeNew = true;
-	var oldLevel = 0;
+	var oldLevel = {};
 
 	var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
@@ -281,7 +280,6 @@
 		options1.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText, false));
 		options1.appendChild(makeCheckBox("removeGoldText", "Remove gold text", removeGoldText, handleEvent, false));
 		options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
-		options1.appendChild(makeCheckBox("showLevelJumps", "Show level jumps", showLevelJumps, toggleShowLevelJumps, false));
 		options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, true));
 
 		if (typeof GM_info !== "undefined") {
@@ -491,17 +489,12 @@
 							);
 						}
 					}
-					if (showLevelJumps) {
-						displayText(
-							enemy.m_Sprite.position.x - (enemy.m_nLane * 440) - 200,
-							enemy.m_Sprite.position.y - 17,
-							">>" + calculateLevelsJumped(),
-							"#66ff66"
-						);
-					}
 				}
 			}
-			oldLevel = getGameLevel();
+			for (i = 3; i >= 0; i--) {
+				oldLevel[i+1] = oldLevel[i];
+			}
+			oldLevel[0] = getGameLevel();
 		}
 	}
 
@@ -705,21 +698,16 @@
 		}
 	}
 
-	function toggleShowLevelJumps(event) {
-		var value = !showLevelJumps;
-		if (event !== undefined) {
-			value = handleCheckBox(event);
+	function getLevelsSkipped() {
+		var total;
+		for (i = 3; i >= 0; i--) {
+			oldLevel[i+1] = oldLevel[i];
+			total += oldLevel[i+1];
 		}
-		if (value) {
-			showLevelJumps = true;
-		} else {
-			showLevelJumps = false;
-		}
-	}
+		oldLevel[0] = getGameLevel();
+		total += oldLevel[0];
 
-	function calculateLevelsJumped() {
-		var lvltoreturn = getGameLevel() - oldLevel;
-		return lvltoreturn.toString();
+		return total;
 	}
 
 	function updateLogLevel(event) {
@@ -1613,15 +1601,28 @@
 		element.textContent = 'Remaining Time: 0 hours, 0 minutes.';
 		breadcrumbs.appendChild(element);
 		document.RemainingTime = element;
+
+		element = document.createElement('span');
+		element.textContent = ' > ';
+		breadcrumbs.appendChild(element);
+
+		element = document.createElement('span');
+		element.style.color = '#33FF33';
+		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
+		element.textContent = 'Skipped 0 levels in last 5s.';
+		breadcrumbs.appendChild(element);
+		document.LevelsSkipped = element;
 	}
 
 	function updateLevelInfoTitle(level)
 	{
 		var exp_lvl = expectedLevel(level);
 		var rem_time = countdown(exp_lvl.remaining_time);
+		var lvl_skip = getLevelsSkipped();
 
 		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
+		document.LevelsSkipped.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
 	}
 
 	// Helpers to access player stats.
