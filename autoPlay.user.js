@@ -1266,17 +1266,17 @@
 	}
 
 	function useLikeNewIfRelevant() {
-		// Allow Like New use for next farm boss round
+		// Allow Like New use for next farm boss round.
 		var level = getGameLevel();
 		if (level % control.rainingRounds !== 0 && !canUseLikeNew) {
 			canUseLikeNew = true;
 			return;
 		}
-		// Check if wormhole is on cooldown and roll the dice 
+		// Check if wormhole is on cooldown and roll the dice.
 		if (canUseItem(ABILITIES.WORMHOLE) || Math.random() > control.useLikeNewChance || level % control.rainingRounds !== 0) {
 			return;
 		}
-		// Start a timer between 1 and 5 seconds to try to use LikeNew
+		// Start a timer between 1 and 5 seconds to try to use LikeNew.
 		if (canUseLikeNew) {
 			var rand = Math.floor(Math.random() * 4000 + 1000);
 			setTimeout(useLikeNew, rand);
@@ -1285,9 +1285,11 @@
 	}
 
 	function useLikeNew() {
+		// Make sure that we're still in the boss round when we actually use it.
+		var level = getGameLevel();
 		if (level % control.rainingRounds === 0) {
 			if (tryUsingItem(ABILITIES.LIKE_NEW)) {
-				advLog('We can actually use Like New semi-reliably! Cooldowns-b-gone.' , 2);
+				advLog('We can actually use Like New semi-reliably! Cooldowns-b-gone.', 2);
 				canUseLikeNew = true;
 			}
 		}
