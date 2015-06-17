@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.6.6
+// @version 4.6.7
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.6.6';
+	var SCRIPT_VERSION = '4.6.7';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -496,6 +496,7 @@
 
 		if(w.CUI && !replacedCUI) {
 			replacedCUI = true;
+			advLog("Anti nuke in effect", 1);
 			w.CUI.prototype.UpdateLog = function( rgLaneLog )
 			{
 				var abilities = this.m_Game.m_rgTuningData.abilities;
@@ -520,8 +521,8 @@
 
 					switch( rgEntry.type ) {
 						case 'ability':
-							if(getGameLevel() % 100 != 0 || [10,11,12,15,20].indexOf(rgEntry.ability) > -1) {
-								var ele = this.m_eleUpdateLogTemplate.clone();
+							var ele = this.m_eleUpdateLogTemplate.clone();
+							if(getGameLevel() % 100 != 0 || [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1) {
 								w.$J(ele).data('abilityid', rgEntry.ability );
 								w.$J('.name', ele).text( rgEntry.actor_name );
 								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name );
@@ -532,15 +533,14 @@
 								this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								if(getGameLevel() % 100 == 0) {
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
-									w.$J('.name', ele).attr( "style", "color: red" );
+									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
 								}
 							} else if(getGameLevel() % 100 != 0 && rgEntry.ability == 26) {
-								var ele = this.m_eleUpdateLogTemplate.clone();
 								w.$J(ele).data('abilityid', rgEntry.ability );
 								w.$J('.name', ele).text( rgEntry.actor_name );
 								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name );
 								w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
-								w.$J('.name', ele).attr( "style", "color: yellow" );
+								w.$J('.name', ele).attr( "style", "color: yellow; font-weight: bold;" );
 
 								w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
 
@@ -568,7 +568,7 @@
 				{
 					e.children[e.children.length-1].remove();
 				}
-			}
+			};
 		}
 	}
 
