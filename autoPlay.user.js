@@ -1273,7 +1273,15 @@
 			return;
 		}
 		// Check if wormhole is on cooldown and roll the dice.
-		if (canUseItem(ABILITIES.WORMHOLE) || Math.random() > control.useLikeNewChance || level % control.rainingRounds !== 0) {
+		var cTime = new Date();
+		var cHours = cTime.getUTCHours();
+		if (cHours > 15) {
+			cHours - 15;
+		} else { 
+			cHours + 9;
+		}
+
+		if (canUseItem(ABILITIES.WORMHOLE) || Math.random() > control.useLikeNewChance * cHours || level % control.rainingRounds !== 0) {
 			return;
 		}
 		// Start a timer between 1 and 5 seconds to try to use LikeNew.
