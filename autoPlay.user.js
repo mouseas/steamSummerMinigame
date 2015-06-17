@@ -478,15 +478,18 @@
 					}
 				}
 			}
-			// Iterate down the levelskipped memory
-			for (var i = 4; i >= 0; i--) {
-				levelsSkipped[i+1] = levelsSkipped[i];
+			
+			// Make sure to only include ticks that are relevant
+			var level_jump = getGameLevel() - oldLevel;
+			if (level_jump > 0) {
+				// Iterate down the levelskipped memory
+				for (var i = 4; i >= 0; i--) {
+					levelsSkipped[i+1] = levelsSkipped[i];
+				}
+				levelsSkipped[0] = level_jump;
+				
+				oldLevel = getGameLevel();	
 			}
-			// Just a failsafe for tick 0
-			if (oldLevel !== 0) {
-				levelsSkipped[0] = getGameLevel() - oldLevel;
-			}
-			oldLevel = getGameLevel();
 		}
 	}
 
