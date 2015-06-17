@@ -438,16 +438,16 @@
 
 			// Made a woopsy, now clicks are actually disabled with wormholes.
 			if (level > control.speedThreshold && level % control.rainingRounds === 0) {
-
-				// If we have wormholes try to make bosses last.
 				if (hasItem(ABILITIES.WORMHOLE)) {
-					s().m_nClicks = 0;
+					currentClickRate = 0;
 				} else {
-					s().m_nClicks = currentClickRate/2;
+					currentClickRate = Math.floor(clickRate/2);
 				}
-			} else {
-				s().m_nClicks = currentClickRate;
+			else {
+				currentClickRate = clickRate;
 			}
+
+			s().m_nClicks = currentClickRate;
 			s().m_nLastTick = false;
 			w.g_msTickRate = 1000;
 
