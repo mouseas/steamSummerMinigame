@@ -1285,7 +1285,7 @@
 		}
 		// Start a timer between 1 and 5 seconds to try to use LikeNew.
 		if (canUseLikeNew) {
-			var rand = Math.floor(Math.random() * useLikeNewTimeSpread * 2 + (speedThreshold - useLikeNewTimeSpread));
+			var rand = Math.floor(Math.random() * control.useLikeNewTimeSpread * 2 + (control.speedThreshold - control.useLikeNewTimeSpread));
 			setTimeout(useLikeNew, rand);
 			advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
 			canUseLikeNew = false;
