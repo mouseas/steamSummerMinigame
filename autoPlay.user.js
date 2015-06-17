@@ -690,6 +690,11 @@
 				return Math.floor(clickRate/2);
 			}
 		}
+		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
+			return Math.floor(clickRate/10);
+		} else if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds*2) {
+			return Math.floor(clickRate/5);
+		}
 		return clickRate;
 	}
 
