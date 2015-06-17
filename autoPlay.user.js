@@ -68,6 +68,8 @@
 	};
 
 	var canUseLikeNew = true;
+	var levelsSkipped = [0, 0, 0, 0, 0];
+	var oldLevel = 0;
 
 	var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
@@ -488,6 +490,15 @@
 					}
 				}
 			}
+			// Iterate down the levelskipped memory
+			for (var i = 4; i >= 0; i--) {
+				levelsSkipped[i+1] = levelsSkipped[i];
+			}
+			// Just a failsafe for tick 0
+			if (oldLevel !== 0) {
+				levelsSkipped[0] = getGameLevel() - oldLevel;
+			}
+			oldLevel = getGameLevel();
 		}
 	}
 
@@ -689,6 +700,16 @@
 		} else {
 			s().m_rgClickNumbers.push = trt_oldPush;
 		}
+	}
+
+	function getLevelsSkipped() {
+		var total = 0;
+		for (var i = 3; i >= 0; i--) {
+			levelsSkipped[i+1] = levelsSkipped[i];
+			total += levelsSkipped[i];
+		}
+		total += levelsSkipped[0];
+		return total;
 	}
 
 	function updateLogLevel(event) {
@@ -1582,15 +1603,28 @@
 		element.textContent = 'Remaining Time: 0 hours, 0 minutes.';
 		breadcrumbs.appendChild(element);
 		document.RemainingTime = element;
+
+		element = document.createElement('span');
+		element.textContent = ' > ';
+		breadcrumbs.appendChild(element);
+
+		element = document.createElement('span');
+		element.style.color = '#33FF33';
+		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
+		element.textContent = 'Skipped 0 levels in last 5s.';
+		breadcrumbs.appendChild(element);
+		document.LevelsSkip = element;
 	}
 
 	function updateLevelInfoTitle(level)
 	{
 		var exp_lvl = expectedLevel(level);
 		var rem_time = countdown(exp_lvl.remaining_time);
+		var lvl_skip = getLevelsSkipped();
 
 		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
+		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
 	}
 
 	// Helpers to access player stats.
