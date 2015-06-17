@@ -1328,7 +1328,7 @@
 	}
 
 	function useReviveIfRelevant(level) {
-		if (level % 10 === 9 && tryUsingItem(ABILITIES.RESURRECTION) && Math.random() <= control.useAbilityChance) {
+		if (level % 10 === 9 && Math.random() <= control.useAbilityChance && tryUsingItem(ABILITIES.RESURRECTION)) {
 			// Resurrect is purchased and we are using it.
 			advLog('Triggered Resurrect.');
 		}
