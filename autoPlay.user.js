@@ -489,9 +489,9 @@
 						}
 					}
 				}
-			};
+			}
 			// Iterate down the levelskipped memory
-			for (i = 4; i >= 0; i--) {
+			for (var i = 4; i >= 0; i--) {
 				levelsSkipped[i+1] = levelsSkipped[i];
 			}
 			// Just a failsafe for tick 0
@@ -704,7 +704,7 @@
 
 	function getLevelsSkipped() {
 		var total = 0;
-		for (i = 3; i >= 0; i--) {
+		for (var i = 3; i >= 0; i--) {
 			levelsSkipped[i+1] = levelsSkipped[i];
 			total += levelsSkipped[i];
 		}
