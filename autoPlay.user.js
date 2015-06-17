@@ -68,7 +68,8 @@
 	};
 
 	var canUseLikeNew = true;
-	var oldLevel = {};
+	int levelsSkipped = {0, 0, 0, 0, 0};
+	int oldLevel = 0;
 
 	var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
@@ -490,11 +491,16 @@
 						}
 					}
 				}
+			};
+			// Iterate down the levelskipped memory
+			for (i = 4; i >= 0; i--) {
+				levelsSkipped[i+1] = levelsSkipped[i];
 			}
-			for (i = 3; i >= 0; i--) {
-				oldLevel[i+1] = oldLevel[i];
+			// Just a failsafe for tick 0
+			if (oldLevel !== 0) {
+				levelsSkipped[0] = getGameLevel() - oldLevel;
 			}
-			oldLevel[0] = getGameLevel();
+			oldLevel = getGameLevel();
 		}
 	}
 
@@ -701,12 +707,10 @@
 	function getLevelsSkipped() {
 		var total;
 		for (i = 3; i >= 0; i--) {
-			oldLevel[i+1] = oldLevel[i];
-			total += oldLevel[i+1];
+			levelsSkipped[i+1] = levelsSkipped[i];
+			total += levelsSkipped[i];
 		}
-		oldLevel[0] = getGameLevel();
-		total += oldLevel[0];
-
+		total += levelsSkipped[0];
 		return total;
 	}
 
@@ -1611,7 +1615,7 @@
 		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
 		element.textContent = 'Skipped 0 levels in last 5s.';
 		breadcrumbs.appendChild(element);
-		document.LevelsSkipped = element;
+		document.LevelsSkip = element;
 	}
 
 	function updateLevelInfoTitle(level)
@@ -1622,7 +1626,7 @@
 
 		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
-		document.LevelsSkipped.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
+		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
 	}
 
 	// Helpers to access player stats.
