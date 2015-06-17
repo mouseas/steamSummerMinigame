@@ -68,8 +68,8 @@
 	};
 
 	var canUseLikeNew = true;
-	int levelsSkipped = [0, 0, 0, 0, 0];
-	int oldLevel = 0;
+	var levelsSkipped = [0, 0, 0, 0, 0];
+	var oldLevel = 0;
 
 	var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
