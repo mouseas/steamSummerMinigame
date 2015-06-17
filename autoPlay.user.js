@@ -722,9 +722,9 @@
 				return Math.floor(clickRate/2);
 			}
 		}
-		if (level > control.speedThreshold && level%100 > 95) {
+		if (level%100 > 95) {
 			return Math.floor(clickRate/10);
-		} else if (level > control.speedThreshold && level%100 > 90) {
+		} else if (level%100 > 90) {
 			return Math.floor(clickRate/5);
 		}
 		return clickRate;
