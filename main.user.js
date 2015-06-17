@@ -499,7 +499,7 @@ function purchaseUpgrades() {
 
 function useReviveIfRelevant() {
 	// Use resurrection if doable
-	if (numItem(ITEMS.REVIVE) <= 0 || isAbilityCoolingDown(ITEMS.REVIVE)) {
+	if (numItem(ITEMS.REVIVE) === 0 || isAbilityCoolingDown(ITEMS.REVIVE)) {
 		return;
 	}
 	
@@ -517,8 +517,7 @@ function useReviveIfRelevant() {
 	// If it was recently used in current lane, don't bother ('instants' take a few seconds to
 	// register and last for 5 seconds). Also skip if number of dead players < 1/3 of lane team or
 	// lane consists of < 20% of total team players.
-	if (hasItem(ITEMS.REVIVE) && !isAbilityCoolingDown(ITEMS.REVIVE) && numRevives === 0 &&
-		deadPercent > 0.33 && getLanePercent() > 0.2) {
+	if (numRevives === 0 && deadPercent > 0.33 && getLanePercent() > 0.2) {
 		console.log('We have revive, cooled down, and needed. Trigger it.');
 		triggerItem(ITEMS.REVIVE);
 	}
