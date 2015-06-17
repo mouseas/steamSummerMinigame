@@ -43,7 +43,7 @@
 	// DO NOT MODIFY
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
-	var currentClickRate = clickRate;
+	var currentClickRate = enableAutoClicker ? clickRate : 0;
 	var lockedElement = -1;
 	var lastLevel = 0;
 	var trt_oldCrit = function() {};
