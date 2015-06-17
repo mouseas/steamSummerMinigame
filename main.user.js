@@ -236,7 +236,7 @@ function useWormholeIfRelevant()
 	if(numItem(ITEMS.WORMHOLE) > 0 && !isAbilityCoolingDown(ITEMS.WORMHOLE))
 	{
 		// Don't use wormholes for the first 11 minutes.
-		if(getSecondsSinceStart > (60 * 11))
+		if(getSecondsSinceStart() > (60 * 11))
 		{
 			if(getCurrentGameLevel() > 0 && (getCurrentGameLevel() % 500 == 0))
 			{
