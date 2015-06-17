@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.3.4
+// @version 4.3.5
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -43,7 +43,7 @@
 	// DO NOT MODIFY
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
-	var currentClickRate = clickRate;
+	var currentClickRate = enableAutoClicker ? clickRate : 0;
 	var lockedElement = -1;
 	var lastLevel = 0;
 	var trt_oldCrit = function() {};
@@ -395,6 +395,7 @@
 			updateLaneData();
 
 			attemptRespawn();
+			useWormholeIfRelevant();
 			goToLaneWithBestTarget();
 			useCooldownIfRelevant();
 			useGoodLuckCharmIfRelevant();
@@ -413,7 +414,6 @@
 			useReviveIfRelevant(level);
 			useMaxElementalDmgIfRelevant();
 			useLikeNewIfRelevant();
-			useWormholeIfRelevant();
 			updatePlayersInGame();
 
 			if (level !== lastLevel) {
