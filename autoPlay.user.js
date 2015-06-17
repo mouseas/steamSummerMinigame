@@ -718,13 +718,14 @@
 		if (level % control.rainingRounds === 0) {
 			if (hasItem(ABILITIES.WORMHOLE)) {
 				return 0;
-			} else if (level > control.speedThreshold && level%100 > 95) {
-				return Math.floor(clickRate/10);
-			} else if (level > control.speedThreshold && level%100 > 90) {
-				return Math.floor(clickRate/5);
 			} else {
 				return Math.floor(clickRate/2);
 			}
+		}
+		if (level > control.speedThreshold && level%100 > 95) {
+			return Math.floor(clickRate/10);
+		} else if (level > control.speedThreshold && level%100 > 90) {
+			return Math.floor(clickRate/5);
 		}
 		return clickRate;
 	}
