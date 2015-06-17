@@ -436,17 +436,7 @@
 				refreshPlayerData();
 			}
 
-			// Made a woopsy, now clicks are actually disabled with wormholes.
-			if (level % control.rainingRounds === 0) {
-				if (hasItem(ABILITIES.WORMHOLE)) {
-					currentClickRate = 0;
-				} else {
-					currentClickRate = Math.floor(clickRate/2);
-				}
-			} else {
-				currentClickRate = clickRate;
-			}
-
+			currentClickRate = getWantedClicksPerSecond();
 			s().m_nClicks = currentClickRate;
 			s().m_nLastTick = false;
 			w.g_msTickRate = 1000;
@@ -720,6 +710,20 @@
 			};
 		} else {
 			s().m_rgClickNumbers.push = trt_oldPush;
+		}
+	}
+
+	function getWantedClicksPerSecond() {
+		if (level % control.rainingRounds === 0) {
+			if (hasItem(ABILITIES.WORMHOLE)) {
+				currentClickRate = 0;
+			} else {
+				currentClickRate = Math.floor(clickRate/2);
+			}
+		} else if (enableAutoClicker) {
+			currentClickRate = clickRate;
+		} else {
+			currentClickRate = 0;
 		}
 	}
 
