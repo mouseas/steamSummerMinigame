@@ -491,8 +491,8 @@
 					}
 					if (showLevelJumps) {
 						displayText(
-							enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
-							enemy.m_Sprite.position.y + 52,
+							enemy.m_nLane * 440,
+							100,
 							">" + calculateLevelsJumped() + ">",
 							"#66ff66"
 						);
@@ -716,7 +716,8 @@
 	}
 
 	function calculateLevelsJumped() {
-		return toString(getGameLevel() - oldLevel);
+		var lvltoreturn = getGameLevel() - oldLevel;
+		return lvltoreturn.toString();
 	}
 
 	function updateLogLevel(event) {
