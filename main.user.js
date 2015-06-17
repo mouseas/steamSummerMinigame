@@ -499,6 +499,9 @@ function purchaseUpgrades() {
 
 function useReviveIfRelevant() {
 	// Use resurrection if doable
+	if (numItem(ITEMS.REVIVE) <= 0 || isAbilityCoolingDown(ITEMS.REVIVE)) {
+		return;
+	}
 	
 	var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 	// Check if anyone needs reviving
