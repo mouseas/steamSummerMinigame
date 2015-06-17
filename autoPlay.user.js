@@ -443,7 +443,7 @@
 				} else {
 					currentClickRate = Math.floor(clickRate/2);
 				}
-			else {
+			} else {
 				currentClickRate = clickRate;
 			}
 
