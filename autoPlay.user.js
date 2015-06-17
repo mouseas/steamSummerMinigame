@@ -714,7 +714,7 @@
 		var level = getGameLevel();
 		if (!enableAutoClicker) {
 			return 0;
-		} 
+		}
 		if (level % control.rainingRounds === 0) {
 			if (hasItem(ABILITIES.WORMHOLE)) {
 				return 0;
