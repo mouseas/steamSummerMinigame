@@ -721,6 +721,7 @@
 			} else {
 				return Math.floor(clickRate/2);
 			}
+		}
 		return clickRate;
 	}
 
