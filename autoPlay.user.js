@@ -436,8 +436,15 @@
 				refreshPlayerData();
 			}
 
+			// Made a woopsy, now clicks are actually disabled with wormholes.
 			if (level > control.speedThreshold && level % control.rainingRounds === 0) {
-				s().m_nClicks = currentClickRate/2;
+
+				// If we have wormholes try to make bosses last.
+				if (hasItem(ABILITIES.WORMHOLE)) {
+					s().m_nClicks = 0;
+				} else {
+					s().m_nClicks = currentClickRate/2;
+				}
 			} else {
 				s().m_nClicks = currentClickRate;
 			}
@@ -1018,9 +1025,6 @@
 			var level = getGameLevel();
 			if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds === 0))) {
 				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
-				if (hasItem(ABILITIES.WORMHOLE)) {
-					s().m_nClicks = 0;
-				}
 			} else {
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
 			}
