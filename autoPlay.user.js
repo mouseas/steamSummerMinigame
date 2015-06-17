@@ -1230,7 +1230,7 @@
 			return;
 		}
 		// Start a timer between 1 and 5 seconds to try to use LikeNew.
-		var rand = Math.floor(Math.random() * control.useLikeNewMaxTime - useLikeNewMinTime + useLikeNewMinTime);
+		var rand = Math.floor(Math.random() * control.useLikeNewMaxTime - control.useLikeNewMinTime + control.useLikeNewMinTime);
 		setTimeout(useLikeNew, rand);
 		advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
 		//canUseLikeNew = false;
