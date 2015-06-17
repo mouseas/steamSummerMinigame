@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.6.5
+// @version 4.6.6
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.6.5';
+	var SCRIPT_VERSION = '4.6.6';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -1199,7 +1199,7 @@
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
 		var level = getGameLevel();
-		if (level < control.speedThreshold || level % control.rainingRounds !== 0) {
+		if (level % control.rainingRounds !== 0) {
 			return;
 		}
 		// Check if Wormhole is purchased
