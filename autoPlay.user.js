@@ -1512,11 +1512,6 @@
 		return false;
 	}
 
-	function fightSafeBossFight() {
-
-
-	}
-
 	function advLog(msg, lvl) {
 		if (lvl <= logLevel) {
 			console.log(msg);
@@ -1673,7 +1668,6 @@
 	function getBossLootChance() {
 		return s().m_rgPlayerTechTree.boss_loot_drop_percentage * 100;
 	}
-
 
 	function startFingering() {
 		w.CSceneGame.prototype.ClearNewPlayer = function() {};
