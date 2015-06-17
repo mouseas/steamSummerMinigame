@@ -319,6 +319,67 @@
 
 		enhanceTooltips();
 		waitForWelcomePanelLoad();
+
+		if(w.CUI) {
+			w.CUI.prototype.UpdateLog = function( rgLaneLog )
+			{
+				var abilities = this.m_Game.m_rgTuningData.abilities;
+
+				if( !this.m_Game.m_rgPlayerTechTree )
+					return;
+
+				var nHighestTime = 0;
+
+				for( var i=rgLaneLog.length-1; i >= 0; i--)
+				{
+					var rgEntry = rgLaneLog[i];
+
+					// If we got a bad time for some reason, assume it's n+1 since we'll be ahead of it by the next update anyway
+					if( isNaN( rgEntry.time ) )
+						rgEntry.time = this.m_nActionLogTime + 1;
+
+					if( rgEntry.time <= this.m_nActionLogTime )
+						continue;
+
+					switch( rgEntry.type )
+					{
+						case 'ability':
+							if(getGameLevel() % 100 != 0 || [10,11,12,15,20].indexOf(rgEntry.ability) > -1) {
+								var ele = this.m_eleUpdateLogTemplate.clone();
+								$J(ele).data('abilityid', rgEntry.ability );
+								$J('.name', ele).text( rgEntry.actor_name );
+								$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name );
+								$J('img', ele).attr( 'src', g_rgIconMap['ability_' + rgEntry.ability].icon );
+
+								$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
+
+								this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
+								if(getGameLevel() % 100 == 0) {
+									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
+								}
+							}
+							break;
+
+						default:
+							console.log("Unknown action log type: %s", rgEntry.type);
+							console.log(rgEntry);
+					}
+
+					if( rgEntry.time > nHighestTime )
+						nHighestTime = rgEntry.time;
+				}
+
+				if( nHighestTime > this.m_nActionLogTime )
+					this.m_nActionLogTime = nHighestTime;
+
+				// Prune older entries
+				var e = this.m_eleUpdateLogContainer[0];
+				while(e.children.length > 20 )
+				{
+					e.children[e.children.length-1].remove();
+				}
+			}
+		}
 	}
 
 	function updateLaneData() {
