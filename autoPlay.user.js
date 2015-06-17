@@ -1275,15 +1275,15 @@
 			return;
 		}
 		// Check if wormhole is on cooldown and roll the dice.
-		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600
-		var likeNewChance = lerp(control.useLikeNewMinChance, control.useLikeNewMaxChance, cLobbyTime/24)
+		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
+		var likeNewChance = lerp(control.useLikeNewMinChance, control.useLikeNewMaxChance, cLobbyTime/24.0);
 
 		if (canUseItem(ABILITIES.WORMHOLE) || Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
 			return;
 		}
 		// Start a timer between 1 and 5 seconds to try to use LikeNew.
 		if (canUseLikeNew) {
-			var rand = Math.floor(Math.random() * useLikeNewTimeSpread * 2 + (speedThreshold - useLikeNewTimeSpread);
+			var rand = Math.floor(Math.random() * useLikeNewTimeSpread * 2 + (speedThreshold - useLikeNewTimeSpread));
 			setTimeout(useLikeNew, rand);
 			advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
 			canUseLikeNew = false;
