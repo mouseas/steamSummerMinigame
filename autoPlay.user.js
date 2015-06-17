@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.6.0
+// @version 4.6.2
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.6.0';
+	var SCRIPT_VERSION = '4.6.2';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -437,7 +437,7 @@
 			}
 
 			// Made a woopsy, now clicks are actually disabled with wormholes.
-			if (level > control.speedThreshold && level % control.rainingRounds === 0) {
+			if (level % control.rainingRounds === 0) {
 				if (hasItem(ABILITIES.WORMHOLE)) {
 					currentClickRate = 0;
 				} else {
@@ -1123,6 +1123,11 @@
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
 		var level = getGameLevel();
+		
+		// Prevent this outright if its within control.rainingSafeRounds of the next rainingRound
+		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds)
+			return;
+		
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = s().GetEnemy(currentLane, i);
@@ -1189,23 +1194,7 @@
 	}
 
 	function useCrippleMonsterIfRelevant() {
-		// Check if Cripple Monster is available
-		if (!canUseItem(ABILITIES.CRIPPLE_MONSTER) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
-			return;
-		}
-
-		var level = getGameLevel();
-		// Use nukes on boss when level >3000 for faster kills
-		if (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0) {
-			var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-			if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-				var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-				if (enemyBossHealthPercent > 0.5) {
-					advLog("Cripple Monster available and used on boss", 2);
-					triggerItem(ABILITIES.CRIPPLE_MONSTER);
-				}
-			}
-		}
+		return;
 	}
 
 	function useCrippleSpawnerIfRelevant() {
@@ -1402,8 +1391,7 @@
 		var level = getGameLevel();
 		var levelmod = level % control.rainingRounds;
 		// Early in the game, or we're a safe distance away from raining rounds.
-		return level < control.speedThreshold - control.rainingSafeRounds ||
-			(levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds);
+		return (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds);
 	}
 
 	function tryUsingAbility(abilityId) {
