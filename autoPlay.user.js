@@ -52,16 +52,22 @@
 
 	var control = {
 		speedThreshold: 2000,
+<<<<<<< HEAD
 		// Stop using offensive abilities shortly before rain/wormhole rounds.
 		rainingSafeRounds: 5,
 		rainingRounds: 500,
+=======
+		rainingRounds: 100,
+>>>>>>> 4a7ff8b59f8b1a1b261d02665d0ecf260c9a8cad
 		timePerUpdate: 60000,
 		useSlowMode: false,
 		minsLeft: 60,
 		allowWormholeLevel: 180000,
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
-		useLikeNewChance: 0.01,
+		useLikeNewMinChance: 0.01,
+		useLikeNewMaxChance: 0.5,
+		useLikeNewTimeSpread: 1000,
 		useGoldThreshold: 200
 	};
 
@@ -1275,13 +1281,17 @@
 			return;
 		}
 		// Check if wormhole is on cooldown and roll the dice.
-		if (canUseItem(ABILITIES.WORMHOLE) || Math.random() > control.useLikeNewChance || level % control.rainingRounds !== 0) {
+		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
+		var likeNewChance = (control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance;
+
+		if (canUseItem(ABILITIES.WORMHOLE) || Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
 			return;
 		}
 		// Start a timer between 1 and 5 seconds to try to use LikeNew.
 		if (canUseLikeNew) {
-			var rand = Math.floor(Math.random() * 4000 + 1000);
+			var rand = Math.floor(Math.random() * useLikeNewTimeSpread * 2 + (speedThreshold - useLikeNewTimeSpread));
 			setTimeout(useLikeNew, rand);
+			advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
 			canUseLikeNew = false;
 		}
 	}
