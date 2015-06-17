@@ -1215,7 +1215,7 @@
 
 	function useMetalDetectorIfRelevant() {
 		// Early game treasures
-		if (getGameLevel() <= 30 && canUseItem(ABILITIES.TREASURE)) {
+		if ((getGameLevel() <= 30 || getGameLevel() >= 100000) && canUseItem(ABILITIES.TREASURE)) {
 			triggerItem(ABILITIES.TREASURE);
 		}
 		// Check if metal detector or treasure is purchased
