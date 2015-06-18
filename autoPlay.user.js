@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.8.0';
+	var SCRIPT_VERSION = '4.8.';
 
 	// OPTIONS
 	var clickRate = 20;
