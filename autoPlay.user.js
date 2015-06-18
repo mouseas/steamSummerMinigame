@@ -44,6 +44,8 @@
 	var refreshTimer = null;
 	var currentClickRate = enableAutoClicker ? clickRate : 0;
 	var lastLevel = 0;
+	var goldHelmUI = "http://i.imgur.com/ueDBBrA.png";
+	var fixedUI = "http://i.imgur.com/ieDoLnx.png";
 	var trt_oldCrit = function() {};
 	var trt_oldPush = function() {};
 	var trt_oldRender = function() {};
@@ -348,9 +350,9 @@
 
 	function fixActiveCapacityUI() {
 		if(praiseGoldHelm) {
-			w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ANl0UCb.png)');
+			w.$J('.tv_ui').css('background-image', 'url(' + goldHelmUI + '')');
 		} else {
-			w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ieDoLnx.png)');
+			w.$J('.tv_ui').css('background-image', 'url(' + fixedUI + ')');
 		}
 		w.$J('#activeinlanecontainer').css('height', '154px');
 		w.$J('#activitycontainer').css('height', '270px');
