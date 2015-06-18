@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.7.2
+// @version 4.7.3
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.7.2';
+	var SCRIPT_VERSION = '4.7.3';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -33,6 +33,7 @@
 	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
+	var praiseGoldHelm = getPreferenceBoolean("praiseGoldHelm", true);
 
 	var autoRefreshMinutes = 30; // refresh page after x minutes
 	var autoRefreshMinutesRandomDelay = 10;
@@ -297,6 +298,7 @@
 		}
 
 		options1.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer", enableFingering, handleEvent, true));
+		options1.appendChild(makeCheckBox("praiseGoldHelm", "Praise Gold Helm!", praiseGoldHelm, togglePraise, true));
 		options1.appendChild(makeNumber("setLogLevel", "Change the log level", "25px", logLevel, 0, 5, updateLogLevel));
 
 		options_box.appendChild(options1);
@@ -345,7 +347,11 @@
 	}
 
 	function fixActiveCapacityUI() {
-		w.$J('.tv_ui').css('background-image', 'url(https://i.imgur.com/1zRXQgm.png)');
+		if(praiseGoldHelm) {
+			w.$J('.tv_ui').css('background-image', 'url(https://i.imgur.com/1zRXQgm.png)');
+		} else {
+			w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ieDoLnx.png)');
+		}
 		w.$J('#activeinlanecontainer').css('height', '154px');
 		w.$J('#activitycontainer').css('height', '270px');
 		w.$J('#activityscroll').css('height', '270px');
@@ -682,6 +688,13 @@
 
 		w[checkbox.name] = checkbox.checked;
 		return checkbox.checked;
+	}
+	
+	function togglePraise(event) {
+		if (event !== undefined) {
+			praiseGoldHelm = handleCheckBox(event);
+		}
+		fixActiveCapacityUI();
 	}
 
 	function toggleAutoClicker(event) {
