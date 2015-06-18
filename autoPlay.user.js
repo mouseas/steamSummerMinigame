@@ -1559,7 +1559,7 @@
 		var abilities = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_abilities;
 		var count = 0;
 		for (var i = 0; i < abilities.length; i++) {
-			if (abilities[i].ability != ability || abilities[i].timestamp_done < Date.now()) {
+			if (abilities[i].ability != ability || abilities[i].timestamp_done < now) {
 				continue;
 			}
 			count++;
