@@ -132,22 +132,28 @@ function doTheThing() {
 		if (purchaseUpgradeToggle){
 			purchaseUpgrades();
 		}
-
-		useGoodLuckCharmIfRelevant();
-		useCritIfRelevant();
-		useReviveIfRelevant();
-		useMedicsIfRelevant();
-		useMoraleBoosterIfRelevant();
-		useClusterBombIfRelevant();
-		useNapalmIfRelevant();
-		useTacticalNukeIfRelevant();
-		useCrippleSpawnerIfRelevant();
-		useMetalDetectorAndTreasureIfRelevant();
-		useGoldRainIfRelevant();
-		attemptRespawn();
-
-		if (clickRate > 0) {
-			startGoldRainClick();
+		try{
+			useWormholeIfRelevant();
+			useGoodLuckCharmIfRelevant();
+			useCritIfRelevant();
+			useReviveIfRelevant();
+			useMedicsIfRelevant();
+			useMoraleBoosterIfRelevant();
+			useClusterBombIfRelevant();
+			useNapalmIfRelevant();
+			useTacticalNukeIfRelevant();
+			useCrippleSpawnerIfRelevant();
+			useMetalDetectorAndTreasureIfRelevant();
+			useGoldRainIfRelevant();
+			attemptRespawn();
+	
+			if (clickRate > 0) {
+				startGoldRainClick();
+			}
+		}catch(e)
+		{
+			console.log("Something went wrong. Don't worry, we'll keep running.");
+			console.log("Error: " + e);
 		}
 
 		isAlreadyRunning = false;
@@ -222,6 +228,19 @@ function purchaseBadgeItems() {
 
 	// Get rid of that interval, it could end up taking up too many resources
 	window.clearInterval(intervalID);
+}
+
+
+function useWormholeIfRelevant()
+{
+	if(numItem(ITEMS.WORMHOLE) > 0 && !isAbilityCoolingDown(ITEMS.WORMHOLE))
+	{
+		if(getCurrentGameLevel() > 0 && (getCurrentGameLevel() % 100 == 0))
+		{
+			console.log("Game is divisible by 100. Time to use Wormhole to gain 10 levels!");
+			triggerItem(ITEMS.WORMHOLE);
+		}
+	}
 }
 
 function goToLaneWithBestTarget() {
@@ -948,6 +967,16 @@ function currentLaneHasAbility(abilityID) {
 	if (typeof(g_Minigame.m_CurrentScene.m_rgLaneData[lane].abilities[abilityID]) == 'undefined')
 		return 0;
 	return g_Minigame.m_CurrentScene.m_rgLaneData[lane].abilities[abilityID];
+}
+
+function getSecondsSinceStart()
+{
+	return g_Minigame.CurrentScene().m_rgGameData.timestamp - g_Minigame.CurrentScene().m_rgGameData.timestamp_game_start;
+}
+
+function getCurrentGameLevel()
+{
+	return g_Minigame.CurrentScene().m_rgGameData.level + 1;
 }
 
 function getLanePercent(lane) {
