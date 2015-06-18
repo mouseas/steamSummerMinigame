@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.8.0
+// @version 4.8.
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -33,6 +33,7 @@
 	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
+	var useTrollTracker = getPreferenceBoolean("useTrollTracker", false);
 	var praiseGoldHelm = getPreferenceBoolean("praiseGoldHelm", true);
 
 	var autoRefreshMinutes = 30; // refresh page after x minutes
@@ -307,6 +308,7 @@
 		}
 
 		options1.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer", enableFingering, handleEvent, true));
+		options1.appendChild(makeCheckBox("useTrollTracker", "Track improper ability use", useTrollTracker, handleEvent, true));
 		options1.appendChild(makeCheckBox("praiseGoldHelm", "Praise Gold Helm!", praiseGoldHelm, togglePraise, false));
 		options1.appendChild(makeDropdown("praiseGoldHelmImage", "", goldHelmUI, goldHelmURLs, changePraiseImage));
 		options1.appendChild(makeNumber("setLogLevel", "Change the log level", "25px", logLevel, 0, 5, updateLogLevel));
@@ -540,7 +542,30 @@
 					switch( rgEntry.type ) {
 						case 'ability':
 							var ele = this.m_eleUpdateLogTemplate.clone();
-							if(getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1) {
+							if(useTrollTracker) {
+								if(getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1) {
+									w.$J(ele).data('abilityid', rgEntry.ability );
+									w.$J('.name', ele).text( rgEntry.actor_name );
+									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
+									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
+	
+									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
+	
+									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
+									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
+									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
+								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 10 > 3 && rgEntry.ability === 26) {
+									w.$J(ele).data('abilityid', rgEntry.ability );
+									w.$J('.name', ele).text( rgEntry.actor_name );
+									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
+									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
+									w.$J('.name', ele).attr( "style", "color: yellow" );
+	
+									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
+	
+									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
+								}
+							} else {
 								w.$J(ele).data('abilityid', rgEntry.ability );
 								w.$J('.name', ele).text( rgEntry.actor_name );
 								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
@@ -550,17 +575,6 @@
 
 								this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
-								w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
-							} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 10 > 3 && rgEntry.ability === 26) {
-								w.$J(ele).data('abilityid', rgEntry.ability );
-								w.$J('.name', ele).text( rgEntry.actor_name );
-								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
-								w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
-								w.$J('.name', ele).attr( "style", "color: yellow" );
-
-								w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-
-								this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 							}
 							break;
 
