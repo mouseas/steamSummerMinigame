@@ -235,14 +235,10 @@ function useWormholeIfRelevant()
 {
 	if(numItem(ITEMS.WORMHOLE) > 0 && !isAbilityCoolingDown(ITEMS.WORMHOLE))
 	{
-		// Don't use wormholes for the first 11 minutes.
-		if(getSecondsSinceStart() > (60 * 11))
+		if(getCurrentGameLevel() > 0 && (getCurrentGameLevel() % 100 == 0))
 		{
-			if(getCurrentGameLevel() > 0 && (getCurrentGameLevel() % 100 == 0))
-			{
-				console.log("Game is divisible by 500. Time to use Wormhole to gain 10 levels!");
-				triggerItem(ITEMS.WORMHOLE);
-			}
+			console.log("Game is divisible by 100. Time to use Wormhole to gain 10 levels!");
+			triggerItem(ITEMS.WORMHOLE);
 		}
 	}
 }
