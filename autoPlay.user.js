@@ -1347,7 +1347,9 @@
 			return;
 		}
 		// Check if Wormhole is purchased
-		if (tryUsingItem(ABILITIES.WORMHOLE)) {
+		if (hasItem(ABILITIES.WORMHOLE)) {
+			// Force usage of it regardless of cooldown. Will work if at least one NL was used suring the last second.
+			triggerAbility(ABILITIES.WORMHOLE);
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
 		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
