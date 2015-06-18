@@ -332,7 +332,9 @@
 		leave_game_box.parentElement.removeChild(leave_game_box);
 
 		enhanceTooltips();
+		enableMultibuy();
 		waitForWelcomePanelLoad();
+
 	}
 
 	function updateLaneData() {
@@ -617,7 +619,7 @@
 			true
 		);
 	}
-	
+
 	function makeDropdown(name, desc, value, values, listener) {
 		var label = document.createElement("label");
 		var description = document.createTextNode(desc);
@@ -726,11 +728,11 @@
 		w[checkbox.name] = checkbox.checked;
 		return checkbox.checked;
 	}
-	
+
 	function handleDropdown(event) {
 		var dropdown = event.target;
 		setPreference(dropdown.name, dropdown.value);
-		
+
 		w[dropdown.name] = dropdown.value;
 		return dropdown.value;
 	}
@@ -741,7 +743,7 @@
 		}
 		fixActiveCapacityUI();
 	}
-	
+
 	function changePraiseImage(event) {
 		if (event !== undefined) {
 			goldHelmUI = handleDropdown(event);
@@ -1773,7 +1775,7 @@
 					strOut += '<br><br>Damage with one crit:';
 					strOut += '<br>DPS: ' + w.FormatNumberForDisplay(currentMultiplier * dps) + ' => ' + w.FormatNumberForDisplay(newMultiplier * dps);
 					strOut += '<br>Click: ' + w.FormatNumberForDisplay(currentMultiplier * clickDamage) + ' => ' + w.FormatNumberForDisplay(newMultiplier * clickDamage);
-					strOut += '<br><br>Base Increased By: ' + w.FormatNumberForDisplay(multiplier) + 'x';
+					strOut += '<br><br>Base Increased By: ' + multiplier.toFixed(1) + 'x';
 					break;
 				case 9: // Boss Loot Drop's type
 					strOut += '<br><br>Boss Loot Drop Rate:';
@@ -1786,6 +1788,49 @@
 			}
 
 			return strOut;
+		};
+	}
+
+	function enableMultibuy(){
+
+		// We have to add this to the scene so that we can access the "this" identifier.
+		s().trt_oldbuy = w.g_Minigame.m_CurrentScene.TrySpendBadgePoints;
+		w.g_Minigame.m_CurrentScene.TrySpendBadgePoints = function(ele, count){
+
+			if (count != 1){
+				s().trt_oldbuy(ele, count);
+				return;
+			}
+
+			var instance = this;
+			var $ele = w.$J(ele);
+
+			var name = w.$J('.name', ele).text();
+			var type = $ele.data('type');
+			var cost = $ele.data('cost');
+
+			var badge_points = instance.m_rgPlayerTechTree.badge_points;
+			var maxBuy = Math.floor(badge_points / cost);
+			var resp = prompt("How many "+ name + " do you want to buy? (max " + maxBuy + ")", 0);
+
+			if (!resp){
+				return;
+			}
+
+			var newCount = parseInt(resp);
+
+			if (isNaN(newCount) || newCount < 0) {
+				alert("Please enter a positive number.");
+				return;
+			}
+
+			if ( instance.m_rgPlayerTechTree.badge_points < (cost * newCount))
+			{
+				alert("Not enough badge points.");
+				return;
+			}
+
+			s().trt_oldbuy(ele, newCount);
 		};
 	}
 
@@ -1854,5 +1899,6 @@
 			});
 		};
 	}, false);
+
 
 }(window));
