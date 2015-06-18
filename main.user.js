@@ -127,27 +127,32 @@ function doTheThing() {
 	if (!isAlreadyRunning){
 		isAlreadyRunning = true;
 
-		goToLaneWithBestTarget();
+		try {
+			goToLaneWithBestTarget();
 
-		if (purchaseUpgradeToggle){
-			purchaseUpgrades();
-		}
+			if (purchaseUpgradeToggle){
+				purchaseUpgrades();
+			}
 
-		useGoodLuckCharmIfRelevant();
-		useCritIfRelevant();
-		useReviveIfRelevant();
-		useMedicsIfRelevant();
-		useMoraleBoosterIfRelevant();
-		useClusterBombIfRelevant();
-		useNapalmIfRelevant();
-		useTacticalNukeIfRelevant();
-		useCrippleSpawnerIfRelevant();
-		useMetalDetectorAndTreasureIfRelevant();
-		useGoldRainIfRelevant();
-		attemptRespawn();
+			useGoodLuckCharmIfRelevant();
+			useCritIfRelevant();
+			useReviveIfRelevant();
+			useMedicsIfRelevant();
+			useMoraleBoosterIfRelevant();
+			useClusterBombIfRelevant();
+			useNapalmIfRelevant();
+			useTacticalNukeIfRelevant();
+			useCrippleSpawnerIfRelevant();
+			useMetalDetectorAndTreasureIfRelevant();
+			useGoldRainIfRelevant();
+			attemptRespawn();
 
-		if (clickRate > 0) {
-			startGoldRainClick();
+			if (clickRate > 0) {
+				startGoldRainClick();
+			}
+		} catch (e) {
+			console.log("An error occurred, but we'll keep running.");
+			console.log(e);
 		}
 
 		isAlreadyRunning = false;
