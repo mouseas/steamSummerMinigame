@@ -71,8 +71,7 @@
 		useAbilityChance: 0.03,
 		useLikeNewMinChance: 0.02,
 		useLikeNewMaxChance: 0.10,
-		useGoldThreshold: 200,
-		wormHoleAttempts: 1
+		useGoldThreshold: 200
 	};
 
 	var replacedCUI = false;
@@ -407,10 +406,8 @@
 			updateLaneData();
 
 			attemptRespawn();
-			for (var i=0; i<control.wormHoleAttempts; i++) {
-				useLikeNew();
-				useWormholeIfRelevant();
-			}
+			useLikeNew();
+			useWormholeIfRelevant();
 			goToLaneWithBestTarget();
 			useCooldownIfRelevant();
 			useGoodLuckCharmIfRelevant();
