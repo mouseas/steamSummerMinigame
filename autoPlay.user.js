@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 6.0.7
+// @version 6.0.8
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '6.0.7';
+	var SCRIPT_VERSION = '6.0.8';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -54,7 +54,8 @@
 		"Gaben + Snoop Dogg": "http://i.imgur.com/9R0436k.gif",
 		"Wormhole Gaben": "http://i.imgur.com/6BuBgxY.png",
 		"MSG2015": "http://i.imgur.com/zHI6C6X.png",
-		"Matrix Gaben": "http://i.imgur.com/titbsfQ.png"
+		"Matrix Gaben": "http://i.imgur.com/titbsfQ.png",
+		"Praising Intensifies": "http://i.imgur.com/PhC6en4.jpg"
 	};
 	var goldHelmUI = getPreference("praiseGoldHelmImage", goldHelmURLs["Golden Gaben"]);
 	var fixedUI = "http://i.imgur.com/ieDoLnx.png";
