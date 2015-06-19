@@ -404,6 +404,8 @@
 			if (level < 10 && control.useSlowMode) {
 				return;
 			}
+			
+			wormHoleConstantUse = (level < 100000);
 
 			updateLaneData();
 
