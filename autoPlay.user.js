@@ -77,8 +77,6 @@
 	};
 
 	var canUseLikeNew = true;
-	var levelsSkipped = [0, 0, 0, 0, 0];
-	var oldLevel = 0;
 	var replacedCUI = false;
 	var predictTicks = 0;
 	var predictJumps = 0;
@@ -504,18 +502,6 @@
 						}
 					}
 				}
-			}
-
-			// Make sure to only include ticks that are relevant
-			var level_jump = getGameLevel() - oldLevel;
-			if (level_jump > 0) {
-				// Iterate down the levelskipped memory
-				for (var i = 4; i >= 0; i--) {
-					levelsSkipped[i+1] = levelsSkipped[i];
-				}
-				levelsSkipped[0] = level_jump;
-
-				oldLevel = getGameLevel();
 			}
 		}
 
@@ -1640,21 +1626,6 @@
 		return {hours : hours, minutes : minutes};
 	}
 
-	function expectedLevel(level) {
-		var time = Math.floor(s().m_nTime) % 86400;
-		time = time - 16*3600;
-		if (time < 0) {
-			time = time + 86400;
-		}
-
-		var remaining_time = 86400 - time;
-		var passed_time = getCurrentTime() - s().m_rgGameData.timestamp_game_start;
-		var expected_level = Math.floor(((level/passed_time)*remaining_time)+level);
-		var likely_level = Math.floor((expected_level - level)/Math.log(3))+ level;
-
-		return {expected_level : expected_level, likely_level : likely_level, remaining_time : remaining_time};
-	}
-
 	if (breadcrumbs) {
 		var element = document.createElement('span');
 		element.textContent = ' > ';
@@ -1687,28 +1658,14 @@
 		element.textContent = 'Remaining Time: 0 hours, 0 minutes.';
 		breadcrumbs.appendChild(element);
 		document.RemainingTime = element;
-
-		element = document.createElement('span');
-		element.textContent = ' > ';
-		breadcrumbs.appendChild(element);
-
-		element = document.createElement('span');
-		element.style.color = '#33FF33';
-		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-		element.textContent = 'Skipped 0 levels in last 5s.';
-		breadcrumbs.appendChild(element);
-		document.LevelsSkip = element;
 	}
 
 	function updateLevelInfoTitle(level)
 	{
-		var exp_lvl = expectedLevel(level);
 		var rem_time = countdown(exp_lvl.remaining_time);
-		var lvl_skip = getLevelsSkipped();
 
 		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Jump: ' + estimateJumps();
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
-		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
 	}
 
 	// Helpers to access player stats.
