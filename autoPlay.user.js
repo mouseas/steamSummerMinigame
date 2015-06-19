@@ -410,7 +410,11 @@
 			attemptRespawn();
 			useLikeNew();
 			useWormholeIfRelevant();
-			goToLaneWithBestTarget();
+			if (level % control.rainingRounds === 0) {
+				goToRainingLane();
+			} else {
+				goToLaneWithBestTarget();
+			}
 			useCooldownIfRelevant();
 			useGoodLuckCharmIfRelevant();
 			useMedicsIfRelevant();
@@ -921,6 +925,25 @@
 			s().m_rgLaneData[1].players +
 			s().m_rgLaneData[2].players;
 		document.getElementById("players_in_game").innerHTML = totalPlayers + "/1500";
+	}
+
+	function goToRainingLane() {
+		// On a WH level, jump everyone to lane 0, unless there is a boss there, in which case jump to lane 1.
+		var targetLane = 0;
+		// Check lane 0, enemy 0 to see if it's a boss.
+		var enemyData = s().GetEnemy(0, 0).m_data;
+		if (typeof enemyData !== "undefined") {
+			var enemyType = enemyData.type;
+			if (enemyType == ENEMY_TYPE.BOSS) {
+				advLog('In lane 0, there is a boss, avoiding', 4);
+				targetLane = 1;
+			}
+		}
+
+		if (s().m_nExpectedLane != targetLane) {
+			advLog('Switching to raining lane' + targetLane, 3);
+			s().TryChangeLane(targetLane);
+		}
 	}
 
 	function goToLaneWithBestTarget() {
