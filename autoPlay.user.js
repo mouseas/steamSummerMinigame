@@ -1387,9 +1387,9 @@
 		}
 		if (!wormholeInterval) {
 			wormholeInterval = w.setInterval(function(){
-			  g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26}); //wormhole
-			  g_Minigame.m_CurrentScene.m_nLastTick = 0;
-			  g_Minigame.m_CurrentScene.Tick();
+				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26}); //wormhole
+				w.g_Minigame.m_CurrentScene.m_nLastTick = 0;
+				w.g_Minigame.m_CurrentScene.Tick();
 			}, 100);
 		}
 	}
