@@ -70,13 +70,10 @@
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
 		useLikeNewMinChance: 0.02,
-		useLikeNewMaxChance: 0.25,
-		useLikeNewMinTime: 0,
-		useLikeNewMaxTime: 500,
+		useLikeNewMaxChance: 0.10,
 		useGoldThreshold: 200
 	};
 
-	var canUseLikeNew = true;
 	var replacedCUI = false;
 	var predictTicks = 0;
 	var predictJumps = 0;
@@ -409,6 +406,7 @@
 			updateLaneData();
 
 			attemptRespawn();
+			useLikeNew();
 			useWormholeIfRelevant();
 			goToLaneWithBestTarget();
 			useCooldownIfRelevant();
@@ -427,7 +425,6 @@
 			useCrippleMonsterIfRelevant(level);
 			useReviveIfRelevant(level);
 			useMaxElementalDmgIfRelevant();
-			useLikeNewIfRelevant();
 			updatePlayersInGame();
 
 			if (level !== lastLevel) {
@@ -1350,6 +1347,7 @@
 		if (level % control.rainingRounds !== 0) {
 			return;
 		}
+		
 		// Check if Wormhole is purchased
 		if (hasItem(ABILITIES.WORMHOLE)) {
 			// Force usage of it regardless of cooldown. Will work if at least one NL was used suring the last second.
@@ -1358,39 +1356,25 @@
 		}
 	}
 
-	function useLikeNewIfRelevant() {
-		// Allow Like New use for next farm boss round.
-		if (!hasItem(ABILITIES.LIKE_NEW)) {
+	function useLikeNew() {
+		// Check the time before using like new.
+		var level = getGameLevel();
+		if (level % control.rainingRounds !== 0) {
 			return;
 		}
-
-		var level = getGameLevel();
-		//if (level % control.rainingRounds !== 0 && !canUseLikeNew) {
-		//	canUseLikeNew = true;
-		//	return;
-		//}
-		// Check if wormhole is on cooldown and roll the dice.
-
+		
+		// Quit if we dont satisfy the chance
 		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
 		var likeNewChance = (control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance;
-
-		if (Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
+		if (Math.random() > likeNewChance) {
 			return;
 		}
-		// Start a timer between 1 and 5 seconds to try to use LikeNew.
-		var rand = Math.floor(Math.random() * control.useLikeNewMaxTime - control.useLikeNewMinTime + control.useLikeNewMinTime);
-		setTimeout(useLikeNew, rand);
-		advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
-		//canUseLikeNew = false;
-	}
-
-	function useLikeNew() {
+		
 		// Make sure that we're still in the boss round when we actually use it.
 		var level = getGameLevel();
 		if (level % control.rainingRounds === 0) {
-			if (tryUsingItem(ABILITIES.LIKE_NEW)) {
+			if (triggerAbility(ABILITIES.LIKE_NEW)) {
 				advLog('We can actually use Like New semi-reliably! Cooldowns-b-gone.', 2);
-				//canUseLikeNew = true;
 			}
 		}
 	}
