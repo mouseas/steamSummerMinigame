@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 6.0
+// @version 6.0.1
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '6.0';
+	var SCRIPT_VERSION = '6.0.1';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -1427,7 +1427,7 @@
 		var level = getGameLevel();
 		var levelmod = level % control.rainingRounds;
 		// Early in the game, or we're a safe distance away from raining rounds.
-		return (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds);
+		return (level >= 99999999 || (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds));
 	}
 
 	function tryUsingAbility(abilityId) {
