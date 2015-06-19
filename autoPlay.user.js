@@ -42,6 +42,7 @@
 
 	// DO NOT MODIFY
 	var wormHoleConstantUse = false;
+	var wormHoleConstantUseOverride = false;
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
 	var currentClickRate = enableAutoClicker ? clickRate : 0;
@@ -424,7 +425,7 @@
 				return;
 			}
 
-			wormHoleConstantUse = (level < 100000);
+			wormHoleConstantUse = ((level < 100000) || wormHoleConstantUseOverride);
 
 			updateLaneData();
 
@@ -1399,20 +1400,20 @@
 	function useLikeNew() {
 		// Check the time before using like new.
 		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0) {
+		if (level % control.rainingRounds !== 0 && !wormHoleConstantUseOverride) {
 			return;
 		}
 
 		// Quit if we dont satisfy the chance
 		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
 		var likeNewChance = (control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance;
-		if (Math.random() > likeNewChance) {
+		if (Math.random() > likeNewChance && !wormHoleConstantUseOverride) {
 			return;
 		}
 
 		// Make sure that we're still in the boss round when we actually use it.
 		level = getGameLevel();
-		if (level % control.rainingRounds === 0) {
+		if (level % control.rainingRounds === 0 || wormHoleConstantUseOverride) {
 			if (triggerAbility(ABILITIES.LIKE_NEW)) {
 				advLog('We can actually use Like New semi-reliably! Cooldowns-b-gone.', 2);
 			}
