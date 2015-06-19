@@ -1343,9 +1343,13 @@
 	}
 
 	function useWormholeIfRelevant() {
+		var elapsed_seconds = (getCurrentTime() - s().m_rgGameData.timestamp_game_start);
+		var remaining_seconds =  86400 - elapsed_seconds;
+		var remaining_wormholes = getItemCount(ABILITIES.WORMHOLE);
+		
 		// Check the time before using wormhole.
 		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse) {
+		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse && remaining_seconds > remaining_wormholes) {
 			return;
 		}
 		
@@ -1494,6 +1498,16 @@
 			}
 		}
 		return false;
+	}
+	
+	function getItemCount(itemId) {
+		for (var i = 0; i < s().m_rgPlayerTechTree.ability_items.length; ++i) {
+			var abilityItem = s().m_rgPlayerTechTree.ability_items[i];
+			if (abilityItem.ability == itemId) {
+				return abilityItem.quantity;
+			}
+		}
+		return 0;
 	}
 
 	function tryUsingItem(itemId, checkInLane) {
