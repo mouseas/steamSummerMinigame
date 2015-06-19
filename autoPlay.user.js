@@ -1143,7 +1143,7 @@
 		
 		// Check the time before using wormhole.
 		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0 && remaining_seconds > remaining_wormholes) {
+		if (level % control.rainingRounds !== 0 && remaining_seconds < remaining_wormholes) {
 			return;
 		}
 		
