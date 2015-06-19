@@ -19,10 +19,7 @@
 	var SCRIPT_VERSION = '4.8.2';
 
 	// OPTIONS
-	var clickRate = 20;
 	var logLevel = 1; // 5 is the most verbose, 0 disables all log
-
-	var enableAutoClicker = getPreferenceBoolean("enableAutoClicker", true);
 
 	var removeInterface = getPreferenceBoolean("removeInterface", true); // get rid of a bunch of pointless DOM var removeParticles = getPreferenceBoolean("removeParticles", true);
 	var removeParticles = getPreferenceBoolean("removeParticles", true);
@@ -45,7 +42,7 @@
 	var likeNewHoleConstantUse = false;
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
-	var currentClickRate = enableAutoClicker ? clickRate : 0;
+	var currentClickRate = 20;
 	var lastLevel = 0;
 	var goldHelmURLs = {
 		"Original Gold Helm": "https://i.imgur.com/1zRXQgm.png",
@@ -294,7 +291,6 @@
 		options1.style["column-count"] = 3;
 		options1.style.width = "100%";
 
-		options1.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker, false));
 		options1.appendChild(makeCheckBox("removeInterface", "Remove interface", removeInterface, handleEvent, true));
 		options1.appendChild(makeCheckBox("removeParticles", "Remove particle effects", removeParticles, handleEvent, true));
 		options1.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects", removeFlinching, handleEvent, true));
@@ -437,9 +433,9 @@
 			
 			// This belongs here so we can update the header during boss fights
 			updateLevelInfoTitle(level);
-
-			currentClickRate = getWantedClicksPerSecond();
-			s().m_nClicks = currentClickRate;
+			
+			var clickRate = getWantedClicksPerSecond();;
+			s().m_nClicks = clickRate
 			s().m_nLastTick = false;
 			w.g_msTickRate = 1000;
 
@@ -448,7 +444,7 @@
 				s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].element
 			);
 
-			advLog("Ticked. Current clicks per second: " + currentClickRate + ". Current damage per second: " + (damagePerClick * currentClickRate), 4);
+			advLog("Ticked. Current clicks per second: " + clickRate + ". Current damage per second: " + (damagePerClick * clickRate), 4);
 
 			if(disableRenderer) {
 				s().Tick();
@@ -464,13 +460,13 @@
 				s().m_rgPlayerData.current_lane,
 				s().m_rgPlayerData.target);
 
-			if (currentClickRate > 0) {
+			if (clickRate > 0) {
 
 				if (enemy) {
 					displayText(
 						enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
 						enemy.m_Sprite.position.y - 52,
-						"-" + w.FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
+						"-" + w.FormatNumberForDisplay((damagePerClick * clickRate), 5),
 						"#aaf"
 					);
 
@@ -485,7 +481,7 @@
 
 					var goldPerClickPercentage = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
 					if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0) {
-						var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
+						var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * clickRate;
 						s().ClientOverride('player_data', 'gold', s().m_rgPlayerData.gold + goldPerSecond);
 						s().ApplyClientOverrides('player_data', true);
 						advLog(
@@ -755,15 +751,6 @@
 		fixActiveCapacityUI();
 	}
 
-	function toggleAutoClicker(event) {
-		var value = enableAutoClicker;
-		if (event !== undefined) {
-			value = handleCheckBox(event);
-		}
-		enableAutoClicker = value;
-		advLog('Autoclicker is ' + enableAutoClicker, 1);
-	}
-
 	function toggleAutoRefresh(event) {
 		var value = enableAutoRefresh;
 		if (event !== undefined) {
@@ -829,22 +816,10 @@
 
 	function getWantedClicksPerSecond() {
 		var level = getGameLevel();
-		if (!enableAutoClicker) {
+		if (level % control.rainingRounds === 0) {
 			return 0;
 		}
-		if (level % control.rainingRounds === 0) {
-			if (hasItem(ABILITIES.WORMHOLE)) {
-				return 0;
-			} else {
-				return Math.floor(clickRate/2);
-			}
-		}
-		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
-			return Math.floor(clickRate/10);
-		} else if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds*2) {
-			return Math.floor(clickRate/5);
-		}
-		return clickRate;
+		return currentClickRate;
 	}
 
 	function getLevelsSkipped() {
