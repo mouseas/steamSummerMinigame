@@ -362,7 +362,7 @@
 	function fixActiveCapacityUI() {
 		if(praiseGoldHelm) {
 			w.$J('.tv_ui').css('background-image', 'url(' + goldHelmUI + ')');
-			w.$J(".pagecontent").attr("style", "padding-bottom: 0px; background-image: url('http://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/368020/7b933b3766d64ec0525c86891dedb4b699a25fb9.jpg')")
+			w.$J(".pagecontent").attr("style", "padding-bottom: 0px; background-image: url('http://cdn.akamai.steamstatic.com/steamcommunity/public/images/items/368020/7b933b3766d64ec0525c86891dedb4b699a25fb9.jpg')");
 		} else {
 			w.$J('.tv_ui').css('background-image', 'url(' + fixedUI + ')');
 		}
