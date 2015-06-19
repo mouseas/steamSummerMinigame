@@ -19,10 +19,7 @@
 	var SCRIPT_VERSION = '4.8.2';
 
 	// OPTIONS
-	var clickRate = 20;
 	var logLevel = 1; // 5 is the most verbose, 0 disables all log
-
-	var enableAutoClicker = getPreferenceBoolean("enableAutoClicker", true);
 
 	var removeInterface = getPreferenceBoolean("removeInterface", true); // get rid of a bunch of pointless DOM var removeParticles = getPreferenceBoolean("removeParticles", true);
 	var removeParticles = getPreferenceBoolean("removeParticles", true);
@@ -41,9 +38,11 @@
 	var autoRefreshSecondsCheckLoadedDelay = 30;
 
 	// DO NOT MODIFY
+	var wormHoleConstantUse = false;
+	var likeNewHoleConstantUse = false;
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
-	var currentClickRate = enableAutoClicker ? clickRate : 0;
+	var currentClickRate = 20;
 	var lastLevel = 0;
 	var goldHelmURLs = {
 		"Original Gold Helm": "https://i.imgur.com/1zRXQgm.png",
@@ -70,13 +69,10 @@
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
 		useLikeNewMinChance: 0.02,
-		useLikeNewMaxChance: 0.25,
-		useLikeNewMinTime: 0,
-		useLikeNewMaxTime: 500,
+		useLikeNewMaxChance: 0.10,
 		useGoldThreshold: 200
 	};
 
-	var canUseLikeNew = true;
 	var replacedCUI = false;
 	var predictTicks = 0;
 	var predictJumps = 0;
@@ -295,7 +291,6 @@
 		options1.style["column-count"] = 3;
 		options1.style.width = "100%";
 
-		options1.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker, false));
 		options1.appendChild(makeCheckBox("removeInterface", "Remove interface", removeInterface, handleEvent, true));
 		options1.appendChild(makeCheckBox("removeParticles", "Remove particle effects", removeParticles, handleEvent, true));
 		options1.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects", removeFlinching, handleEvent, true));
@@ -408,26 +403,27 @@
 
 			updateLaneData();
 
+			// Pop up
 			attemptRespawn();
-			useWormholeIfRelevant();
 			goToLaneWithBestTarget();
+
+			// Do it faster
 			useCooldownIfRelevant();
-			useGoodLuckCharmIfRelevant();
+
+			// Use what matters
+			useLikeNew();
+			useWormholeIfRelevant();
+
+			// Heal and cry
 			useMedicsIfRelevant();
-			useMoraleBoosterIfRelevant();
-			useMetalDetectorIfRelevant();
-			useClusterBombIfRelevant();
-			useNapalmIfRelevant();
-			useTacticalNukeIfRelevant();
-			useCrippleMonsterIfRelevant();
 			useCrippleSpawnerIfRelevant();
-			if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
-				useGoldRainIfRelevant();
-			}
-			useCrippleMonsterIfRelevant(level);
+
+			// MAKE IT RAIN
+			useGoldRainIfRelevant();
+
+			// Bring people up
 			useReviveIfRelevant(level);
-			useMaxElementalDmgIfRelevant();
-			useLikeNewIfRelevant();
+
 			updatePlayersInGame();
 
 			if (level !== lastLevel) {
@@ -437,9 +433,9 @@
 			
 			// This belongs here so we can update the header during boss fights
 			updateLevelInfoTitle(level);
-
-			currentClickRate = getWantedClicksPerSecond();
-			s().m_nClicks = currentClickRate;
+			
+			var clickRate = getWantedClicksPerSecond();;
+			s().m_nClicks = clickRate
 			s().m_nLastTick = false;
 			w.g_msTickRate = 1000;
 
@@ -448,7 +444,7 @@
 				s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].element
 			);
 
-			advLog("Ticked. Current clicks per second: " + currentClickRate + ". Current damage per second: " + (damagePerClick * currentClickRate), 4);
+			advLog("Ticked. Current clicks per second: " + clickRate + ". Current damage per second: " + (damagePerClick * clickRate), 4);
 
 			if(disableRenderer) {
 				s().Tick();
@@ -464,13 +460,13 @@
 				s().m_rgPlayerData.current_lane,
 				s().m_rgPlayerData.target);
 
-			if (currentClickRate > 0) {
+			if (clickRate > 0) {
 
 				if (enemy) {
 					displayText(
 						enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
 						enemy.m_Sprite.position.y - 52,
-						"-" + w.FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
+						"-" + w.FormatNumberForDisplay((damagePerClick * clickRate), 5),
 						"#aaf"
 					);
 
@@ -485,7 +481,7 @@
 
 					var goldPerClickPercentage = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
 					if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0) {
-						var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
+						var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * clickRate;
 						s().ClientOverride('player_data', 'gold', s().m_rgPlayerData.gold + goldPerSecond);
 						s().ApplyClientOverrides('player_data', true);
 						advLog(
@@ -755,15 +751,6 @@
 		fixActiveCapacityUI();
 	}
 
-	function toggleAutoClicker(event) {
-		var value = enableAutoClicker;
-		if (event !== undefined) {
-			value = handleCheckBox(event);
-		}
-		enableAutoClicker = value;
-		advLog('Autoclicker is ' + enableAutoClicker, 1);
-	}
-
 	function toggleAutoRefresh(event) {
 		var value = enableAutoRefresh;
 		if (event !== undefined) {
@@ -829,22 +816,10 @@
 
 	function getWantedClicksPerSecond() {
 		var level = getGameLevel();
-		if (!enableAutoClicker) {
+		if (level % control.rainingRounds === 0) {
 			return 0;
 		}
-		if (level % control.rainingRounds === 0) {
-			if (hasItem(ABILITIES.WORMHOLE)) {
-				return 0;
-			} else {
-				return Math.floor(clickRate/2);
-			}
-		}
-		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
-			return Math.floor(clickRate/10);
-		} else if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds*2) {
-			return Math.floor(clickRate/5);
-		}
-		return clickRate;
+		return currentClickRate;
 	}
 
 	function getLevelsSkipped() {
@@ -1093,15 +1068,6 @@
 	}
 
 	function useCooldownIfRelevant() {
-		if (getActiveAbilityLaneCount(ABILITIES.DECREASE_COOLDOWNS) > 0 || Math.random() > control.useAbilityChance) {
-			disableAbility(ABILITIES.DECREASE_COOLDOWNS);
-			return;
-		}
-
-		if (!isAbilityActive(ABILITIES.DECREASE_COOLDOWNS)) {
-			enableAbility(ABILITIES.DECREASE_COOLDOWNS);
-		}
-
 		tryUsingAbility(ABILITIES.DECREASE_COOLDOWNS);
 	}
 
@@ -1124,135 +1090,6 @@
 		} else if (tryUsingItem(ABILITIES.GOD_MODE)) {
 			advLog('We have god mode, cooled down. Trigger it.', 2);
 		}
-	}
-
-	// Use Good Luck Charm if doable
-	function useGoodLuckCharmIfRelevant() {
-
-		// check if Crits is purchased and cooled down
-		if (tryUsingItem(ABILITIES.CRIT)) {
-			// Crits is purchased, cooled down, and needed. Trigger it.
-			advLog('Crit chance is always good.', 3);
-		}
-
-		// check if Good Luck Charms is purchased and cooled down
-		if (tryUsingAbility(ABILITIES.GOOD_LUCK_CHARMS)) {
-			advLog('Good Luck Charms is purchased, cooled down, and needed. Trigger it.', 2);
-		}
-	}
-
-	function useClusterBombIfRelevant() {
-		//Check if Cluster Bomb is purchased and cooled down
-		if (!canUseAbility(ABILITIES.CLUSTER_BOMB) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
-			return;
-		}
-
-		//Check lane has monsters to explode
-		var currentLane = s().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
-		var level = getGameLevel();
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
-					enemySpawnerExists = true;
-				}
-			}
-		}
-		//Bombs away if spawner and 2+ other monsters
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.CLUSTER_BOMB);
-		}
-	}
-
-	function useNapalmIfRelevant() {
-		//Check if Napalm is purchased and cooled down
-		if (!canUseAbility(ABILITIES.NAPALM) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
-			return;
-		}
-
-		//Check lane has monsters to burn
-		var currentLane = s().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
-		var level = getGameLevel();
-
-		// Prevent this outright if its within control.rainingSafeRounds of the next rainingRound
-		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
-			return;
-		}
-
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
-					enemySpawnerExists = true;
-				}
-			}
-		}
-
-		//Burn them all if spawner and 2+ other monsters
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.NAPALM);
-		}
-	}
-
-	// Use Moral Booster if doable
-	function useMoraleBoosterIfRelevant() {
-		// check if Good Luck Charms is purchased and cooled down
-		if (!canUseAbility(ABILITIES.MORALE_BOOSTER) || Math.random() > control.useAbilityChance) {
-			return;
-		}
-		var numberOfWorthwhileEnemies = 0;
-		for (var i = 0; i < s().m_rgGameData.lanes[s().m_nExpectedLane].enemies.length; i++) {
-			//Worthwhile enemy is when an enamy has a current hp value of at least 1,000,000
-			if (s().m_rgGameData.lanes[s().m_nExpectedLane].enemies[i].hp > 1000000) {
-				numberOfWorthwhileEnemies++;
-			}
-		}
-		if (numberOfWorthwhileEnemies >= 2) {
-			// Moral Booster is purchased, cooled down, and needed. Trigger it.
-			advLog('Moral Booster is purchased, cooled down, and needed. Trigger it.', 2);
-			triggerAbility(ABILITIES.MORALE_BOOSTER);
-		}
-	}
-
-	function useTacticalNukeIfRelevant() {
-		// Check if Tactical Nuke is purchased
-		if (!canUseAbility(ABILITIES.TACTICAL_NUKE) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
-			return;
-		}
-
-		//Check that the lane has a spawner and record it's health percentage
-		var currentLane = s().m_nExpectedLane;
-		var enemySpawnerExists = false;
-		var enemySpawnerHealthPercent = 0.0;
-		var level = getGameLevel();
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
-					enemySpawnerExists = true;
-					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-				}
-			}
-		}
-
-		// If there is a spawner and it's health is between 60% and 30%, nuke it!
-		if (enemySpawnerExists && enemySpawnerHealthPercent < 0.6 && enemySpawnerHealthPercent > 0.3) {
-			advLog("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.", 2);
-			triggerAbility(ABILITIES.TACTICAL_NUKE);
-		}
-	}
-
-	function useCrippleMonsterIfRelevant() {
-		return;
 	}
 
 	function useCrippleSpawnerIfRelevant() {
@@ -1284,72 +1121,32 @@
 	}
 
 	function useGoldRainIfRelevant() {
-		// Check if gold rain is purchased
-		if (!canUseItem(ABILITIES.RAINING_GOLD)) {
-			return;
-		}
-
-		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-		// check if current target is a boss, otherwise its not worth using the gold rain
-		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-
-			if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
-				// Gold Rain is purchased, cooled down, and needed. Trigger it.
-				advLog('Gold rain is purchased and cooled down, Triggering it on boss', 2);
-				triggerItem(ABILITIES.RAINING_GOLD);
-			}
-		}
-	}
-
-	function useMetalDetectorIfRelevant() {
-		// Early game treasures
-		if ((getGameLevel() <= 30 || getGameLevel() >= 100000) && canUseItem(ABILITIES.TREASURE)) {
-			triggerItem(ABILITIES.TREASURE);
-		}
-		// Check if metal detector or treasure is purchased
-		if (canUseAbility(ABILITIES.METAL_DETECTOR) || canUseItem(ABILITIES.TREASURE)) {
-			if (isAbilityActive(ABILITIES.METAL_DETECTOR)) {
-				return;
-			}
-
-			var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-			// check if current target is a boss, otherwise we won't use metal detector
-			if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-				var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-
-				if (enemyBossHealthPercent <= 0.25) { // We want sufficient time for the metal detector to be applicable
-					// Metal Detector is purchased, cooled down, and needed. Trigger it.
-					if (canUseAbility(ABILITIES.METAL_DETECTOR)) {
-						advLog('Metal Detector is purchased and cooled down, Triggering it on boss', 2);
-						triggerAbility(ABILITIES.METAL_DETECTOR);
-					} else if (canUseItem(ABILITIES.TREASURE)) {
-						advLog('Treasure is available and cooled down, Triggering it on boss', 2);
-						triggerItem(ABILITIES.TREASURE);
-					}
-				}
-			}
-		}
-	}
-
-
-	function useMaxElementalDmgIfRelevant() {
-		// Check if Max Elemental Damage is purchased
-		if (isAbilityActive(ABILITIES.MAX_ELEMENTAL_DAMAGE) || Math.random() > control.useAbilityChance) {
-			return;
-		}
-		if (tryUsingItem(ABILITIES.MAX_ELEMENTAL_DAMAGE, true)) {
-			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
-			advLog('Max Elemental Damage is purchased and cooled down, triggering it.', 2);
+		// Use raining gold whenever you can not on boss rounds
+		var level = getGameLevel();
+		if (level % control.rainingRounds !== 0) {
+			advLog('Gold rain is purchased and cooled down, Triggering it on boss', 2);
+			triggerItem(ABILITIES.RAINING_GOLD);
 		}
 	}
 
 	function useWormholeIfRelevant() {
-		// Check the time before using wormhole.
-		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0) {
+		// Trigger this if the variable says so
+		if (wormHoleConstantUse) {
+			if (triggerAbility(ABILITIES.WORMHOLE)) {
+				advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
+			}
 			return;
 		}
+		var elapsed_seconds = (getCurrentTime() - s().m_rgGameData.timestamp_game_start);
+		var remaining_seconds =  86400 - elapsed_seconds;
+		var remaining_wormholes = getItemCount(ABILITIES.WORMHOLE);
+		
+		// Check the time before using wormhole.
+		var level = getGameLevel();
+		if (level % control.rainingRounds !== 0 && remaining_seconds > remaining_wormholes) {
+			return;
+		}
+		
 		// Check if Wormhole is purchased
 		if (hasItem(ABILITIES.WORMHOLE)) {
 			// Force usage of it regardless of cooldown. Will work if at least one NL was used suring the last second.
@@ -1358,39 +1155,32 @@
 		}
 	}
 
-	function useLikeNewIfRelevant() {
-		// Allow Like New use for next farm boss round.
-		if (!hasItem(ABILITIES.LIKE_NEW)) {
+	function useLikeNew() {
+		// Trigger this if the variable says so
+		if (likeNewHoleConstantUse) {
+			if (triggerAbility(ABILITIES.LIKE_NEW)) {
+				advLog('We can actually use Like New semi-reliably! Cooldowns-b-gone.', 2);
+			}
 			return;
 		}
-
+		// Check the time before using like new.
 		var level = getGameLevel();
-		//if (level % control.rainingRounds !== 0 && !canUseLikeNew) {
-		//	canUseLikeNew = true;
-		//	return;
-		//}
-		// Check if wormhole is on cooldown and roll the dice.
-
+		if (level % control.rainingRounds !== 0) {
+			return;
+		}
+		
+		// Quit if we dont satisfy the chance
 		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
 		var likeNewChance = (control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance;
-
-		if (Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
+		if (Math.random() > likeNewChance) {
 			return;
 		}
-		// Start a timer between 1 and 5 seconds to try to use LikeNew.
-		var rand = Math.floor(Math.random() * control.useLikeNewMaxTime - control.useLikeNewMinTime + control.useLikeNewMinTime);
-		setTimeout(useLikeNew, rand);
-		advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
-		//canUseLikeNew = false;
-	}
-
-	function useLikeNew() {
+		
 		// Make sure that we're still in the boss round when we actually use it.
 		var level = getGameLevel();
 		if (level % control.rainingRounds === 0) {
-			if (tryUsingItem(ABILITIES.LIKE_NEW)) {
+			if (triggerAbility(ABILITIES.LIKE_NEW)) {
 				advLog('We can actually use Like New semi-reliably! Cooldowns-b-gone.', 2);
-				//canUseLikeNew = true;
 			}
 		}
 	}
@@ -1509,6 +1299,16 @@
 			}
 		}
 		return false;
+	}
+	
+	function getItemCount(itemId) {
+		for (var i = 0; i < s().m_rgPlayerTechTree.ability_items.length; ++i) {
+			var abilityItem = s().m_rgPlayerTechTree.ability_items[i];
+			if (abilityItem.ability == itemId) {
+				return abilityItem.quantity;
+			}
+		}
+		return 0;
 	}
 
 	function tryUsingItem(itemId, checkInLane) {
@@ -1672,7 +1472,7 @@
 
 		var rem_time = countdown(remaining_time);
 
-		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Jump: ' + estimateJumps();
+		document.ExpectedLevel.textContent = 'Level: ' + w.FormatNumberForDisplay(level, 5) + ', Expected Jump: ' + w.FormatNumberForDisplay(estimateJumps(), 5);
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
 	}
 
