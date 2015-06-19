@@ -38,6 +38,7 @@
 	var autoRefreshSecondsCheckLoadedDelay = 30;
 
 	// DO NOT MODIFY
+	var wormHoleShouldSkip = true;
 	var wormHoleConstantUse = false;
 	var likeNewHoleConstantUse = false;
 	var isAlreadyRunning = false;
@@ -400,7 +401,12 @@
 			if (level < 10 && control.useSlowMode) {
 				return;
 			}
-
+			
+			var elapsed_time = (getCurrentTime() - s().m_rgGameData.timestamp_game_start);
+			var remaining_time =  (86400 - elapsed_time) / 3600;
+			var remaining_wormholes = getItemCount(ABILITIES.WORMHOLE) / level;
+			wormHoleShouldSkip = (remaining_time < remaining_wormholes * 1000);
+			
 			updateLaneData();
 
 			// Pop up
@@ -1137,13 +1143,10 @@
 			}
 			return;
 		}
-		var elapsed_seconds = (getCurrentTime() - s().m_rgGameData.timestamp_game_start);
-		var remaining_seconds =  86400 - elapsed_seconds;
-		var remaining_wormholes = getItemCount(ABILITIES.WORMHOLE);
 		
 		// Check the time before using wormhole.
 		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0 && remaining_seconds < remaining_wormholes) {
+		if (level % control.rainingRounds !== 0 && !wormHoleShouldSkip) {
 			return;
 		}
 		
