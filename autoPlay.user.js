@@ -1881,7 +1881,7 @@
 	        return 0;
 	    }
 	 
-	    return predictJumps / predictTicks * (s().m_rgGameData.timestamp - s().m_rgGameData.timestamp_level_start)
+	    return predictJumps / predictTicks * (s().m_rgGameData.timestamp - s().m_rgGameData.timestamp_level_start);
 	    //advLog('PT:' + predictTicks + ' PJ:' + predictJumps + ' PLWU:' + predictLastWormholesUpdate, 1);
 	}
 
