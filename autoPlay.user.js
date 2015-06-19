@@ -1657,7 +1657,7 @@
 
 		var rem_time = countdown(remaining_time);
 
-		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Jump: ' + estimateJumps();
+		document.ExpectedLevel.textContent = 'Level: ' + w.FormatNumberForDisplay(level, 5) + ', Expected Jump: ' + w.FormatNumberForDisplay(estimateJumps(), 5);
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
 	}
 
