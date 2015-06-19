@@ -80,6 +80,9 @@
 	var levelsSkipped = [0, 0, 0, 0, 0];
 	var oldLevel = 0;
 	var replacedCUI = false;
+	var predictTicks = 0;
+	var predictJumps = 0;
+	var predictLastWormholesUpdate = 0;
 
 	var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
@@ -1701,7 +1704,7 @@
 		var rem_time = countdown(exp_lvl.remaining_time);
 		var lvl_skip = getLevelsSkipped();
 
-		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
+		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Jump: ' + estimateJumps();
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
 		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
 	}
@@ -1849,6 +1852,37 @@
 
 	function getGameLevel() {
 		return s().m_rgGameData.level + 1;
+	}
+	
+	//I'm sorry of the way I name things. This function predicts jumps on a warp boss level, returns the value.
+	function estimateJumps() {
+	    var level = getGameLevel();
+	    var wormholesNow = 0;
+	 
+	    //Gather total wormholes active.
+	    for (var i = 0; i <= 2; i++) {
+	                //advLog('L' + i + ':' + g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26], 1);
+	                if (typeof g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== 'undefined') {
+	                        wormholesNow += g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26];
+	                }
+	        }
+	 
+	        //During baws round fc
+	    if (level % control.rainingRounds == 0) {
+	        if (predictLastWormholesUpdate !== wormholesNow) {
+	                predictTicks++;
+	                predictJumps += wormholesNow;
+	                predictLastWormholesUpdate = wormholesNow;
+	        }
+	    } else {
+	        predictTicks = 0;
+	        predictJumps = 0;
+	        predictLastWormholesUpdate = 0;
+	        return 0;
+	    }
+	 
+	    return predictJumps / predictTicks * (s().m_rgGameData.timestamp - s().m_rgGameData.timestamp_level_start)
+	    //advLog('PT:' + predictTicks + ' PJ:' + predictJumps + ' PLWU:' + predictLastWormholesUpdate, 1);
 	}
 
 	/** Check periodicaly if the welcome panel is visible
