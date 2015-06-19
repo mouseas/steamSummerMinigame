@@ -79,6 +79,7 @@
 	var predictTicks = 0;
 	var predictJumps = 0;
 	var predictLastWormholesUpdate = 0;
+	var wormholeInterval = false;
 
 	var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
@@ -1362,14 +1363,18 @@
 		// Check the time before using wormhole.
 		var level = getGameLevel();
 		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse) {
+			if(wormholeInterval) {
+				w.clearInterval(wormholeInterval);
+				wormholeInterval = false;
+			}
 			return;
 		}
-
-		// Check if Wormhole is purchased
-		if (hasItem(ABILITIES.WORMHOLE)) {
-			// Force usage of it regardless of cooldown. Will work if at least one NL was used suring the last second.
-			triggerAbility(ABILITIES.WORMHOLE);
-			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
+		if (!wormholeInterval) {
+			wormholeInterval = w.setInterval(function(){
+			  g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26}); //wormhole
+			  g_Minigame.m_CurrentScene.m_nLastTick = 0;
+			  g_Minigame.m_CurrentScene.Tick();
+			}, 100);
 		}
 	}
 
