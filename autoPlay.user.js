@@ -1663,12 +1663,12 @@
 	function updateLevelInfoTitle(level)
 	{
 		var time = Math.floor(s().m_nTime) % 86400;
--		time = time - 16*3600;
--		if (time < 0) {
--			time = time + 86400;
--		}
--
--		var remaining_time = 86400 - time;
+		time = time - 16*3600;
+		if (time < 0) {
+			time = time + 86400;
+		}
+
+		var remaining_time = 86400 - time;
 
 		var rem_time = countdown(remaining_time);
 
