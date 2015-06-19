@@ -1662,7 +1662,15 @@
 
 	function updateLevelInfoTitle(level)
 	{
-		var rem_time = countdown(exp_lvl.remaining_time);
+		var time = Math.floor(s().m_nTime) % 86400;
+-		time = time - 16*3600;
+-		if (time < 0) {
+-			time = time + 86400;
+-		}
+-
+-		var remaining_time = 86400 - time;
+
+		var rem_time = countdown(remaining_time);
 
 		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Jump: ' + estimateJumps();
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
