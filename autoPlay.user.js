@@ -443,17 +443,17 @@
 			useMedicsIfRelevant();
 			useMoraleBoosterIfRelevant();
 			useMetalDetectorIfRelevant();
-			useClusterBombIfRelevant();
-			useNapalmIfRelevant();
-			useTacticalNukeIfRelevant();
-			useCrippleMonsterIfRelevant();
+		//	useClusterBombIfRelevant();
+		//	useNapalmIfRelevant();
+		//	useTacticalNukeIfRelevant();
+		//	useCrippleMonsterIfRelevant();
 			useCrippleSpawnerIfRelevant();
 			if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
 				useGoldRainIfRelevant();
 			}
-			useCrippleMonsterIfRelevant(level);
+		//	useCrippleMonsterIfRelevant(level);
 			useReviveIfRelevant(level);
-			useMaxElementalDmgIfRelevant();
+		//	useMaxElementalDmgIfRelevant();
 			updatePlayersInGame();
 
 			if (level !== lastLevel) {
