@@ -434,9 +434,11 @@
 
 			if (level !== lastLevel) {
 				lastLevel = level;
-				updateLevelInfoTitle(level);
 				refreshPlayerData();
 			}
+			
+			// This belongs here so we can update the header during boss fights
+			updateLevelInfoTitle(level);
 
 			currentClickRate = getWantedClicksPerSecond();
 			s().m_nClicks = currentClickRate;
