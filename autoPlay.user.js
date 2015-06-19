@@ -41,6 +41,7 @@
 	var autoRefreshSecondsCheckLoadedDelay = 30;
 
 	// DO NOT MODIFY
+	var wormHoleConstantUse = false;
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
 	var currentClickRate = enableAutoClicker ? clickRate : 0;
@@ -1344,7 +1345,7 @@
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
 		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0) {
+		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse) {
 			return;
 		}
 		
