@@ -60,6 +60,14 @@ powerups for you.
 4. Press `F12` and navigate to the `Console` tab.
 5. Paste into the javascript input, and hit `Enter`.
 
+##### Safari #####
+1. Make sure you have `Show Develop menu in menu bar` checked in Preferences - Advanced.
+2. Open `main.user.js` in a text editor.
+2. Select All, Copy.
+3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
+4. Press `⌘  + Opt + I`.
+5. Paste into the javascript input, and hit `Enter`.
+
 To stop the manual script, type `window.clearTimeout(thingTimer);` into the console and hit `Enter`.
 
 The game should now play itself, you should leave it running in the background. If you're not sure if it is auto-playing, try changing lanes. If it jumps back almost immediately, it's working.
