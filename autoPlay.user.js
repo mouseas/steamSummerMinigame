@@ -28,7 +28,7 @@
 	var removeCritText = getPreferenceBoolean("removeCritText", false);
 	var removeGoldText = getPreferenceBoolean("removeGoldText", false);
 	var removeAllText = getPreferenceBoolean("removeAllText", false);
-	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
+	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined" || w.usingMsgScript);
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
 	var useTrollTracker = getPreferenceBoolean("useTrollTracker", false);
@@ -317,7 +317,7 @@
 		options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
 		options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, true));
 
-		if (typeof GM_info !== "undefined") {
+		if (typeof GM_info !== "undefined" || w.usingMsgScript) {
 			options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh", enableAutoRefresh, toggleAutoRefresh, false));
 		}
 
@@ -430,7 +430,7 @@
 			return false;
 		}
 	}
-	
+
 	function getRemainingTime() {
 		var time = Math.floor(s().m_nTime) % 86400;
 		time = time - 16*3600;
@@ -462,7 +462,7 @@
 				w.clearInterval(wormholeInterval);
 				wormholeInterval = false;
 			}
-			
+
 			if (likenewInterval) {
 				w.clearInterval(likenewInterval);
 				likenewInterval = false;
@@ -1317,7 +1317,7 @@
 		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse && !wormHoleConstantUseOverride) {
 			return;
 		}
-		
+
 		if (!wormholeInterval) {
 			wormholeInterval = w.setInterval(function(){
 				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26}); //wormhole
@@ -1452,7 +1452,7 @@
 		}
 		return false;
 	}
-	
+
 	function getItemCount(itemId) {
 		for (var i = 0; i < s().m_rgPlayerTechTree.ability_items.length; ++i) {
 			var abilityItem = s().m_rgPlayerTechTree.ability_items[i];
