@@ -9,8 +9,8 @@
 		"matches": [ "*://steamcommunity.com/minigame/towerattack", "*://steamcommunity.com/minigame/towerattack/", "*://steamcommunity.com//minigame//towerattack/", "*://steamcommunity.com//minigame//towerattack//" ],
 		"run_at": "document_end"
 	}],
-	"version": "1.02",
-	"permissions": [ "https://github.com/wchill/steamSummerMinigame/*", "https://raw.githubusercontent.com/wchill/steamSummerMinigame/*" ],
+	"version": "1.03",
+	"permissions": [ "https://github.com/wchill/steamSummerMinigame/*", "https://raw.githubusercontent.com/wchill/steamSummerMinigame/*", "https://github.com/codetorex/SteamMonsterLobby/*", "https://raw.githubusercontent.com/codetorex/SteamMonsterLobby/*" ],
 	"web_accessible_resources": [ "js/mainloop.js" ],
 	"content_security_policy": "script-src 'self' https://raw.githubusercontent.com; object-src 'self'",
 	"minimum_chrome_version": "9",
