@@ -28,7 +28,7 @@
 	var removeCritText = getPreferenceBoolean("removeCritText", false);
 	var removeGoldText = getPreferenceBoolean("removeGoldText", false);
 	var removeAllText = getPreferenceBoolean("removeAllText", false);
-	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined" || w.usingMsgScript);
+	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined" || w.usingMsgScript !== "undefined");
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
 	var useTrollTracker = getPreferenceBoolean("useTrollTracker", false);
@@ -317,7 +317,7 @@
 		options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
 		options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, true));
 
-		if (typeof GM_info !== "undefined" || w.usingMsgScript) {
+		if (typeof GM_info !== "undefined" || w.usingMsgScript !== "undefined") {
 			options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh", enableAutoRefresh, toggleAutoRefresh, false));
 		}
 
