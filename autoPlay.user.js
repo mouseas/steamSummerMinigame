@@ -618,9 +618,9 @@
 							if(useTrollTracker) {
 								if((getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
-									if(BigNumber !== "undefined") {
-										var num = new BigNumber(rgEntry.actor);
-										w.$J('.name', ele).append( "<a href=\"http://steamcommunity.com/profiles/" + num.plus(new BigNumber("76561197960265728")) + "\" target=\"_blank\" style=\"color: red; font-weight: bold;\">" + rgEntry.actor_name + "</a>" );
+									if(w.BigNumber !== "undefined") {
+										var num = new w.BigNumber(rgEntry.actor);
+										w.$J('.name', ele).append( "<a href=\"http://steamcommunity.com/profiles/" + num.plus(new w.BigNumber("76561197960265728")) + "\" target=\"_blank\" style=\"color: red; font-weight: bold;\">" + rgEntry.actor_name + "</a>" );
 									} else {
 										w.$J('.name', ele).text( rgEntry.actor_name );
 									}
