@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.4.0
+// @version 7.4.1
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -1207,12 +1207,12 @@
 		}
 
 		// Don't use medics if it's too often
-		if (control.medicChance < Math.Random()) {
+		if (control.medicChance < Math.random()) {
 			return;
 		}
 
 		// check if Medics is purchased and cooled down
-		if (tryUsingAbility(ABILITIES.MEDICS)) {
+		if (tryUsingAbility(ABILITIES.MEDICS, false, true)) {
 			advLog('Medics is purchased, cooled down. Trigger it.', 2);
 		}
 
