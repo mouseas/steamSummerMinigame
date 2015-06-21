@@ -680,10 +680,10 @@
 										data: JSON.stringify({"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}),
 										dataType: 'json',
 										success: function(responseData, textStatus, jqXHR) {
-											advLog("Reported " + rgEntry.actor_name + " at time " + rgEntry.time, 2);
+											console.log("Reported " + rgEntry.actor_name + " at time " + rgEntry.time);
 										},
 										error: function (responseData, textStatus, errorThrown) {
-											console.log('POST failed.', 2);
+											console.log('POST failed.');
 										}
 									});
 								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 100 > 90 && rgEntry.ability === 26) {
