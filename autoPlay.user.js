@@ -1235,7 +1235,7 @@
 		}
 
 		// Don't use good luck if it's too often
-		if (control.goodLuckChance < Math.Random()) {
+		if (control.goodLuckChance < Math.random()) {
 			return;
 		}
 
