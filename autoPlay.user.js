@@ -1810,7 +1810,7 @@
 
 		//Gather total wormholes active.
 		for (var i = 0; i <= 2; i++) {
-			if (typeof w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== undefined) {
+			if (typeof w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== 'undefined') {
 				wormholesNow += w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26];
 			}
 		}
