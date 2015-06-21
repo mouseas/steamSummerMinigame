@@ -73,7 +73,9 @@
 		githubVersion: SCRIPT_VERSION,
 		useLikeNewMinChance: 0.02,
 		useLikeNewMaxChance: 1.0,
-		useGoldThreshold: 200
+		useGoldThreshold: 200,
+		goodLuckChance: 0.02,
+		medicChance: 0.02
 	};
 
 	var replacedCUI = false;
@@ -477,8 +479,8 @@
 				useCooldownIfRelevant();
 				useGoodLuckCharmIfRelevant();
 				useMedicsIfRelevant();
-				useMoraleBoosterIfRelevant();
-				useMetalDetectorIfRelevant();
+				//	useMoraleBoosterIfRelevant();
+				//	useMetalDetectorIfRelevant();
 				//	useClusterBombIfRelevant();
 				//	useNapalmIfRelevant();
 				//	useTacticalNukeIfRelevant();
@@ -1204,6 +1206,11 @@
 			return;
 		}
 
+		// Don't use medics if it's too often
+		if (medicChance < Math.Random()) {
+			return;
+		}
+
 		// check if Medics is purchased and cooled down
 		if (tryUsingAbility(ABILITIES.MEDICS)) {
 			advLog('Medics is purchased, cooled down. Trigger it.', 2);
@@ -1225,6 +1232,11 @@
 		if (tryUsingItem(ABILITIES.CRIT)) {
 			// Crits is purchased, cooled down, and needed. Trigger it.
 			advLog('Crit chance is always good.', 3);
+		}
+
+		// Don't use good luck if it's too often
+		if (goodLuckChance < Math.Random()) {
+			return;
 		}
 
 		// check if Good Luck Charms is purchased and cooled down
