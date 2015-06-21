@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.0.3
+// @version 7.4.1
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '7.0.3';
+	var SCRIPT_VERSION = '7.4.1';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -73,7 +73,9 @@
 		githubVersion: SCRIPT_VERSION,
 		useLikeNewMinChance: 0.02,
 		useLikeNewMaxChance: 1.0,
-		useGoldThreshold: 200
+		useGoldThreshold: 200,
+		goodLuckChance: 0.02,
+		medicChance: 0.02
 	};
 
 	var replacedCUI = false;
@@ -517,8 +519,8 @@
 				useCooldownIfRelevant();
 				useGoodLuckCharmIfRelevant();
 				useMedicsIfRelevant();
-				useMoraleBoosterIfRelevant();
-				useMetalDetectorIfRelevant();
+				//	useMoraleBoosterIfRelevant();
+				//	useMetalDetectorIfRelevant();
 				//	useClusterBombIfRelevant();
 				//	useNapalmIfRelevant();
 				//	useTacticalNukeIfRelevant();
@@ -1242,8 +1244,13 @@
 			return;
 		}
 
+		// Don't use medics if it's too often
+		if (control.medicChance < Math.random()) {
+			return;
+		}
+
 		// check if Medics is purchased and cooled down
-		if (tryUsingAbility(ABILITIES.MEDICS)) {
+		if (tryUsingAbility(ABILITIES.MEDICS, false, true)) {
 			advLog('Medics is purchased, cooled down. Trigger it.', 2);
 		}
 
@@ -1263,6 +1270,11 @@
 		if (tryUsingItem(ABILITIES.CRIT)) {
 			// Crits is purchased, cooled down, and needed. Trigger it.
 			advLog('Crit chance is always good.', 3);
+		}
+
+		// Don't use good luck if it's too often
+		if (control.goodLuckChance < Math.random()) {
+			return;
 		}
 
 		// check if Good Luck Charms is purchased and cooled down
