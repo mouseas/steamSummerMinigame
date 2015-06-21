@@ -1207,7 +1207,7 @@
 		}
 
 		// Don't use medics if it's too often
-		if (medicChance < Math.Random()) {
+		if (control.medicChance < Math.Random()) {
 			return;
 		}
 
@@ -1235,7 +1235,7 @@
 		}
 
 		// Don't use good luck if it's too often
-		if (goodLuckChance < Math.Random()) {
+		if (control.goodLuckChance < Math.Random()) {
 			return;
 		}
 
