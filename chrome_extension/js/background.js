@@ -17,7 +17,7 @@ chrome.webRequest.onHeadersReceived.addListener(function (details)
 		
 		var csp = details.responseHeaders[i].value;
 		
-		 csp = csp.replace("connect-src 'self'", "connect-src 'self' * ");
+		 csp = csp.replace("connect-src 'self'", "connect-src 'self' http://188.166.36.23:3900/");
 		
 		details.responseHeaders[i].value = csp;
 		}

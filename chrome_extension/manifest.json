@@ -11,8 +11,10 @@
 	}],
 	"version": "1.4.0",
 	"permissions": [ "https://github.com/wchill/steamSummerMinigame/*", "https://raw.githubusercontent.com/wchill/steamSummerMinigame/*", "https://github.com/codetorex/SteamMonsterLobby/*", "https://raw.githubusercontent.com/codetorex/SteamMonsterLobby/*",
-		"http://*/",
-		"https://*/",
+		"http://steamcommunity.com/minigame/*",
+		"http://steamcommunity.com/minigame/towerattack/*",
+		"http://steamcommunity.com//minigame/*",
+		"http://steamcommunity.com//minigame/towerattack/*",
 		"webRequestBlocking",
 		"webRequest",
 		"tabs"	
