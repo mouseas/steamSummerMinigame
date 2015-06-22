@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.4.9
+// @version 8.1.1
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '7.4.9';
+	var SCRIPT_VERSION = '8.1.1';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -39,8 +39,8 @@
 	var autoRefreshSecondsCheckLoadedDelay = 30;
 
 	// DO NOT MODIFY
-	var wormHoleConstantUse = false;
-	var wormHoleConstantUseOverride = false;
+	var wormHoleConstantUse = true;
+	var wormHoleConstantUseOverride = true;
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
 	var currentClickRate = clickRate;
@@ -160,6 +160,7 @@
 		ABILITIES.REFLECT_DAMAGE,
 		ABILITIES.FEELING_LUCKY
 	];
+	NUISANCE_ABILITIES = [];
 
 	var BOSS_DISABLED_ABILITIES = [
 		ABILITIES.MORALE_BOOSTER,
@@ -174,6 +175,7 @@
 		ABILITIES.REFLECT_DAMAGE,
 		ABILITIES.THROW_MONEY_AT_SCREEN
 	];
+	BOSS_DISABLED_ABILITIES = [];
 
 	var ENEMY_TYPE = {
 		"SPAWNER": 0,
@@ -517,19 +519,19 @@
 				}
 				useCooldownIfRelevant();
 				useGoodLuckCharmIfRelevant();
-				useMedicsIfRelevant();
-				//	useMoraleBoosterIfRelevant();
-				//	useMetalDetectorIfRelevant();
-				//	useClusterBombIfRelevant();
-				//	useNapalmIfRelevant();
-				//	useTacticalNukeIfRelevant();
-				//	useCrippleMonsterIfRelevant();
+				//useMedicsIfRelevant();
+				useMoraleBoosterIfRelevant();
+				//useMetalDetectorIfRelevant();
+				useClusterBombIfRelevant();
+				useNapalmIfRelevant();
+				useTacticalNukeIfRelevant();
+				useCrippleMonsterIfRelevant();
 				useCrippleSpawnerIfRelevant();
 				if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
-					useGoldRainIfRelevant();
+					//useGoldRainIfRelevant();
 				}
-				//	useCrippleMonsterIfRelevant(level);
-				useMaxElementalDmgIfRelevant();
+				useCrippleMonsterIfRelevant(level);
+				//useMaxElementalDmgIfRelevant();
 			}
 			else {
 				if (level % control.rainingRounds === 0 || wormHoleConstantUseOverride) {
@@ -538,11 +540,17 @@
 					goToLaneWithBestTarget();
 				}
 				useCooldownIfRelevant();
-				useMedicsIfRelevant();
+				//useMedicsIfRelevant();
 				useMoraleBoosterIfRelevant();
-				useMetalDetectorIfRelevant();
-				useMaxElementalDmgIfRelevant();
-
+				//useMetalDetectorIfRelevant();
+				//useMaxElementalDmgIfRelevant();
+				if (level % 100 < 90){
+					useClusterBombIfRelevant();
+					useNapalmIfRelevant();
+					useTacticalNukeIfRelevant();
+					useGoodLuckCharmIfRelevant();
+					useMoraleBoosterIfRelevant();
+				}
 				useLikeNew();
 				useWormholeIfRelevant();
 				useReviveIfRelevant(level);
@@ -654,9 +662,12 @@
 
 					switch( rgEntry.type ) {
 						case 'ability':
+							break;
 							var ele = this.m_eleUpdateLogTemplate.clone();
+							var should_send = false;
 							if(useTrollTracker) {
-								if((getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
+								var level = getGameLevel();
+								if((level % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
 									if(!!w.BigNumber) {
 										var num = new w.BigNumber(rgEntry.actor);
@@ -664,19 +675,33 @@
 									} else {
 										w.$J('.name', ele).text( rgEntry.actor_name );
 									}
-									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
+									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + level);
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
 
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
 
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
-									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
+									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + level, 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
+									should_send = true;
+								} else if(level % 100 !== 0 && level % 100 > 90 && rgEntry.ability === 26) {
+									w.$J(ele).data('abilityid', rgEntry.ability );
+									w.$J('.name', ele).text( rgEntry.actor_name );
+									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + level);
+									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
+									w.$J('.name', ele).attr( "style", "color: yellow" );
+
+									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
+
+									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
+									should_send = true;
+								}
+								if(should_send) {
 									w.$J.ajax({
 										type: 'POST',
 										url: 'http://steam.intense.io:8080/report',
 										crossDomain: true,
-										data: JSON.stringify({"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}),
+										data: JSON.stringify({"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":level, "ability":rgEntry.ability, "time":rgEntry.time}),
 										dataType: 'json',
 										success: function(responseData, textStatus, jqXHR) {
 											console.log("Reported " + rgEntry.actor_name + " at time " + rgEntry.time);
@@ -685,21 +710,11 @@
 											console.log('POST failed.');
 										}
 									});
-								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 100 > 90 && rgEntry.ability === 26) {
-									w.$J(ele).data('abilityid', rgEntry.ability );
-									w.$J('.name', ele).text( rgEntry.actor_name );
-									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
-									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
-									w.$J('.name', ele).attr( "style", "color: yellow" );
-
-									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-
-									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								}
 							} else {
 								w.$J(ele).data('abilityid', rgEntry.ability );
 								w.$J('.name', ele).text( rgEntry.actor_name );
-								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
+								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + level);
 								w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
 
 								w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
@@ -738,7 +753,7 @@
 	function refreshPlayerData() {
 		advLog("Refreshing player data", 2);
 
-		disableAbility('25');
+		//disableAbility('25');
 
 		w.g_Server.GetPlayerData(
 			function(rgResult) {
@@ -1210,7 +1225,7 @@
 			// Prevent attack abilities and items if up against a boss or treasure minion
 			var level = getGameLevel();
 			if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds === 0))) {
-				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
+				//BOSS_DISABLED_ABILITIES.forEach(disableAbility);
 			} else {
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
 			}
@@ -1224,7 +1239,7 @@
 
 	function useCooldownIfRelevant() {
 		if (getActiveAbilityLaneCount(ABILITIES.DECREASE_COOLDOWNS) > 0) {
-			disableAbility(ABILITIES.DECREASE_COOLDOWNS);
+			//disableAbility(ABILITIES.DECREASE_COOLDOWNS);
 			return;
 		}
 
@@ -1288,7 +1303,7 @@
 
 		// Check the time before using like new.
 		var level = getGameLevel();
-		if (level % control.rainingRounds === 0) {
+		if (level % control.rainingRounds === 0 || level % 100 >= 90) {
 			return;
 		}
 
@@ -1299,6 +1314,7 @@
 	}
 
 	function useNapalmIfRelevant() {
+		triggerAbility(ABILITIES.NAPALM);
 	}
 
 	// Use Moral Booster if doable
@@ -1316,7 +1332,7 @@
 
 		// Check the time before using like new.
 		var level = getGameLevel();
-		if (level % control.rainingRounds === 0) {
+		if (level % control.rainingRounds === 0 || level % 100 >= 90) {
 			return;
 		}
 
@@ -1387,6 +1403,10 @@
 			return;
 		}
 
+		if (level % 100 <= 90 && level % 100 <= 99){
+			return; // Stop using stuff to try to land near something safe.
+		}
+
 		if (!wormholeInterval) {
 			wormholeInterval = w.setInterval(function(){
 				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26}); //wormhole
@@ -1425,7 +1445,7 @@
 	}
 
 	function disableAbility(abilityId) {
-		toggleAbilityVisibility(abilityId, false);
+		toggleAbilityVisibility(abilityId, true);
 	}
 
 	function enableAbility(abilityId) {
@@ -1463,7 +1483,8 @@
 		var level = getGameLevel();
 		var levelmod = level % control.rainingRounds;
 		// Early in the game, or we're a safe distance away from raining rounds.
-		return (level >= 99999999 || (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds));
+		return true;
+		//return (level >= 99999999 || (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds));
 	}
 
 	function tryUsingAbility(abilityId) {
