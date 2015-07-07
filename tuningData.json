@@ -1,5 +1,6 @@
 {
-    "version": 1434297503,
+    "universe_level": 100000000,
+    "version": 1434662461,
     "player": {
         "respawn_time": 60,
         "min_dead_time": 5,
@@ -32,7 +33,7 @@
         "hp_multiplier": "1.2",
         "hp_exponent": "1.5",
         "dps_multiplier": 1,
-        "dps_exponent": 1,
+        "dps_exponent": "1.2",
         "gold_multiplier": "1.6",
         "gold_exponent": "1.1"
     },
@@ -44,7 +45,7 @@
         "hp_multiplier_variance": "0.2",
         "hp_exponent": "1.5",
         "dps_multiplier": 1,
-        "dps_exponent": 1,
+        "dps_exponent": "1.2",
         "gold_multiplier": "1.2",
         "gold_exponent": "1.02"
     },
@@ -56,7 +57,7 @@
         "hp_multiplier": "1.2",
         "hp_exponent": "1.5",
         "dps_multiplier": 1,
-        "dps_exponent": 1,
+        "dps_exponent": "1.2",
         "gold_multiplier": "1.7",
         "gold_exponent": "1.1"
     },
@@ -67,7 +68,7 @@
         "hp_multiplier": "1.5",
         "hp_exponent": 3,
         "dps_multiplier": 1,
-        "dps_exponent": 1,
+        "dps_exponent": "1.2",
         "gold_multiplier": "1.9",
         "gold_exponent": "1.25"
     },
@@ -77,7 +78,7 @@
         "gold": 200,
         "hp_multiplier": "1.2",
         "hp_exponent": "1.5",
-        "dps_exponent": 1,
+        "dps_exponent": "1.2",
         "lifetime": 10,
         "chance": "0.01",
         "gold_multiplier": "1.7",
@@ -251,7 +252,7 @@
             "instant": 1,
             "duration": 0,
             "cooldown": 5,
-            "desc": "Gives you 100k of gold and automatically deploys Metal Detector in your lane for free."
+            "desc": "Gives you a base 100k of gold and automatically deploys Metal Detector in your lane for free.<br><br>More gold will be given based on the level you are on when this item is used."
         },
         "23": {
             "name": "Steal Health",
@@ -276,7 +277,8 @@
             "instant": 1,
             "duration": 10,
             "cooldown": 1800,
-            "desc": "Grant every alive player in your lane one random special item.<br><br>This item can only be purchased with badge points."
+            "start_of_game_cooldown": 0,
+            "desc": "Grant every alive player in your lane one random special item.<br><br>This item can only be acquired by spending badge points."
         },
         "26": {
             "name": "Wormhole",
@@ -286,7 +288,8 @@
             "instant": 1,
             "duration": 10,
             "cooldown": 60,
-            "desc": "Skips a level with each use (stackable) and grants 50k of gold to every player. However, enemies will not drop gold or loot for any skipped levels.<br><br>This item can only be purchased with badge points."
+            "start_of_game_cooldown": 0,
+            "desc": "Skip a level with each use (stackable) after the current level has been cleared, and grants 50k of gold to every player. Enemies will not drop gold or loot for any skipped levels.<br><br>When used on every 100th level, will skip 10 levels with each use and grant the appropriate amount of gold.<br><br>You must defeat a boss level after using Wormhole in order to level up your Monster Summer Badge.<br><br>This item can only be acquired by spending badge points."
         },
         "27": {
             "name": "Like New",
@@ -294,7 +297,8 @@
             "badge_points_cost": 100,
             "duration": 5,
             "cooldown": 1,
-            "desc": "While active, clears the cooldown on every ability for all players in your lane.<br><br>This item can only be purchased with badge points."
+            "start_of_game_cooldown": 0,
+            "desc": "While active, clears the cooldown on every ability for all players in your lane.<br><br>This item can only be acquired by spending badge points."
         }
     },
     "upgrades": {
@@ -537,6 +541,186 @@
             "cost": 1000000,
             "cost_exponential_base": "2.2",
             "required_upgrade": 22,
+            "required_upgrade_level": 10,
+            "desc": "Increases your click damage"
+        },
+        "26": {
+            "name": "Cybernetic Enhancements",
+            "multiplier": 10000,
+            "type": 0,
+            "cost": "10000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 23,
+            "required_upgrade_level": 10,
+            "desc": "Increases your health (HP)"
+        },
+        "27": {
+            "name": "Level 1 Sentry Gun",
+            "multiplier": 10000,
+            "type": 1,
+            "cost": "10000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 24,
+            "required_upgrade_level": 10,
+            "desc": "Increases the damage inflicted by your Auto-fire Cannon"
+        },
+        "28": {
+            "name": "Titanium Mouse Button",
+            "multiplier": 10000,
+            "type": 2,
+            "cost": "10000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 25,
+            "required_upgrade_level": 10,
+            "desc": "Increases your click damage"
+        },
+        "29": {
+            "name": "Exoskeleton",
+            "multiplier": 100000,
+            "type": 0,
+            "cost": "100000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 26,
+            "required_upgrade_level": 10,
+            "desc": "Increases your health (HP)"
+        },
+        "30": {
+            "name": "Level 2 Sentry Gun",
+            "multiplier": 100000,
+            "type": 1,
+            "cost": "100000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 27,
+            "required_upgrade_level": 10,
+            "desc": "Increases the damage inflicted by your Auto-fire Cannon"
+        },
+        "31": {
+            "name": "Double-Barrelled Mouse",
+            "multiplier": 100000,
+            "type": 2,
+            "cost": "100000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 28,
+            "required_upgrade_level": 10,
+            "desc": "Increases your click damage"
+        },
+        "32": {
+            "name": "Yoga Training",
+            "multiplier": 1000000,
+            "type": 0,
+            "cost": "1000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 29,
+            "required_upgrade_level": 10,
+            "desc": "Increases your health (HP)"
+        },
+        "33": {
+            "name": "Level 3 Sentry Gun",
+            "multiplier": 1000000,
+            "type": 1,
+            "cost": "1000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 30,
+            "required_upgrade_level": 10,
+            "desc": "Increases the damage inflicted by your Auto-fire Cannon"
+        },
+        "34": {
+            "name": "Bionic Finger",
+            "multiplier": 1000000,
+            "type": 2,
+            "cost": "1000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 31,
+            "required_upgrade_level": 10,
+            "desc": "Increases your click damage"
+        },
+        "35": {
+            "name": "Protein Shakes",
+            "multiplier": 10000000,
+            "type": 0,
+            "cost": "10000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 32,
+            "required_upgrade_level": 10,
+            "desc": "Increases your health (HP)"
+        },
+        "36": {
+            "name": "Level 1 Drones",
+            "multiplier": 10000000,
+            "type": 1,
+            "cost": "10000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 33,
+            "required_upgrade_level": 10,
+            "desc": "Increases the damage inflicted by your Auto-fire Cannon"
+        },
+        "37": {
+            "name": "Two Bionic Fingers",
+            "multiplier": 10000000,
+            "type": 2,
+            "cost": "10000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 34,
+            "required_upgrade_level": 10,
+            "desc": "Increases your click damage"
+        },
+        "38": {
+            "name": "Martial Arts Training",
+            "multiplier": 100000000,
+            "type": 0,
+            "cost": "100000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 35,
+            "required_upgrade_level": 10,
+            "desc": "Increases your health (HP)"
+        },
+        "39": {
+            "name": "Level 2 Drones",
+            "multiplier": 100000000,
+            "type": 1,
+            "cost": "100000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 36,
+            "required_upgrade_level": 10,
+            "desc": "Increases the damage inflicted by your Auto-fire Cannon"
+        },
+        "40": {
+            "name": "Bionic Hand",
+            "multiplier": 100000000,
+            "type": 2,
+            "cost": "100000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 37,
+            "required_upgrade_level": 10,
+            "desc": "Increases your click damage"
+        },
+        "41": {
+            "name": "Seriously? Another HP Upgrade",
+            "multiplier": 1000000000,
+            "type": 0,
+            "cost": "1000000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 38,
+            "required_upgrade_level": 10,
+            "desc": "Increases your health (HP)"
+        },
+        "42": {
+            "name": "Level 3 Drones",
+            "multiplier": 1000000000,
+            "type": 1,
+            "cost": "1000000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 39,
+            "required_upgrade_level": 10,
+            "desc": "Increases the damage inflicted by your Auto-fire Cannon"
+        },
+        "43": {
+            "name": "Bionic Arm",
+            "multiplier": 1000000000,
+            "type": 2,
+            "cost": "1000000000000.0",
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 40,
             "required_upgrade_level": 10,
             "desc": "Increases your click damage"
         }
